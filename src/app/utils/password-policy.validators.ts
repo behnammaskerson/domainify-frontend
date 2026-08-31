@@ -3,6 +3,14 @@ import { PasswordPolicy } from '../services/password-policy.service';
 
 const SPECIAL_PATTERN = /[!@#$%^&*()_+\-=[\]{}|;:'",.<>?/\\`~]/;
 
+export type PolicyCheckId = 'minLength' | 'uppercase' | 'lowercase' | 'digit' | 'special';
+
+export interface PasswordPolicyCheck {
+  id: PolicyCheckId;
+  label: string;
+  met: boolean;
+}
+
 export function passwordMeetsPolicy(password: string, policy: PasswordPolicy): ValidationErrors | null {
   if (!password) {
     return null;
@@ -40,19 +48,77 @@ export function buildPasswordValidators(policy: PasswordPolicy | null | undefine
   return [Validators.required, passwordPolicyValidator(policy)];
 }
 
-export function policyRequirementKeys(policy: PasswordPolicy): string[] {
-  const keys: string[] = ['settings.passwordPolicy.reqMinLength'];
+export function isPolicyCheckMet(id: PolicyCheckId, password: string, policy: PasswordPolicy): boolean {
+  switch (id) {
+    case 'minLength':
+      return password.length >= policy.minLength;
+    case 'uppercase':
+      return /[A-Z]/.test(password);
+    case 'lowercase':
+      return /[a-z]/.test(password);
+    case 'digit':
+      return /\d/.test(password);
+    case 'special':
+      return SPECIAL_PATTERN.test(password);
+    default:
+      return false;
+  }
+}
+
+/** Build checklist rows for the active policy; `met` reflects the current password. */
+export function buildPasswordPolicyChecks(
+  policy: PasswordPolicy,
+  password: string,
+  labels: Partial<Record<PolicyCheckId, string>>
+): PasswordPolicyCheck[] {
+  const checks: PasswordPolicyCheck[] = [
+    {
+      id: 'minLength',
+      label: labels.minLength ?? '',
+      met: isPolicyCheckMet('minLength', password, policy)
+    }
+  ];
   if (policy.requireUppercase) {
-    keys.push('settings.passwordPolicy.reqUppercase');
+    checks.push({
+      id: 'uppercase',
+      label: labels.uppercase ?? '',
+      met: isPolicyCheckMet('uppercase', password, policy)
+    });
   }
   if (policy.requireLowercase) {
-    keys.push('settings.passwordPolicy.reqLowercase');
+    checks.push({
+      id: 'lowercase',
+      label: labels.lowercase ?? '',
+      met: isPolicyCheckMet('lowercase', password, policy)
+    });
   }
   if (policy.requireDigit) {
-    keys.push('settings.passwordPolicy.reqDigit');
+    checks.push({
+      id: 'digit',
+      label: labels.digit ?? '',
+      met: isPolicyCheckMet('digit', password, policy)
+    });
   }
   if (policy.requireSpecial) {
-    keys.push('settings.passwordPolicy.reqSpecial');
+    checks.push({
+      id: 'special',
+      label: labels.special ?? '',
+      met: isPolicyCheckMet('special', password, policy)
+    });
   }
-  return keys;
+  return checks;
+}
+
+/** 0–4 strength score aligned with register form heuristics, using policy min length. */
+export function calculatePasswordStrength(password: string, minLength = 8): number {
+  if (!password) {
+    return 0;
+  }
+  let strength = 0;
+  if (password.length >= minLength) strength++;
+  if (password.length >= minLength + 4) strength++;
+  if (/[A-Z]/.test(password)) strength++;
+  if (/[0-9]/.test(password)) strength++;
+  if (/[^A-Za-z0-9]/.test(password)) strength++;
+  return Math.min(strength, 4);
 }

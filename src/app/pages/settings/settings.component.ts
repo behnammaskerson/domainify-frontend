@@ -16,8 +16,13 @@ import { PageHeroComponent } from '../../components/page-hero/page-hero.componen
 import { UsersService } from '../../services/users.service';
 import { AuthService, User } from '../../services/auth.service';
 import { ApiErrorService } from '../../services/api-error.service';
-import { PasswordPolicyService } from '../../services/password-policy.service';
-import { buildPasswordValidators } from '../../utils/password-policy.validators';
+import { PasswordPolicyService, PasswordPolicy } from '../../services/password-policy.service';
+import {
+  buildPasswordValidators,
+  buildPasswordPolicyChecks,
+  calculatePasswordStrength,
+  PasswordPolicyCheck
+} from '../../utils/password-policy.validators';
 import { AvatarEditorDialogComponent } from '../../components/avatar-editor-dialog/avatar-editor-dialog.component';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { TotpSetupDialogComponent } from '../../components/totp-setup-dialog/totp-setup-dialog.component';
@@ -216,18 +221,37 @@ interface SettingsNavItem {
               <mat-form-field appearance="outline">
                 <mat-icon matPrefix>vpn_key</mat-icon>
                 <mat-label>{{ 'settings.password.new' | translate }}</mat-label>
-                <input matInput type="password" formControlName="newPassword">
+                <input matInput type="password" formControlName="newPassword" autocomplete="new-password">
               </mat-form-field>
               <mat-form-field appearance="outline">
                 <mat-icon matPrefix>lock_clock</mat-icon>
                 <mat-label>{{ 'settings.password.confirm' | translate }}</mat-label>
-                <input matInput type="password" formControlName="confirmPassword">
+                <input matInput type="password" formControlName="confirmPassword" autocomplete="new-password">
               </mat-form-field>
             </div>
-            @if (passwordRequirements.length) {
-              <ul class="policy-requirements">
-                @for (req of passwordRequirements; track req) {
-                  <li>{{ req }}</li>
+            @if (passwordForm.controls.newPassword.value) {
+              <div class="password-strength password-strength--block">
+                <div class="strength-track">
+                  <div class="strength-bar"
+                       [class.weak]="passwordStrength < 3"
+                       [class.medium]="passwordStrength >= 3 && passwordStrength < 4"
+                       [class.strong]="passwordStrength >= 4"
+                       [style.width.%]="passwordStrength * 25"></div>
+                </div>
+                <span [class.weak]="passwordStrength < 3"
+                      [class.medium]="passwordStrength >= 3 && passwordStrength < 4"
+                      [class.strong]="passwordStrength >= 4">
+                  {{ passwordStrengthLabelKey | translate }}
+                </span>
+              </div>
+            }
+            @if (passwordPolicyChecks.length) {
+              <ul class="policy-requirements" aria-live="polite">
+                @for (req of passwordPolicyChecks; track req.id) {
+                  <li [class.met]="req.met">
+                    <mat-icon aria-hidden="true">{{ req.met ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                    <span>{{ req.label }}</span>
+                  </li>
                 }
               </ul>
             }
@@ -361,11 +385,21 @@ interface SettingsNavItem {
                     <mat-icon matPrefix>straighten</mat-icon>
                     <mat-label>{{ 'settings.passwordPolicy.minLength' | translate }}</mat-label>
                     <input matInput type="number" formControlName="minLength" min="4" max="128">
+                    @if (policyForm.controls.minLength.hasError('required')) {
+                      <mat-error>{{ 'auth.validation.required' | translate }}</mat-error>
+                    } @else if (policyForm.controls.minLength.hasError('min') || policyForm.controls.minLength.hasError('max')) {
+                      <mat-error>{{ 'settings.passwordPolicy.minLengthRange' | translate }}</mat-error>
+                    }
                   </mat-form-field>
                   <mat-form-field appearance="outline">
                     <mat-icon matPrefix>height</mat-icon>
                     <mat-label>{{ 'settings.passwordPolicy.maxLength' | translate }}</mat-label>
                     <input matInput type="number" formControlName="maxLength" min="4" max="256">
+                    @if (policyForm.controls.maxLength.hasError('required')) {
+                      <mat-error>{{ 'auth.validation.required' | translate }}</mat-error>
+                    } @else if (policyForm.controls.maxLength.hasError('min') || policyForm.controls.maxLength.hasError('max')) {
+                      <mat-error>{{ 'settings.passwordPolicy.maxLengthRange' | translate }}</mat-error>
+                    }
                   </mat-form-field>
                 </div>
 
@@ -590,12 +624,79 @@ interface SettingsNavItem {
     }
 
     .policy-requirements {
-      margin: 0 0 8px;
-      padding-inline-start: 1.2rem;
+      list-style: none;
+      margin: 4px 0 12px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .policy-requirements li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       color: var(--text-muted);
       font-size: 0.82rem;
-      line-height: 1.45;
+      line-height: 1.35;
     }
+
+    .policy-requirements li mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .policy-requirements li.met {
+      color: var(--success);
+    }
+
+    .policy-requirements li.met mat-icon {
+      color: var(--success);
+    }
+
+    .password-strength {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .password-strength--block {
+      margin: 0 0 10px;
+      max-width: 100%;
+    }
+
+    .strength-track {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border-color);
+      overflow: hidden;
+    }
+
+    .strength-bar {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.25s ease, background 0.25s ease;
+    }
+
+    .strength-bar.weak { background: var(--danger); }
+    .strength-bar.medium { background: var(--warning); }
+    .strength-bar.strong { background: var(--success); }
+
+    .password-strength span {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .password-strength span.weak { color: var(--danger); }
+    .password-strength span.medium { color: var(--warning); }
+    .password-strength span.strong { color: var(--success); }
 
     @media (max-width: 640px) {
       .form-row {
@@ -649,7 +750,16 @@ export class SettingsComponent implements OnInit {
   profileInitials = '?';
   phoneMaskPlaceholder = '';
   selectedDialCode = '';
-  passwordRequirements: string[] = [];
+  passwordPolicyChecks: PasswordPolicyCheck[] = [];
+  passwordStrength = 0;
+  private activePasswordPolicy: PasswordPolicy | null = null;
+  private policyCheckLabels: Partial<Record<PasswordPolicyCheck['id'], string>> = {};
+
+  get passwordStrengthLabelKey(): string {
+    if (this.passwordStrength < 3) return 'auth.register.passwordWeak';
+    if (this.passwordStrength < 4) return 'auth.register.passwordMedium';
+    return 'auth.register.passwordStrong';
+  }
 
   profileForm = this.fb.nonNullable.group({
     firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -686,6 +796,9 @@ export class SettingsComponent implements OnInit {
     if (this.authService.isAdmin()) {
       this.loadAdminPasswordPolicy();
     }
+    this.passwordForm.controls.newPassword.valueChanges.subscribe((value) => {
+      this.refreshPasswordFeedback(String(value ?? ''));
+    });
     this.route.fragment.subscribe((fragment) => {
       if (!fragment) {
         return;
@@ -712,25 +825,30 @@ export class SettingsComponent implements OnInit {
   private loadPasswordPolicyForForms(): void {
     this.passwordPolicyService.getPublicPolicy().subscribe({
       next: (policy) => {
+        this.activePasswordPolicy = policy;
         this.passwordForm.controls.newPassword.setValidators(buildPasswordValidators(policy));
         this.passwordForm.controls.newPassword.updateValueAndValidity({ emitEvent: false });
-        this.passwordRequirements = [
-          this.translate.instant('settings.passwordPolicy.reqMinLength', { n: policy.minLength })
-        ];
-        if (policy.requireUppercase) {
-          this.passwordRequirements.push(this.translate.instant('settings.passwordPolicy.reqUppercase'));
-        }
-        if (policy.requireLowercase) {
-          this.passwordRequirements.push(this.translate.instant('settings.passwordPolicy.reqLowercase'));
-        }
-        if (policy.requireDigit) {
-          this.passwordRequirements.push(this.translate.instant('settings.passwordPolicy.reqDigit'));
-        }
-        if (policy.requireSpecial) {
-          this.passwordRequirements.push(this.translate.instant('settings.passwordPolicy.reqSpecial'));
-        }
+        this.policyCheckLabels = {
+          minLength: this.translate.instant('settings.passwordPolicy.reqMinLength', { n: policy.minLength }),
+          uppercase: this.translate.instant('settings.passwordPolicy.reqUppercase'),
+          lowercase: this.translate.instant('settings.passwordPolicy.reqLowercase'),
+          digit: this.translate.instant('settings.passwordPolicy.reqDigit'),
+          special: this.translate.instant('settings.passwordPolicy.reqSpecial')
+        };
+        this.refreshPasswordFeedback(this.passwordForm.controls.newPassword.value);
       }
     });
+  }
+
+  private refreshPasswordFeedback(password: string): void {
+    const policy = this.activePasswordPolicy;
+    const minLength = policy?.minLength ?? 8;
+    this.passwordStrength = calculatePasswordStrength(password, minLength);
+    if (!policy) {
+      this.passwordPolicyChecks = [];
+      return;
+    }
+    this.passwordPolicyChecks = buildPasswordPolicyChecks(policy, password, this.policyCheckLabels);
   }
 
   private loadAdminPasswordPolicy(): void {
@@ -1041,6 +1159,7 @@ export class SettingsComponent implements OnInit {
       next: () => {
         this.passwordSaving = false;
         this.passwordForm.reset();
+        this.refreshPasswordFeedback('');
         this.snack(this.translate.instant('settings.password.saved'));
       },
       error: (error) => {

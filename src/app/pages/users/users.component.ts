@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
@@ -23,11 +23,11 @@ import { DatetimeFilterFieldComponent } from '../../components/datetime-filter-f
 import { ApiErrorService } from '../../services/api-error.service';
 import { ManagedUser, UsersService } from '../../services/users.service';
 import { TranslationService } from '../../services/translation.service';
-import { PasswordPolicyService } from '../../services/password-policy.service';
+import { PasswordPolicy, PasswordPolicyService } from '../../services/password-policy.service';
 import { buildPasswordValidators } from '../../utils/password-policy.validators';
 import { LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
 import { findPhoneCountry, formatPhoneDigits } from '../../utils/phone-countries';
-import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 
 @Component({
   selector: 'app-user-form-dialog',
@@ -73,26 +73,42 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
             <mat-error>{{ 'auth.validation.email' | translate }}</mat-error>
           }
         </mat-form-field>
-        @if (!data.user) {
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'users.fields.password' | translate }}</mat-label>
+          <input matInput type="password" formControlName="password" autocomplete="new-password">
+          @if (isEdit) {
+            <mat-hint>{{ 'users.fields.passwordOptionalHint' | translate }}</mat-hint>
+          }
+          @if (form.controls.password.hasError('required')) {
+            <mat-error>{{ 'auth.validation.required' | translate }}</mat-error>
+          } @else if (form.controls.password.hasError('policyMinLength')) {
+            <mat-error>{{ 'settings.passwordPolicy.reqMinLength' | translate:{ n: form.controls.password.getError('policyMinLength')?.requiredLength } }}</mat-error>
+          } @else if (form.controls.password.hasError('minlength')) {
+            <mat-error>{{ 'auth.validation.minLength' | translate }}</mat-error>
+          } @else if (form.controls.password.hasError('policyUppercase')) {
+            <mat-error>{{ 'settings.passwordPolicy.reqUppercase' | translate }}</mat-error>
+          } @else if (form.controls.password.hasError('policyLowercase')) {
+            <mat-error>{{ 'settings.passwordPolicy.reqLowercase' | translate }}</mat-error>
+          } @else if (form.controls.password.hasError('policyDigit')) {
+            <mat-error>{{ 'settings.passwordPolicy.reqDigit' | translate }}</mat-error>
+          } @else if (form.controls.password.hasError('policySpecial')) {
+            <mat-error>{{ 'settings.passwordPolicy.reqSpecial' | translate }}</mat-error>
+          }
+        </mat-form-field>
+
+        @if (!isEdit || form.controls.password.value) {
           <mat-form-field appearance="outline">
-            <mat-label>{{ 'users.fields.password' | translate }}</mat-label>
-            <input matInput type="password" formControlName="password">
-            @if (form.controls.password.hasError('required')) {
+            <mat-label>{{ 'users.fields.confirmPassword' | translate }}</mat-label>
+            <input matInput type="password" formControlName="confirmPassword" autocomplete="new-password">
+            @if (form.controls.confirmPassword.hasError('required')) {
               <mat-error>{{ 'auth.validation.required' | translate }}</mat-error>
-            } @else if (form.controls.password.hasError('policyMinLength')) {
-              <mat-error>{{ 'settings.passwordPolicy.reqMinLength' | translate:{ n: form.controls.password.getError('policyMinLength')?.requiredLength } }}</mat-error>
-            } @else if (form.controls.password.hasError('minlength')) {
-              <mat-error>{{ 'auth.validation.minLength' | translate }}</mat-error>
-            } @else if (form.controls.password.hasError('policyUppercase')) {
-              <mat-error>{{ 'settings.passwordPolicy.reqUppercase' | translate }}</mat-error>
-            } @else if (form.controls.password.hasError('policyLowercase')) {
-              <mat-error>{{ 'settings.passwordPolicy.reqLowercase' | translate }}</mat-error>
-            } @else if (form.controls.password.hasError('policyDigit')) {
-              <mat-error>{{ 'settings.passwordPolicy.reqDigit' | translate }}</mat-error>
-            } @else if (form.controls.password.hasError('policySpecial')) {
-              <mat-error>{{ 'settings.passwordPolicy.reqSpecial' | translate }}</mat-error>
+            } @else if (form.hasError('passwordMismatch') && form.controls.confirmPassword.touched) {
+              <mat-error>{{ 'auth.validation.passwordMismatch' | translate }}</mat-error>
             }
           </mat-form-field>
+        }
+
+        @if (!isEdit) {
           <mat-form-field appearance="outline">
             <mat-label>{{ 'users.fields.role' | translate }}</mat-label>
             <mat-select formControlName="role">
@@ -128,46 +144,78 @@ export class UserFormDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly passwordPolicyService = inject(PasswordPolicyService);
   readonly roles = ['USER', 'SELLER', 'ADMIN'];
+  readonly isEdit: boolean;
+  private policy: PasswordPolicy | null = null;
 
   form = this.fb.nonNullable.group({
     firstName: ['', [Validators.required, Validators.minLength(2)]],
     lastName: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
     password: [''],
+    confirmPassword: [''],
     role: ['USER']
-  });
+  }, { validators: [this.passwordMatchValidator.bind(this)] });
 
   constructor(
     private dialogRef: MatDialogRef<UserFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { user?: ManagedUser }
   ) {
+    this.isEdit = !!data.user;
     if (data.user) {
       this.form.patchValue({
         firstName: data.user.firstName,
         lastName: data.user.lastName,
         email: data.user.email
       });
-      this.form.controls.password.clearValidators();
       this.form.controls.role.clearValidators();
-      this.form.controls.password.updateValueAndValidity();
       this.form.controls.role.updateValueAndValidity();
     } else {
       this.form.controls.role.setValidators([Validators.required]);
       this.form.controls.role.updateValueAndValidity();
-      this.passwordPolicyService.getPublicPolicy().subscribe({
-        next: (policy) => {
-          this.form.controls.password.setValidators(buildPasswordValidators(policy));
-          this.form.controls.password.updateValueAndValidity();
-        },
-        error: () => {
-          this.form.controls.password.setValidators([Validators.required, Validators.minLength(8)]);
-          this.form.controls.password.updateValueAndValidity();
-        }
-      });
     }
+
+    this.passwordPolicyService.getPublicPolicy().subscribe({
+      next: (policy) => {
+        this.policy = policy;
+        this.applyPasswordValidators();
+      },
+      error: () => {
+        this.policy = null;
+        this.applyPasswordValidators();
+      }
+    });
+
+    this.form.controls.password.valueChanges.subscribe(() => this.applyPasswordValidators());
+  }
+
+  private passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
+    const password = String(group.get('password')?.value ?? '');
+    const confirm = String(group.get('confirmPassword')?.value ?? '');
+    if (!password) {
+      return null;
+    }
+    return password === confirm ? null : { passwordMismatch: true };
+  }
+
+  private applyPasswordValidators(): void {
+    const password = String(this.form.controls.password.value ?? '');
+    if (this.isEdit && !password) {
+      this.form.controls.password.setValidators([]);
+      this.form.controls.confirmPassword.setValidators([]);
+    } else if (this.policy) {
+      this.form.controls.password.setValidators(buildPasswordValidators(this.policy));
+      this.form.controls.confirmPassword.setValidators([Validators.required]);
+    } else {
+      this.form.controls.password.setValidators([Validators.required, Validators.minLength(8)]);
+      this.form.controls.confirmPassword.setValidators([Validators.required]);
+    }
+    this.form.controls.password.updateValueAndValidity({ emitEvent: false });
+    this.form.controls.confirmPassword.updateValueAndValidity({ emitEvent: false });
+    this.form.updateValueAndValidity({ emitEvent: false });
   }
 
   submit(): void {
+    this.applyPasswordValidators();
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -1426,13 +1474,26 @@ export class UsersComponent implements OnInit {
       if (!result) {
         return;
       }
+      const password = String(result.password ?? '').trim();
       this.usersService.update(user.id, {
         firstName: result.firstName,
         lastName: result.lastName,
         email: result.email
-      }).subscribe({
+      }).pipe(
+        switchMap(() => {
+          if (!password) {
+            return of(null);
+          }
+          return this.usersService.setPassword(user.id, {
+            password,
+            confirmPassword: String(result.confirmPassword ?? '')
+          });
+        })
+      ).subscribe({
         next: () => {
-          this.snack(this.translate.instant('users.messages.updated'));
+          this.snack(this.translate.instant(
+            password ? 'users.messages.passwordUpdated' : 'users.messages.updated'
+          ));
           this.loadUsers();
         },
         error: (error) => this.showError(error)

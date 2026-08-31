@@ -319,6 +319,8 @@
       "save": "ذخیره سیاست رمز عبور",
       "saved": "سیاست رمز عبور به‌روز شد",
       "minMaxError": "حداقل طول نمی‌تواند از حداکثر بیشتر باشد",
+      "minLengthRange": "عددی بین ۴ تا ۱۲۸ وارد کنید",
+      "maxLengthRange": "عددی بین ۴ تا ۲۵۶ وارد کنید",
       "reqMinLength": "حداقل {{n}} کاراکتر",
       "reqUppercase": "شامل حرف بزرگ",
       "reqLowercase": "شامل حرف کوچک",
@@ -382,6 +384,8 @@
       "lastName": "نام خانوادگی",
       "email": "ایمیل",
       "password": "رمز عبور",
+      "confirmPassword": "تأیید رمز عبور",
+      "passwordOptionalHint": "برای حفظ رمز فعلی خالی بگذارید",
       "role": "نقش"
     },
     "table": {
@@ -435,6 +439,7 @@
     "messages": {
       "created": "کاربر ایجاد شد",
       "updated": "کاربر به‌روز شد",
+      "passwordUpdated": "کاربر به‌روز و رمز عبور تغییر کرد",
       "deleted": "کاربر حذف شد",
       "enabled": "کاربر فعال شد",
       "disabled": "کاربر غیرفعال شد",

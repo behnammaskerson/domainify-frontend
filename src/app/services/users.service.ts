@@ -118,6 +118,10 @@ export class UsersService {
     return this.http.patch<ManagedUser>(`${this.API_URL}/users/${id}/role`, { role });
   }
 
+  setPassword(id: number, payload: { password: string; confirmPassword: string }): Observable<unknown> {
+    return this.http.put(`${this.API_URL}/users/${id}/password`, payload);
+  }
+
   delete(id: number): Observable<unknown> {
     return this.http.delete(`${this.API_URL}/users/${id}`);
   }
