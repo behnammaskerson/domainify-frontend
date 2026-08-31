@@ -1,0 +1,153 @@
+// Brand gold M3 palettes — seeded from --primary #d4af37 / --accent #b8941f.
+// Tone 40 (light primary) and tone 80 (dark primary) are pinned to brand hexes
+// so Material components match Domainify tokens (MCU remapping is overridden).
+
+@use 'sass:map';
+@use '@angular/material' as mat;
+
+$_palettes: (
+  primary: (
+    0: #000000,
+    10: #241a00,
+    20: #3c2f00,
+    25: #4a3900,
+    30: #574500,
+    35: #655000,
+    40: #d4af37,
+    50: #c9a52e,
+    60: #b8941f,
+    70: #e0c04a,
+    80: #f5d76b,
+    90: #f6efd4,
+    95: #fff6dc,
+    98: #fffaf0,
+    99: #fffbff,
+    100: #ffffff,
+  ),
+  secondary: (
+    0: #000000,
+    10: #241a00,
+    20: #3c2f05,
+    25: #473a0f,
+    30: #544519,
+    35: #605124,
+    40: #b8941f,
+    50: #877645,
+    60: #a28f5c,
+    70: #beaa74,
+    80: #dac58d,
+    90: #f7e1a6,
+    95: #ffefcc,
+    98: #fff8f0,
+    99: #fffbff,
+    100: #ffffff,
+  ),
+  tertiary: (
+    0: #000000,
+    10: #241a00,
+    20: #3d2f00,
+    25: #4a3900,
+    30: #584400,
+    35: #665000,
+    40: #b8941f,
+    50: #927300,
+    60: #af8d11,
+    70: #cda733,
+    80: #eac24c,
+    90: #ffe08d,
+    95: #ffefce,
+    98: #fff8f1,
+    99: #fffbff,
+    100: #ffffff,
+  ),
+  neutral: (
+    0: #000000,
+    10: #1f1b13,
+    20: #343027,
+    25: #3f3b32,
+    30: #4b463c,
+    35: #575248,
+    40: #635e53,
+    50: #7c766b,
+    60: #969084,
+    70: #b1aa9e,
+    80: #cdc6b9,
+    90: #eae1d4,
+    95: #f8f0e2,
+    98: #fff8f0,
+    99: #fffbff,
+    100: #ffffff,
+    4: #110e07,
+    6: #16130b,
+    12: #231f17,
+    17: #2d2a21,
+    22: #38342b,
+    24: #3d392f,
+    87: #e1d9cc,
+    92: #efe7da,
+    94: #f5eddf,
+    96: #fbf3e5,
+  ),
+  neutral-variant: (
+    0: #000000,
+    10: #201b0d,
+    20: #363020,
+    25: #413b2b,
+    30: #4d4635,
+    35: #595240,
+    40: #655e4c,
+    50: #7f7663,
+    60: #99907c,
+    70: #b4aa95,
+    80: #d0c5af,
+    90: #ede1ca,
+    95: #fbf0d8,
+    98: #fff8f0,
+    99: #fffbff,
+    100: #ffffff,
+  ),
+  error: (
+    0: #000000,
+    10: #410002,
+    20: #690005,
+    25: #7e0007,
+    30: #93000a,
+    35: #a80710,
+    40: #ba1a1a,
+    50: #de3730,
+    60: #ff5449,
+    70: #ff897d,
+    80: #ffb4ab,
+    90: #ffdad6,
+    95: #ffedea,
+    98: #fff8f7,
+    99: #fffbff,
+    100: #ffffff,
+  ),
+);
+
+$_rest: (
+  secondary: map.get($_palettes, secondary),
+  neutral: map.get($_palettes, neutral),
+  neutral-variant: map.get($_palettes, neutral-variant),
+  error: map.get($_palettes, error),
+);
+
+$_primary: map.merge(map.get($_palettes, primary), $_rest);
+$_tertiary: map.merge(map.get($_palettes, tertiary), $_rest);
+
+$light-theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: $_primary,
+    tertiary: $_tertiary,
+  ),
+));
+
+$dark-theme: mat.define-theme((
+  color: (
+    theme-type: dark,
+    primary: $_primary,
+    tertiary: $_tertiary,
+  ),
+));

@@ -1,0 +1,264 @@
+import { Component, EventEmitter, Output, inject, computed, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslateModule } from '@ngx-translate/core';
+import { TranslationService } from '../../services/translation.service';
+
+@Component({
+  selector: 'app-sidebar',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatIconModule,
+    MatTooltipModule,
+    TranslateModule
+  ],
+  template: `
+    <aside class="sidebar"
+           [class.collapsed]="collapsed"
+           [class.mobile-open]="mobileOpen"
+           [attr.aria-label]="'a11y.mainNavigation' | translate">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">
+          <mat-icon>public</mat-icon>
+        </div>
+        @if (!collapsed) {
+          <div class="brand-text">
+            <span class="name">{{ 'app.name' | translate }}</span>
+            <span class="tag">{{ 'app.tagline' | translate }}</span>
+          </div>
+        }
+      </div>
+
+      <nav class="nav">
+        @for (item of navItems; track item.route) {
+          <a class="nav-link"
+             [routerLink]="item.route"
+             routerLinkActive="active"
+             (click)="onNavigate()"
+             [matTooltip]="collapsed ? (item.labelKey | translate) : ''"
+             [matTooltipPosition]="tooltipPosition()">
+            <mat-icon>{{ item.icon }}</mat-icon>
+            @if (!collapsed) {
+              <span>{{ item.labelKey | translate }}</span>
+            }
+          </a>
+        }
+      </nav>
+
+      <div class="footer">
+        <a class="nav-link"
+           routerLink="/settings"
+           routerLinkActive="active"
+           (click)="onNavigate()"
+           [matTooltip]="collapsed ? ('menu.settings' | translate) : ''"
+           [matTooltipPosition]="tooltipPosition()">
+          <mat-icon>settings</mat-icon>
+          @if (!collapsed) {
+            <span>{{ 'menu.settings' | translate }}</span>
+          }
+        </a>
+        <a class="nav-link"
+           href="#"
+           (click)="$event.preventDefault()"
+           [matTooltip]="collapsed ? ('menu.help' | translate) : ''"
+           [matTooltipPosition]="tooltipPosition()">
+          <mat-icon>help_outline</mat-icon>
+          @if (!collapsed) {
+            <span>{{ 'menu.help' | translate }}</span>
+          }
+        </a>
+      </div>
+    </aside>
+  `,
+  styles: [`
+    .sidebar {
+      width: 260px;
+      height: 100vh;
+      background: var(--bg-primary);
+      border-inline-end: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      inset-inline-start: 0;
+      top: 0;
+      z-index: 100;
+      transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1), transform 0.28s ease;
+      overflow: hidden;
+    }
+
+    .sidebar.collapsed {
+      width: 76px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 22px 18px;
+      min-height: 76px;
+    }
+
+    .mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1c1812;
+      color: #f5d76b;
+    }
+
+    .mark mat-icon {
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+      color: inherit;
+    }
+
+    .brand-text {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .name {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      line-height: 1.1;
+    }
+
+    .tag {
+      display: block;
+      margin-top: 3px;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav {
+      flex: 1;
+      padding: 8px 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .footer {
+      padding: 12px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 44px;
+      padding: 0 12px;
+      border-radius: 10px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      position: relative;
+      transition: background var(--transition-base), color var(--transition-base);
+    }
+
+    .nav-link mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: inherit;
+      flex-shrink: 0;
+    }
+
+    .nav-link:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .nav-link.active {
+      background: var(--accent-light);
+      color: var(--accent-dark);
+      font-weight: 600;
+    }
+
+    :host-context(body.dark-theme) .nav-link.active {
+      color: var(--accent);
+    }
+
+    .nav-link.active::before {
+      content: '';
+      position: absolute;
+      inset-inline-start: 0;
+      top: 10px;
+      bottom: 10px;
+      width: 3px;
+      border-radius: 2px;
+      background: var(--accent);
+    }
+
+    .collapsed .nav-link {
+      justify-content: center;
+      padding: 0;
+    }
+
+    .collapsed .brand {
+      justify-content: center;
+      padding-inline: 12px;
+    }
+
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-105%);
+      }
+
+      [dir="rtl"] .sidebar {
+        transform: translateX(105%);
+      }
+
+      .sidebar.mobile-open {
+        transform: translateX(0) !important;
+        width: 260px;
+      }
+    }
+  `]
+})
+export class SidebarComponent {
+  @Input() collapsed = false;
+  @Input() mobileOpen = false;
+  @Output() toggle = new EventEmitter<void>();
+  @Output() closeMobile = new EventEmitter<void>();
+
+  translationService = inject(TranslationService);
+
+  tooltipPosition = computed(() => this.translationService.isRtl() ? 'left' : 'right');
+
+  navItems = [
+    { icon: 'dashboard', labelKey: 'menu.dashboard', route: '/dashboard' },
+    { icon: 'language', labelKey: 'menu.domains', route: '/domains' },
+    { icon: 'analytics', labelKey: 'menu.analyzer', route: '/analyzer' },
+    { icon: 'storefront', labelKey: 'menu.marketplace', route: '/marketplace' },
+    { icon: 'bar_chart', labelKey: 'menu.analytics', route: '/analytics' },
+    { icon: 'people', labelKey: 'menu.users', route: '/user' },
+    { icon: 'description', labelKey: 'menu.reports', route: '/reports' }
+  ];
+
+  onNavigate(): void {
+    this.closeMobile.emit();
+  }
+}
