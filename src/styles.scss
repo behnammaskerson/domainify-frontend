@@ -800,6 +800,24 @@ body.dark-theme {
   display: none;
 }
 
+.sms-config-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.sms-config-fields .sms-control-field,
+.sms-wizard-fields .sms-control-field {
+  width: 100%;
+}
+
+.sms-config-fields .sms-control-field input,
+.sms-wizard-fields .sms-control-field input[dir='ltr'] {
+  direction: ltr;
+  text-align: left;
+}
+
 .phone-row .phone-control-field.has-dial-prefix .mat-mdc-form-field-text-prefix {
   color: var(--text-secondary);
   font-weight: 600;
@@ -955,6 +973,36 @@ html[dir='rtl'] .phone-row .mdc-notched-outline__leading,
 html[dir='rtl'] .phone-row .mdc-notched-outline__notch,
 html[dir='rtl'] .phone-row .mdc-notched-outline__trailing {
   direction: ltr !important;
+}
+
+/* SMS config: RTL floatable labels/errors; LTR technical input values. */
+html[dir='rtl'] .sms-config-fields .sms-control-field.mat-mdc-form-field-has-icon-prefix .mat-mdc-text-field-wrapper,
+html[dir='rtl'] .sms-wizard-fields .sms-control-field.mat-mdc-form-field-has-icon-prefix .mat-mdc-text-field-wrapper {
+  --mat-mdc-form-field-label-offset-x: -8px;
+}
+
+html[dir='rtl'] .sms-config-fields .sms-control-field .mat-mdc-form-field-subscript-wrapper,
+html[dir='rtl'] .sms-config-fields .sms-control-field .mat-mdc-form-field-hint-wrapper,
+html[dir='rtl'] .sms-config-fields .sms-control-field .mat-mdc-form-field-error-wrapper,
+html[dir='rtl'] .sms-wizard-fields .sms-control-field .mat-mdc-form-field-subscript-wrapper,
+html[dir='rtl'] .sms-wizard-fields .sms-control-field .mat-mdc-form-field-hint-wrapper,
+html[dir='rtl'] .sms-wizard-fields .sms-control-field .mat-mdc-form-field-error-wrapper {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+html[dir='rtl'] .sms-config-fields .sms-control-field .mat-mdc-form-field-error,
+html[dir='rtl'] .sms-config-fields .sms-control-field .mat-mdc-form-field-hint,
+html[dir='rtl'] .sms-config-fields .sms-control-field mat-error,
+html[dir='rtl'] .sms-config-fields .sms-control-field mat-hint,
+html[dir='rtl'] .sms-wizard-fields .sms-control-field .mat-mdc-form-field-error,
+html[dir='rtl'] .sms-wizard-fields .sms-control-field .mat-mdc-form-field-hint,
+html[dir='rtl'] .sms-wizard-fields .sms-control-field mat-error,
+html[dir='rtl'] .sms-wizard-fields .sms-control-field mat-hint {
+  direction: rtl !important;
+  text-align: right !important;
+  justify-content: flex-end !important;
+  width: 100%;
 }
 
 @media (max-width: 640px) {
@@ -1239,6 +1287,39 @@ a {
 
 .panel-surface.table-wrap mat-paginator .mat-mdc-paginator-container {
   padding: 8px 12px;
+}
+
+.cell-datetime {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.cell-strong {
+  font-weight: 650;
+}
+
+.cell-muted {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+.method-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.col-actions {
+  width: 56px;
+  text-align: end;
 }
 
 body.dark-theme .panel-surface.table-wrap .users-table .mat-mdc-header-cell {

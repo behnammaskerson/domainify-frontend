@@ -17,6 +17,7 @@ import { UsersService } from '../../services/users.service';
 import { AuthService, User } from '../../services/auth.service';
 import { ApiErrorService } from '../../services/api-error.service';
 import { PasswordPolicyService, PasswordPolicy } from '../../services/password-policy.service';
+import { SmsConfigService, SmsCreditResult, SmsLinesResult, SmsProviderResult } from '../../services/sms-config.service';
 import {
   buildPasswordValidators,
   buildPasswordPolicyChecks,
@@ -28,6 +29,7 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-
 import { TotpSetupDialogComponent } from '../../components/totp-setup-dialog/totp-setup-dialog.component';
 import { TotpDisableDialogComponent, TotpDisableDialogData } from '../../components/totp-disable-dialog/totp-disable-dialog.component';
 import { LtrHostComponent } from '../../components/ltr-host/ltr-host.component';
+import { LocaleNumberPipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
 import {
   buildPhoneCountries,
   countryOptionLabel,
@@ -63,7 +65,9 @@ interface SettingsNavItem {
     MatSelectModule,
     TranslateModule,
     PageHeroComponent,
-    LtrHostComponent
+    LtrHostComponent,
+    LocaleNumberPipe,
+    LocaleDigitsPipe
   ],
   template: `
     <div class="page">
@@ -456,6 +460,110 @@ interface SettingsNavItem {
               </form>
             }
           </section>
+
+          <section class="settings-group settings-anchor" id="sms-config">
+            <h2 class="settings-group-title">{{ 'settings.smsConfig.title' | translate }}</h2>
+            <p class="settings-group-desc">{{ 'settings.smsConfig.subtitle' | translate }}</p>
+
+            @if (smsConfigLoading) {
+              <p class="settings-group-desc">{{ 'settings.smsConfig.loading' | translate }}</p>
+            } @else {
+              @if (smsApiKeyConfigured) {
+                <div class="sms-credit-card">
+                  <div class="sms-credit-copy">
+                    <span class="sms-credit-label">{{ 'settings.smsConfig.credit' | translate }}</span>
+                    @if (smsCreditLoading) {
+                      <span class="sms-credit-muted">{{ 'settings.smsConfig.creditLoading' | translate }}</span>
+                    } @else if (smsCreditResult?.success && smsCreditResult?.credit != null) {
+                      <span class="sms-credit-value">
+                        {{ smsCreditResult!.credit! | localeNumber:{ minimumFractionDigits: 0, maximumFractionDigits: 2 } }}
+                      </span>
+                    } @else {
+                      <span class="sms-credit-error">{{ smsCreditErrorMessage }}</span>
+                    }
+                  </div>
+                  <button mat-stroked-button type="button" [disabled]="smsCreditLoading" (click)="loadSmsCredit()">
+                    <mat-icon>refresh</mat-icon>
+                    {{ 'settings.smsConfig.creditRefresh' | translate }}
+                  </button>
+                </div>
+
+                <div class="sms-lines-card">
+                  <div class="sms-lines-header">
+                    <span class="sms-credit-label">{{ 'settings.smsConfig.lines' | translate }}</span>
+                    <button mat-stroked-button type="button" [disabled]="smsLinesLoading" (click)="loadSmsLines()">
+                      <mat-icon>refresh</mat-icon>
+                      {{ 'settings.smsConfig.linesRefresh' | translate }}
+                    </button>
+                  </div>
+                  @if (smsLinesLoading) {
+                    <p class="sms-credit-muted">{{ 'settings.smsConfig.linesLoading' | translate }}</p>
+                  } @else if (smsLinesResult?.success && smsLines.length) {
+                    <mat-form-field appearance="outline" class="full-width sms-control-field">
+                      <mat-icon matPrefix>dialpad</mat-icon>
+                      <mat-label>{{ 'settings.smsConfig.defaultLine' | translate }}</mat-label>
+                      <mat-select [value]="selectedDefaultLine"
+                                  [disabled]="defaultLineSaving"
+                                  (selectionChange)="onDefaultLineSelected($event.value)">
+                        @for (line of smsLines; track line) {
+                          <mat-option [value]="line">{{ line | localeDigits }}</mat-option>
+                        }
+                      </mat-select>
+                      @if (selectedDefaultLine) {
+                        <mat-hint>{{ 'settings.smsConfig.defaultLineHint' | translate }}</mat-hint>
+                      }
+                    </mat-form-field>
+                  } @else if (smsLinesResult?.success) {
+                    <p class="sms-credit-muted">{{ 'settings.smsConfig.linesEmpty' | translate }}</p>
+                  } @else if (smsLinesErrorMessage) {
+                    <p class="sms-credit-error">{{ smsLinesErrorMessage }}</p>
+                  }
+                </div>
+              }
+
+              <form [formGroup]="smsConfigForm" class="policy-form" (ngSubmit)="saveSmsConfig()">
+                <div class="sms-config-fields">
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-icon matPrefix>link</mat-icon>
+                    <mat-label>{{ 'settings.smsConfig.serverUrl' | translate }}</mat-label>
+                    <input matInput
+                           formControlName="serverUrl"
+                           type="url"
+                           dir="ltr"
+                           autocomplete="off">
+                    @if (smsConfigForm.controls.serverUrl.hasError('required') && smsConfigForm.controls.serverUrl.touched) {
+                      <mat-error>{{ 'auth.validation.required' | translate }}</mat-error>
+                    } @else if (smsConfigForm.controls.serverUrl.hasError('pattern') && smsConfigForm.controls.serverUrl.touched) {
+                      <mat-error>{{ 'settings.smsConfig.serverUrlInvalid' | translate }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-icon matPrefix>vpn_key</mat-icon>
+                    <mat-label>{{ 'settings.smsConfig.apiKey' | translate }}</mat-label>
+                    <input matInput
+                           formControlName="apiKey"
+                           type="password"
+                           dir="ltr"
+                           autocomplete="new-password">
+                    @if (smsApiKeyConfigured) {
+                      <mat-hint>{{ 'settings.smsConfig.apiKeyHint' | translate }}</mat-hint>
+                    }
+                    @if (smsConfigForm.controls.apiKey.hasError('required') && smsConfigForm.controls.apiKey.touched) {
+                      <mat-error>{{ 'auth.validation.required' | translate }}</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+
+                <div class="form-actions">
+                  <button mat-flat-button color="primary" type="submit"
+                          [disabled]="smsConfigForm.invalid || smsConfigSaving">
+                    {{ 'settings.smsConfig.save' | translate }}
+                  </button>
+                </div>
+              </form>
+            }
+          </section>
         }
       </div>
     </div>
@@ -698,6 +806,77 @@ interface SettingsNavItem {
     .password-strength span.medium { color: var(--warning); }
     .password-strength span.strong { color: var(--success); }
 
+    .sms-credit-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+    }
+
+    .sms-credit-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .sms-credit-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .sms-credit-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent-dark);
+      line-height: 1.3;
+    }
+
+    :host-context(body.dark-theme) .sms-credit-value {
+      color: var(--accent);
+    }
+
+    .sms-credit-muted {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .sms-credit-error {
+      font-size: 0.85rem;
+      color: var(--danger);
+      line-height: 1.4;
+    }
+
+    .sms-lines-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+    }
+
+    .sms-lines-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .policy-form .full-width {
+      width: 100%;
+    }
+
     @media (max-width: 640px) {
       .form-row {
         grid-template-columns: 1fr;
@@ -714,6 +893,7 @@ export class SettingsComponent implements OnInit {
   readonly authService = inject(AuthService);
   private readonly usersService = inject(UsersService);
   private readonly passwordPolicyService = inject(PasswordPolicyService);
+  private readonly smsConfigService = inject(SmsConfigService);
   private readonly apiError = inject(ApiErrorService);
   private readonly translate = inject(TranslateService);
   private readonly snackBar = inject(MatSnackBar);
@@ -732,7 +912,8 @@ export class SettingsComponent implements OnInit {
     { id: 'language', titleKey: 'settings.language', icon: 'translate' },
     { id: 'notifications', titleKey: 'settings.notifications', icon: 'notifications' },
     { id: 'security', titleKey: 'settings.security', icon: 'shield' },
-    { id: 'password-policy', titleKey: 'settings.passwordPolicy.title', icon: 'policy', adminOnly: true }
+    { id: 'password-policy', titleKey: 'settings.passwordPolicy.title', icon: 'policy', adminOnly: true },
+    { id: 'sms-config', titleKey: 'settings.smsConfig.title', icon: 'sms', adminOnly: true }
   ];
 
   get visibleNavItems(): SettingsNavItem[] {
@@ -745,6 +926,18 @@ export class SettingsComponent implements OnInit {
   totpBusy = false;
   policyLoading = false;
   policySaving = false;
+  smsConfigLoading = false;
+  smsConfigSaving = false;
+  smsApiKeyConfigured = false;
+  smsCreditLoading = false;
+  smsCreditResult: SmsCreditResult | null = null;
+  smsCreditErrorMessage = '';
+  smsLinesLoading = false;
+  smsLinesResult: SmsLinesResult | null = null;
+  smsLines: string[] = [];
+  smsLinesErrorMessage = '';
+  selectedDefaultLine = '';
+  defaultLineSaving = false;
   totpEnabled = false;
   avatarSrc: string | null = null;
   profileInitials = '?';
@@ -787,6 +980,14 @@ export class SettingsComponent implements OnInit {
     historyCount: [0, [Validators.required, Validators.min(0), Validators.max(24)]]
   });
 
+  smsConfigForm = this.fb.nonNullable.group({
+    serverUrl: ['https://api.sms.ir/', [
+      Validators.required,
+      Validators.pattern(/^https?:\/\/.+/i)
+    ]],
+    apiKey: ['']
+  });
+
   ngOnInit(): void {
     this.usersService.getMe().subscribe({
       next: (user) => this.applyUser(user),
@@ -795,6 +996,7 @@ export class SettingsComponent implements OnInit {
     this.loadPasswordPolicyForForms();
     if (this.authService.isAdmin()) {
       this.loadAdminPasswordPolicy();
+      this.loadAdminSmsConfig();
     }
     this.passwordForm.controls.newPassword.valueChanges.subscribe((value) => {
       this.refreshPasswordFeedback(String(value ?? ''));
@@ -904,6 +1106,170 @@ export class SettingsComponent implements OnInit {
       },
       error: (error) => {
         this.policySaving = false;
+        this.showError(error);
+      }
+    });
+  }
+
+  private loadAdminSmsConfig(): void {
+    this.smsConfigLoading = true;
+    this.smsConfigService.getConfig().subscribe({
+      next: (config) => {
+        this.smsConfigLoading = false;
+        this.smsApiKeyConfigured = config.apiKeyConfigured;
+        this.smsConfigForm.patchValue({
+          serverUrl: config.serverUrl,
+          apiKey: ''
+        });
+        this.selectedDefaultLine = config.defaultLine ?? '';
+        this.applySmsApiKeyValidators();
+        if (config.apiKeyConfigured) {
+          this.loadSmsCredit();
+          this.loadSmsLines();
+        } else {
+          this.smsCreditResult = null;
+          this.smsCreditErrorMessage = '';
+          this.smsLinesResult = null;
+          this.smsLines = [];
+          this.smsLinesErrorMessage = '';
+          this.selectedDefaultLine = '';
+        }
+      },
+      error: (error) => {
+        this.smsConfigLoading = false;
+        this.showError(error);
+      }
+    });
+  }
+
+  private applySmsApiKeyValidators(): void {
+    if (this.smsApiKeyConfigured) {
+      this.smsConfigForm.controls.apiKey.setValidators([]);
+    } else {
+      this.smsConfigForm.controls.apiKey.setValidators([Validators.required]);
+    }
+    this.smsConfigForm.controls.apiKey.updateValueAndValidity({ emitEvent: false });
+  }
+
+  loadSmsCredit(): void {
+    if (!this.authService.isAdmin() || !this.smsApiKeyConfigured) {
+      return;
+    }
+    this.smsCreditLoading = true;
+    this.smsCreditErrorMessage = '';
+    this.smsConfigService.getCredit().subscribe({
+      next: (result) => {
+        this.smsCreditLoading = false;
+        this.smsCreditResult = result;
+        if (!result.success) {
+          this.smsCreditErrorMessage = this.resolveSmsProviderMessage(result);
+        }
+      },
+      error: (error) => {
+        this.smsCreditLoading = false;
+        this.smsCreditResult = null;
+        this.smsCreditErrorMessage = this.apiError.resolve(error);
+      }
+    });
+  }
+
+  loadSmsLines(): void {
+    if (!this.authService.isAdmin() || !this.smsApiKeyConfigured) {
+      return;
+    }
+    this.smsLinesLoading = true;
+    this.smsLinesErrorMessage = '';
+    this.smsConfigService.getLines().subscribe({
+      next: (result) => {
+        this.smsLinesLoading = false;
+        this.smsLinesResult = result;
+        this.smsLines = result.success && result.lines ? [...result.lines] : [];
+        if (!result.success) {
+          this.smsLinesErrorMessage = this.resolveSmsProviderMessage(result, 'settings.smsConfig.linesUnavailable');
+          return;
+        }
+        if (this.selectedDefaultLine && !this.smsLines.includes(this.selectedDefaultLine)) {
+          this.selectedDefaultLine = '';
+        }
+      },
+      error: (error) => {
+        this.smsLinesLoading = false;
+        this.smsLinesResult = null;
+        this.smsLines = [];
+        this.smsLinesErrorMessage = this.apiError.resolve(error);
+      }
+    });
+  }
+
+  onDefaultLineSelected(line: string): void {
+    if (!line || !this.authService.isAdmin()) {
+      return;
+    }
+    const previous = this.selectedDefaultLine;
+    this.selectedDefaultLine = line;
+    this.defaultLineSaving = true;
+    this.smsConfigService.setDefaultLine(line).subscribe({
+      next: (config) => {
+        this.defaultLineSaving = false;
+        this.selectedDefaultLine = config.defaultLine ?? line;
+        this.snack(this.translate.instant('settings.smsConfig.defaultLineSaved'));
+      },
+      error: (error) => {
+        this.defaultLineSaving = false;
+        this.selectedDefaultLine = previous;
+        this.showError(error);
+      }
+    });
+  }
+
+  private resolveSmsProviderMessage(result: SmsProviderResult, fallbackKey = 'settings.smsConfig.creditUnavailable'): string {
+    if (result.providerStatus != null) {
+      const providerKey = `settings.smsConfig.providerStatus.${result.providerStatus}`;
+      const providerMessage = this.translate.instant(providerKey);
+      if (providerMessage !== providerKey) {
+        return providerMessage;
+      }
+    }
+    if (result.httpStatus != null) {
+      const httpKey = `settings.smsConfig.httpStatus.${result.httpStatus}`;
+      const httpMessage = this.translate.instant(httpKey);
+      if (httpMessage !== httpKey) {
+        return httpMessage;
+      }
+    }
+    return this.translate.instant(fallbackKey);
+  }
+
+  saveSmsConfig(): void {
+    if (this.smsConfigForm.invalid || !this.authService.isAdmin()) {
+      this.smsConfigForm.markAllAsTouched();
+      return;
+    }
+    const raw = this.smsConfigForm.getRawValue();
+    const apiKey = String(raw.apiKey ?? '').trim();
+    if (!this.smsApiKeyConfigured && !apiKey) {
+      this.smsConfigForm.controls.apiKey.setErrors({ required: true });
+      this.smsConfigForm.controls.apiKey.markAsTouched();
+      return;
+    }
+    this.smsConfigSaving = true;
+    this.smsConfigService.updateConfig({
+      serverUrl: raw.serverUrl.trim(),
+      apiKey: apiKey || undefined
+    }).subscribe({
+      next: (config) => {
+        this.smsConfigSaving = false;
+        this.smsApiKeyConfigured = config.apiKeyConfigured;
+        this.smsConfigForm.patchValue({ serverUrl: config.serverUrl, apiKey: '' });
+        this.applySmsApiKeyValidators();
+        this.snack(this.translate.instant('settings.smsConfig.saved'));
+        if (config.apiKeyConfigured) {
+          this.loadSmsCredit();
+          this.loadSmsLines();
+        }
+      },
+      error: (error) => {
+        this.smsConfigSaving = false;
         this.showError(error);
       }
     });

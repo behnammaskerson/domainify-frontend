@@ -1,6 +1,7 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { TranslationService, Language } from './translation.service';
 import { numberingSystemFor, toLocaleDigits } from '../utils/locale-digits';
+import { formatJalaliDate } from '../utils/jalali-date';
 
 const LOCALE_MAP: Record<Language, string> = {
   en: 'en-US',
@@ -53,6 +54,12 @@ export class LocaleService {
 
   formatDate(value: Date | string | number, options?: Intl.DateTimeFormatOptions): string {
     const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    if (this.translationService.currentLang() === 'fa') {
+      return formatJalaliDate(date, options);
+    }
     return new Intl.DateTimeFormat(this.locale(), this.withNumbering(options)).format(date);
   }
 

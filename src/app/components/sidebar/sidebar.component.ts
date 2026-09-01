@@ -1,10 +1,24 @@
-import { Component, EventEmitter, Output, inject, computed, Input } from '@angular/core';
+import { Component, EventEmitter, Output, inject, computed, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
+import { filter } from 'rxjs/operators';
 import { TranslationService } from '../../services/translation.service';
+import { AuthService } from '../../services/auth.service';
+
+interface NavItem {
+  icon: string;
+  labelKey: string;
+  route: string;
+}
+
+interface NavGroupChild {
+  icon: string;
+  labelKey: string;
+  route: string;
+}
 
 @Component({
   selector: 'app-sidebar',
@@ -47,6 +61,41 @@ import { TranslationService } from '../../services/translation.service';
             }
           </a>
         }
+
+        @if (authService.isAdmin()) {
+          @if (collapsed) {
+            <a class="nav-link"
+               routerLink="/sms/single-send"
+               routerLinkActive="active"
+               (click)="onNavigate()"
+               [matTooltip]="'menu.singleSmsSend' | translate"
+               [matTooltipPosition]="tooltipPosition()">
+              <mat-icon>send</mat-icon>
+            </a>
+          } @else {
+            <div class="nav-group" [class.expanded]="smsExpanded">
+              <button type="button"
+                      class="nav-link nav-group-trigger"
+                      (click)="toggleSmsGroup()"
+                      [attr.aria-expanded]="smsExpanded">
+                <mat-icon>sms</mat-icon>
+                <span class="nav-group-label">{{ 'menu.smsManagement' | translate }}</span>
+                <mat-icon class="chevron">{{ smsExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+              </button>
+              @if (smsExpanded) {
+                @for (child of smsNavChildren; track child.route) {
+                  <a class="nav-link nav-child"
+                     [routerLink]="child.route"
+                     routerLinkActive="active"
+                     (click)="onNavigate()">
+                    <mat-icon>{{ child.icon }}</mat-icon>
+                    <span>{{ child.labelKey | translate }}</span>
+                  </a>
+                }
+              }
+            </div>
+          }
+        }
       </nav>
 
       <div class="footer">
@@ -87,7 +136,8 @@ import { TranslationService } from '../../services/translation.service';
       top: 0;
       z-index: 100;
       transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1), transform 0.28s ease;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: hidden;
     }
 
     .sidebar.collapsed {
@@ -100,6 +150,8 @@ import { TranslationService } from '../../services/translation.service';
       gap: 12px;
       padding: 22px 18px;
       min-height: 76px;
+      min-width: 0;
+      overflow: hidden;
     }
 
     .mark {
@@ -149,7 +201,9 @@ import { TranslationService } from '../../services/translation.service';
     .nav {
       flex: 1;
       padding: 8px 12px;
+      overflow-x: hidden;
       overflow-y: auto;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       gap: 4px;
@@ -161,6 +215,8 @@ import { TranslationService } from '../../services/translation.service';
       display: flex;
       flex-direction: column;
       gap: 4px;
+      overflow-x: hidden;
+      min-width: 0;
     }
 
     .nav-link {
@@ -168,6 +224,8 @@ import { TranslationService } from '../../services/translation.service';
       align-items: center;
       gap: 12px;
       min-height: 44px;
+      min-width: 0;
+      max-width: 100%;
       padding: 0 12px;
       border-radius: 10px;
       color: var(--text-secondary);
@@ -176,6 +234,20 @@ import { TranslationService } from '../../services/translation.service';
       font-weight: 500;
       position: relative;
       transition: background var(--transition-base), color var(--transition-base);
+      border: none;
+      background: transparent;
+      width: 100%;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      text-align: start;
+      box-sizing: border-box;
+    }
+
+    .nav-link > span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .nav-link mat-icon {
@@ -212,6 +284,46 @@ import { TranslationService } from '../../services/translation.service';
       background: var(--accent);
     }
 
+    .nav-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .nav-group-trigger {
+      justify-content: flex-start;
+    }
+
+    .nav-group-label {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .nav-group-trigger .chevron {
+      margin-inline-start: auto;
+      flex-shrink: 0;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      opacity: 0.7;
+    }
+
+    .nav-child {
+      min-height: 40px;
+      padding-inline-start: 40px;
+      font-size: 0.86rem;
+    }
+
+    .nav-child.active::before {
+      top: 8px;
+      bottom: 8px;
+    }
+
     .collapsed .nav-link {
       justify-content: center;
       padding: 0;
@@ -238,17 +350,21 @@ import { TranslationService } from '../../services/translation.service';
     }
   `]
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
   @Input() collapsed = false;
   @Input() mobileOpen = false;
   @Output() toggle = new EventEmitter<void>();
   @Output() closeMobile = new EventEmitter<void>();
 
+  readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
   translationService = inject(TranslationService);
+
+  smsExpanded = false;
 
   tooltipPosition = computed(() => this.translationService.isRtl() ? 'left' : 'right');
 
-  navItems = [
+  navItems: NavItem[] = [
     { icon: 'dashboard', labelKey: 'menu.dashboard', route: '/dashboard' },
     { icon: 'language', labelKey: 'menu.domains', route: '/domains' },
     { icon: 'analytics', labelKey: 'menu.analyzer', route: '/analyzer' },
@@ -258,7 +374,29 @@ export class SidebarComponent {
     { icon: 'description', labelKey: 'menu.reports', route: '/reports' }
   ];
 
+  readonly smsNavChildren: NavGroupChild[] = [
+    { icon: 'sms', labelKey: 'menu.singleSmsSend', route: '/sms/single-send' },
+    { icon: 'send', labelKey: 'menu.bulkSmsSend', route: '/sms/bulk-send' },
+    { icon: 'upload_file', labelKey: 'menu.bulkSmsFileSend', route: '/sms/bulk-send-file' },
+    { icon: 'schedule_send', labelKey: 'menu.scheduledSms', route: '/sms/scheduled' }
+  ];
+
+  ngOnInit(): void {
+    this.updateSmsExpanded(this.router.url);
+    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
+      this.updateSmsExpanded(this.router.url);
+    });
+  }
+
+  toggleSmsGroup(): void {
+    this.smsExpanded = !this.smsExpanded;
+  }
+
   onNavigate(): void {
     this.closeMobile.emit();
+  }
+
+  private updateSmsExpanded(url: string): void {
+    this.smsExpanded = url.startsWith('/sms');
   }
 }

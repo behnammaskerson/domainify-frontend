@@ -59,6 +59,26 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/users/users.component').then(m => m.UsersComponent)
       },
       {
+        path: 'sms/single-send',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/sms/single-sms-send.component').then(m => m.SingleSmsSendComponent)
+      },
+      {
+        path: 'sms/bulk-send',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/sms/bulk-sms-send.component').then(m => m.BulkSmsSendComponent)
+      },
+      {
+        path: 'sms/bulk-send-file',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/sms/bulk-sms-file-send.component').then(m => m.BulkSmsFileSendComponent)
+      },
+      {
+        path: 'sms/scheduled',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/sms/scheduled-sms.component').then(m => m.ScheduledSmsComponent)
+      },
+      {
         path: 'customers',
         redirectTo: 'user',
         pathMatch: 'full'
