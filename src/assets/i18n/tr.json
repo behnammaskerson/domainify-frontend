@@ -86,6 +86,10 @@
     "analyzer": "Alan Adı Analizörü",
     "marketplace": "Pazar Yeri",
     "settings": "Ayarlar",
+    "createTicket": "Bilet Oluştur",
+    "myTickets": "Biletlerim",
+    "ticketCategories": "Bilet Kategorileri",
+    "support": "Destek",
     "analytics": "Analitik",
     "customers": "Müşteriler",
     "users": "Kullanıcılar",
@@ -101,6 +105,120 @@
     "smsLiveSends": "Günün Gönderimleri",
     "smsArchiveSends": "Arşiv Gönderimleri",
     "smsDailyPacks": "Günün Paketleri"
+  },
+  "tickets": {
+    "categoriesPage": {
+      "eyebrow": "Destek",
+      "title": "Bilet Kategorileri",
+      "subtitle": "Destek bileti oluştururken kullanılacak kategorileri yönetin."
+    },
+    "portal": {
+      "eyebrow": "Destek portalı",
+      "navLabel": "Destek portalı bölümleri",
+      "myTickets": "Biletlerim",
+      "createTicket": "Bilet oluştur"
+    },
+    "mine": {
+      "eyebrow": "Destek",
+      "title": "Biletlerim",
+      "subtitle": "Gönderdiğiniz biletlerin durumunu takip edin.",
+      "create": "Bilet oluştur",
+      "refresh": "Yenile",
+      "statusFilter": "Duruma göre filtrele",
+      "allStatuses": "Tümü",
+      "search": "Ara",
+      "searchPlaceholder": "Bilet kimliği veya konu…",
+      "clearSearch": "Aramayı temizle",
+      "loading": "Biletler yükleniyor…",
+      "empty": "Filtrelerinize uyan bilet yok.",
+      "pagination": "Bilet sayfalama",
+      "resultCount": "{{count}} bilet",
+      "table": {
+        "id": "Bilet kimliği",
+        "subject": "Konu",
+        "category": "Kategori",
+        "priority": "Öncelik",
+        "status": "Durum",
+        "createdAt": "Oluşturulma"
+      }
+    },
+    "create": {
+      "eyebrow": "Destek",
+      "title": "Bilet Oluştur",
+      "subtitle": "Sorununuzu açıklayın ve gerekirse dosya ekleyin. En kısa sürede takip edeceğiz.",
+      "subject": "Konu",
+      "subjectRequired": "Konu gerekli",
+      "description": "Açıklama",
+      "descriptionRequired": "Açıklama gerekli",
+      "category": "Kategori",
+      "categoryRequired": "Kategori gerekli",
+      "priority": "Öncelik",
+      "priorityRequired": "Öncelik gerekli",
+      "attachments": "Ekler",
+      "attachmentsHint": "İsteğe bağlı. En fazla 5 dosya (JPEG, PNG, WebP, PDF, TXT, DOC/DOCX), her biri en fazla 5MB.",
+      "addFiles": "Dosya ekle",
+      "submit": "Bileti gönder",
+      "submitting": "Gönderiliyor...",
+      "successTitle": "Bilet oluşturuldu",
+      "successMessage": "Biletiniz başarıyla oluşturuldu. Takip için bu kimliği saklayın.",
+      "successToast": "Bilet {{number}} oluşturuldu",
+      "ticketId": "Bilet kimliği",
+      "copyId": "Kimliği kopyala",
+      "idCopied": "Bilet kimliği kopyalandı",
+      "createAnother": "Başka bilet oluştur",
+      "viewMyTickets": "Biletlerimi görüntüle",
+      "loadingCategories": "Kategoriler yükleniyor…",
+      "noCategoriesTitle": "Kategoriler hazır değil",
+      "noCategoriesMessage": "Destek kategorileri henüz kullanılamıyor. Lütfen daha sonra tekrar deneyin veya bir yöneticiye başvurun."
+    },
+    "categories": {
+      "BILLING": "Faturalama",
+      "TECHNICAL": "Teknik",
+      "DOMAINS": "Alan adları",
+      "SMS": "SMS",
+      "ACCOUNT": "Hesap",
+      "OTHER": "Diğer"
+    },
+    "priorities": {
+      "LOW": "Düşük",
+      "MEDIUM": "Orta",
+      "HIGH": "Yüksek",
+      "URGENT": "Acil"
+    },
+    "statuses": {
+      "NEW": "Yeni",
+      "OPEN": "Açık",
+      "PENDING": "Beklemede",
+      "ON_HOLD": "Askıda",
+      "RESOLVED": "Çözüldü",
+      "CLOSED": "Kapalı"
+    },
+    "detail": {
+      "title": "Bilet",
+      "subtitle": "Konuşma",
+      "back": "Biletlerime dön",
+      "loading": "Bilet yükleniyor…",
+      "notFound": "Bilet bulunamadı.",
+      "conversation": "Konuşma",
+      "unknownAuthor": "Bilinmiyor",
+      "you": "Siz",
+      "replyTitle": "Yanıtla",
+      "replyBody": "Mesajınız",
+      "replyRequired": "Yanıt metni gerekli",
+      "attachments": "Ekler",
+      "attachmentsHint": "İsteğe bağlı. En fazla 5 dosya (JPEG, PNG, WebP, PDF, TXT, DOC/DOCX), her biri en fazla 5MB.",
+      "addFiles": "Dosya ekle",
+      "sendReply": "Yanıtı gönder",
+      "sending": "Gönderiliyor…",
+      "replySent": "Yanıt gönderildi",
+      "closedNotice": "Bu bilet kapalı. Artık yanıt veremezsiniz.",
+      "meta": {
+        "status": "Durum",
+        "priority": "Öncelik",
+        "category": "Kategori",
+        "created": "Oluşturulma"
+      }
+    }
   },
   "sms": {
     "singleSend": {
@@ -787,6 +905,21 @@
         "124": "Şu anda yalnızca OTP SMS gönderilebilir ve şablonunuz OTP olarak tanınmadı"
       }
     },
+    "ticketCategories": {
+      "title": "Bilet Kategorileri",
+      "subtitle": "Destek bileti oluştururken kullanılacak kategorileri tanımlayın. Yalnızca yönetici.",
+      "loading": "Kategoriler yükleniyor...",
+      "name": "Kategori adı",
+      "code": "Kod",
+      "codeHint": "İsteğe bağlı. Boş bırakılırsa addan üretilir.",
+      "add": "Kategori ekle",
+      "added": "Kategori eklendi",
+      "removed": "Kategori kaldırıldı",
+      "inactive": "Pasif",
+      "empty": "Henüz kategori yok.",
+      "removeTitle": "Kategoriyi kaldır",
+      "removeMessage": "\"{{name}}\" kategorisi kaldırılsın mı? Mevcut biletlerde kullanılıyorsa silinmez, pasifleştirilir."
+    },
     "totp": {
       "enabledStatus": "Etkin",
       "setupTitle": "Kimlik doğrulama uygulamasını ayarla",
@@ -984,7 +1117,27 @@
     "SMS_SCHEDULED_ALREADY_SENT": "Bu zamanlanmış SMS zaten gönderilmiş",
     "SMS_SCHEDULED_CANCEL_TOO_LATE": "İptal yalnızca gönderim zamanından 3 dakika öncesine kadar yapılabilir",
     "SMS_SCHEDULED_CANCEL_FAILED": "Zamanlanmış SMS sağlayıcı ile iptal edilemedi",
-    "SMS_PACK_ID_REQUIRED": "SMS paket kimliği gerekli"
+    "SMS_PACK_ID_REQUIRED": "SMS paket kimliği gerekli",
+    "TICKET_SUBJECT_REQUIRED": "Bilet konusu gerekli",
+    "TICKET_SUBJECT_TOO_LONG": "Bilet konusu en fazla 200 karakter olabilir",
+    "TICKET_DESCRIPTION_REQUIRED": "Bilet açıklaması gerekli",
+    "TICKET_DESCRIPTION_TOO_LONG": "Bilet açıklaması en fazla 10000 karakter olabilir",
+    "TICKET_CATEGORY_REQUIRED": "Bilet kategorisi gerekli",
+    "TICKET_CATEGORY_NOT_FOUND": "Bilet kategorisi bulunamadı",
+    "TICKET_CATEGORY_INACTIVE": "Bilet kategorisi pasif",
+    "TICKET_CATEGORY_NAME_REQUIRED": "Bilet kategori adı gerekli",
+    "TICKET_CATEGORY_NAME_INVALID": "Kategori adı 2 ile 100 karakter arasında olmalıdır",
+    "TICKET_CATEGORY_CODE_INVALID": "Bilet kategori kodu geçersiz",
+    "TICKET_CATEGORY_CODE_EXISTS": "Bilet kategori kodu zaten mevcut",
+    "TICKET_PRIORITY_REQUIRED": "Bilet önceliği gerekli",
+    "TICKET_ATTACHMENTS_LIMIT": "Bilet başına en fazla 5 ek dosyaya izin verilir",
+    "TICKET_ATTACHMENT_INVALID": "Geçersiz ek. 5MB altında JPEG, PNG, WebP, PDF, TXT veya DOC/DOCX kullanın",
+    "TICKET_ATTACHMENT_UPLOAD_FAILED": "Bilet eki yüklenemedi",
+    "TICKET_NOT_FOUND": "Bilet bulunamadı",
+    "TICKET_REPLY_BODY_REQUIRED": "Yanıt metni gerekli",
+    "TICKET_REPLY_BODY_TOO_LONG": "Yanıt en fazla 10000 karakter olabilir",
+    "TICKET_CLOSED_NO_REPLY": "Bu bilet kapalı ve yanıt kabul etmiyor",
+    "TICKET_ATTACHMENT_NOT_FOUND": "Ek bulunamadı"
   },
   "avatar": {
     "title": "Avatarı düzenle",

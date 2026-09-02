@@ -86,6 +86,10 @@
     "analyzer": "Domain Analyzer",
     "marketplace": "Marketplace",
     "settings": "Settings",
+    "createTicket": "Create Ticket",
+    "myTickets": "My Tickets",
+    "ticketCategories": "Ticket Categories",
+    "support": "Support",
     "analytics": "Analytics",
     "customers": "Customers",
     "users": "Users",
@@ -101,6 +105,120 @@
     "smsLiveSends": "Today's Sends",
     "smsArchiveSends": "Archived Sends",
     "smsDailyPacks": "Today's Packs"
+  },
+  "tickets": {
+    "categoriesPage": {
+      "eyebrow": "Support",
+      "title": "Ticket Categories",
+      "subtitle": "Define categories available when creating support tickets."
+    },
+    "portal": {
+      "eyebrow": "Support portal",
+      "navLabel": "Support portal sections",
+      "myTickets": "My tickets",
+      "createTicket": "Create ticket"
+    },
+    "mine": {
+      "eyebrow": "Support",
+      "title": "My Tickets",
+      "subtitle": "Track the status of tickets you have submitted.",
+      "create": "Create ticket",
+      "refresh": "Refresh",
+      "statusFilter": "Filter by status",
+      "allStatuses": "All",
+      "search": "Search",
+      "searchPlaceholder": "Ticket ID or subject…",
+      "clearSearch": "Clear search",
+      "loading": "Loading tickets…",
+      "empty": "No tickets match your filters.",
+      "pagination": "Tickets pagination",
+      "resultCount": "{{count}} tickets",
+      "table": {
+        "id": "Ticket ID",
+        "subject": "Subject",
+        "category": "Category",
+        "priority": "Priority",
+        "status": "Status",
+        "createdAt": "Created"
+      }
+    },
+    "create": {
+      "eyebrow": "Support",
+      "title": "Create Ticket",
+      "subtitle": "Describe your issue and attach files if needed. We will follow up as soon as possible.",
+      "subject": "Subject",
+      "subjectRequired": "Subject is required",
+      "description": "Description",
+      "descriptionRequired": "Description is required",
+      "category": "Category",
+      "categoryRequired": "Category is required",
+      "priority": "Priority",
+      "priorityRequired": "Priority is required",
+      "attachments": "Attachments",
+      "attachmentsHint": "Optional. Up to 5 files (JPEG, PNG, WebP, PDF, TXT, DOC/DOCX), max 5MB each.",
+      "addFiles": "Add files",
+      "submit": "Submit ticket",
+      "submitting": "Submitting...",
+      "successTitle": "Ticket created",
+      "successMessage": "Your ticket was created successfully. Keep this ID for follow-up.",
+      "successToast": "Ticket {{number}} created",
+      "ticketId": "Ticket ID",
+      "copyId": "Copy ID",
+      "idCopied": "Ticket ID copied",
+      "createAnother": "Create another ticket",
+      "viewMyTickets": "View my tickets",
+      "loadingCategories": "Loading categories…",
+      "noCategoriesTitle": "Categories not ready",
+      "noCategoriesMessage": "Support categories are not available yet. Please try again later or contact an administrator."
+    },
+    "categories": {
+      "BILLING": "Billing",
+      "TECHNICAL": "Technical",
+      "DOMAINS": "Domains",
+      "SMS": "SMS",
+      "ACCOUNT": "Account",
+      "OTHER": "Other"
+    },
+    "priorities": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "URGENT": "Urgent"
+    },
+    "statuses": {
+      "NEW": "New",
+      "OPEN": "Open",
+      "PENDING": "Pending",
+      "ON_HOLD": "On hold",
+      "RESOLVED": "Resolved",
+      "CLOSED": "Closed"
+    },
+    "detail": {
+      "title": "Ticket",
+      "subtitle": "Conversation",
+      "back": "Back to my tickets",
+      "loading": "Loading ticket…",
+      "notFound": "Ticket not found.",
+      "conversation": "Conversation",
+      "unknownAuthor": "Unknown",
+      "you": "You",
+      "replyTitle": "Reply",
+      "replyBody": "Your message",
+      "replyRequired": "Reply text is required",
+      "attachments": "Attachments",
+      "attachmentsHint": "Optional. Up to 5 files (JPEG, PNG, WebP, PDF, TXT, DOC/DOCX), max 5MB each.",
+      "addFiles": "Add files",
+      "sendReply": "Send reply",
+      "sending": "Sending…",
+      "replySent": "Reply sent",
+      "closedNotice": "This ticket is closed. You can no longer reply.",
+      "meta": {
+        "status": "Status",
+        "priority": "Priority",
+        "category": "Category",
+        "created": "Created"
+      }
+    }
   },
   "sms": {
     "singleSend": {
@@ -865,6 +983,21 @@
         "124": "Only OTP SMS is available and your template was not recognized as OTP"
       }
     },
+    "ticketCategories": {
+      "title": "Ticket Categories",
+      "subtitle": "Define categories available when creating support tickets. Admin only.",
+      "loading": "Loading categories...",
+      "name": "Category name",
+      "code": "Code",
+      "codeHint": "Optional. Auto-generated from name if empty.",
+      "add": "Add category",
+      "added": "Category added",
+      "removed": "Category removed",
+      "inactive": "Inactive",
+      "empty": "No categories yet.",
+      "removeTitle": "Remove category",
+      "removeMessage": "Remove category \"{{name}}\"? If it is used by existing tickets, it will be deactivated instead of deleted."
+    },
     "totp": {
       "enabledStatus": "Enabled",
       "setupTitle": "Set up authenticator app",
@@ -1062,7 +1195,27 @@
     "SMS_SCHEDULED_ALREADY_SENT": "This scheduled SMS has already been sent",
     "SMS_SCHEDULED_CANCEL_TOO_LATE": "Cancellation is only allowed until 3 minutes before send time",
     "SMS_SCHEDULED_CANCEL_FAILED": "Failed to cancel scheduled SMS with the provider",
-    "SMS_PACK_ID_REQUIRED": "SMS pack ID is required"
+    "SMS_PACK_ID_REQUIRED": "SMS pack ID is required",
+    "TICKET_SUBJECT_REQUIRED": "Ticket subject is required",
+    "TICKET_SUBJECT_TOO_LONG": "Ticket subject must be at most 200 characters",
+    "TICKET_DESCRIPTION_REQUIRED": "Ticket description is required",
+    "TICKET_DESCRIPTION_TOO_LONG": "Ticket description must be at most 10000 characters",
+    "TICKET_CATEGORY_REQUIRED": "Ticket category is required",
+    "TICKET_CATEGORY_NOT_FOUND": "Ticket category was not found",
+    "TICKET_CATEGORY_INACTIVE": "Ticket category is inactive",
+    "TICKET_CATEGORY_NAME_REQUIRED": "Ticket category name is required",
+    "TICKET_CATEGORY_NAME_INVALID": "Ticket category name must be between 2 and 100 characters",
+    "TICKET_CATEGORY_CODE_INVALID": "Ticket category code is invalid",
+    "TICKET_CATEGORY_CODE_EXISTS": "Ticket category code already exists",
+    "TICKET_PRIORITY_REQUIRED": "Ticket priority is required",
+    "TICKET_ATTACHMENTS_LIMIT": "Maximum 5 attachments allowed per ticket",
+    "TICKET_ATTACHMENT_INVALID": "Invalid attachment. Use JPEG, PNG, WebP, PDF, TXT, or DOC/DOCX under 5MB",
+    "TICKET_ATTACHMENT_UPLOAD_FAILED": "Failed to upload ticket attachment",
+    "TICKET_NOT_FOUND": "Ticket was not found",
+    "TICKET_REPLY_BODY_REQUIRED": "Reply text is required",
+    "TICKET_REPLY_BODY_TOO_LONG": "Reply must be at most 10000 characters",
+    "TICKET_CLOSED_NO_REPLY": "This ticket is closed and cannot accept replies",
+    "TICKET_ATTACHMENT_NOT_FOUND": "Attachment was not found"
   },
   "avatar": {
     "title": "Edit avatar",

@@ -50,6 +50,28 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent)
       },
       {
+        path: 'tickets',
+        pathMatch: 'full',
+        redirectTo: 'tickets/mine'
+      },
+      {
+        path: 'tickets/mine',
+        loadComponent: () => import('./pages/tickets/my-tickets.component').then(m => m.MyTicketsComponent)
+      },
+      {
+        path: 'tickets/mine/:id',
+        loadComponent: () => import('./pages/tickets/ticket-detail.component').then(m => m.TicketDetailComponent)
+      },
+      {
+        path: 'tickets/new',
+        loadComponent: () => import('./pages/tickets/create-ticket.component').then(m => m.CreateTicketComponent)
+      },
+      {
+        path: 'tickets/categories',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/tickets/ticket-categories-page.component').then(m => m.TicketCategoriesPageComponent)
+      },
+      {
         path: 'analytics',
         loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },

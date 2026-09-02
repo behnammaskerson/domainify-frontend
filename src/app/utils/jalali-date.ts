@@ -10,6 +10,12 @@ const DATETIME_OPTIONS: Intl.DateTimeFormatOptions = {
   minute: '2-digit'
 };
 
+/** Numeric Jalali patterns — avoid MMM/MMMM (date-fns-jalali can emit "شهر"). */
+const JALALI_DATE = 'yyyy/MM/dd';
+const JALALI_DATETIME = 'yyyy/MM/dd, HH:mm';
+const JALALI_MONTH_YEAR = 'yyyy/MM';
+const JALALI_TIME = 'HH:mm';
+
 export function formatJalaliDate(
   value: Date | string | number,
   options?: Intl.DateTimeFormatOptions
@@ -26,7 +32,7 @@ export function formatJalaliDate(
 
 function resolveJalaliPattern(options?: Intl.DateTimeFormatOptions): string {
   if (!options) {
-    return 'd MMM yyyy';
+    return JALALI_DATE;
   }
 
   const hasTime = !!(options.timeStyle || options.hour !== undefined || options.minute !== undefined);
@@ -37,36 +43,19 @@ function resolveJalaliPattern(options?: Intl.DateTimeFormatOptions): string {
     || options.day !== undefined
   );
 
-  if (options.dateStyle === 'medium' && options.timeStyle === 'short') {
-    return 'd MMM yyyy, HH:mm';
-  }
-
-  if (
-    options.year === 'numeric'
-    && options.month === 'short'
-    && options.day === 'numeric'
-    && hasTime
-  ) {
-    return 'd MMM yyyy, HH:mm';
-  }
-
-  if (options.month === 'short' && options.year === 'numeric' && options.day === undefined) {
-    return 'MMM yyyy';
-  }
-
-  if (options.month === 'short') {
-    return 'd MMM yyyy';
+  if (options.month === 'short' && options.year === 'numeric' && options.day === undefined && !hasTime) {
+    return JALALI_MONTH_YEAR;
   }
 
   if (hasTime && !hasDate) {
-    return 'HH:mm';
+    return JALALI_TIME;
   }
 
   if (hasDate && hasTime) {
-    return 'yyyy/MM/dd, HH:mm';
+    return JALALI_DATETIME;
   }
 
-  return 'yyyy/MM/dd';
+  return JALALI_DATE;
 }
 
 export const SMS_DATETIME_FORMAT: Intl.DateTimeFormatOptions = DATETIME_OPTIONS;

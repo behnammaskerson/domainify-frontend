@@ -86,6 +86,10 @@
     "analyzer": "محلل النطاقات",
     "marketplace": "السوق",
     "settings": "الإعدادات",
+    "createTicket": "إنشاء تذكرة",
+    "myTickets": "تذاكري",
+    "ticketCategories": "فئات التذاكر",
+    "support": "الدعم",
     "analytics": "التحليلات",
     "customers": "العملاء",
     "users": "المستخدمون",
@@ -101,6 +105,120 @@
     "smsLiveSends": "إرسالات اليوم",
     "smsArchiveSends": "الإرسالات المؤرشفة",
     "smsDailyPacks": "حزم اليوم"
+  },
+  "tickets": {
+    "categoriesPage": {
+      "eyebrow": "الدعم",
+      "title": "فئات التذاكر",
+      "subtitle": "أدِر الفئات المتاحة عند إنشاء تذاكر الدعم."
+    },
+    "portal": {
+      "eyebrow": "بوابة الدعم",
+      "navLabel": "أقسام بوابة الدعم",
+      "myTickets": "تذاكري",
+      "createTicket": "إنشاء تذكرة"
+    },
+    "mine": {
+      "eyebrow": "الدعم",
+      "title": "تذاكري",
+      "subtitle": "تابع حالة التذاكر التي أرسلتها.",
+      "create": "إنشاء تذكرة",
+      "refresh": "تحديث",
+      "statusFilter": "تصفية حسب الحالة",
+      "allStatuses": "الكل",
+      "search": "بحث",
+      "searchPlaceholder": "معرّف التذكرة أو الموضوع…",
+      "clearSearch": "مسح البحث",
+      "loading": "جارٍ تحميل التذاكر…",
+      "empty": "لا توجد تذاكر مطابقة لعوامل التصفية.",
+      "pagination": "ترقيم صفحات التذاكر",
+      "resultCount": "{{count}} تذكرة",
+      "table": {
+        "id": "معرّف التذكرة",
+        "subject": "الموضوع",
+        "category": "الفئة",
+        "priority": "الأولوية",
+        "status": "الحالة",
+        "createdAt": "تاريخ الإنشاء"
+      }
+    },
+    "create": {
+      "eyebrow": "الدعم",
+      "title": "إنشاء تذكرة",
+      "subtitle": "صف مشكلتك وأرفق ملفات إن لزم. سنتابع الأمر في أقرب وقت.",
+      "subject": "الموضوع",
+      "subjectRequired": "الموضوع مطلوب",
+      "description": "الوصف",
+      "descriptionRequired": "الوصف مطلوب",
+      "category": "الفئة",
+      "categoryRequired": "الفئة مطلوبة",
+      "priority": "الأولوية",
+      "priorityRequired": "الأولوية مطلوبة",
+      "attachments": "المرفقات",
+      "attachmentsHint": "اختياري. حتى 5 ملفات (JPEG وPNG وWebP وPDF وTXT وDOC/DOCX)، بحد أقصى 5 ميجابايت لكل ملف.",
+      "addFiles": "إضافة ملفات",
+      "submit": "إرسال التذكرة",
+      "submitting": "جارٍ الإرسال...",
+      "successTitle": "تم إنشاء التذكرة",
+      "successMessage": "تم إنشاء تذكرتك بنجاح. احتفظ بهذا المعرّف للمتابعة.",
+      "successToast": "تم إنشاء التذكرة {{number}}",
+      "ticketId": "معرّف التذكرة",
+      "copyId": "نسخ المعرّف",
+      "idCopied": "تم نسخ معرّف التذكرة",
+      "createAnother": "إنشاء تذكرة أخرى",
+      "viewMyTickets": "عرض تذاكري",
+      "loadingCategories": "جارٍ تحميل الفئات…",
+      "noCategoriesTitle": "الفئات غير جاهزة",
+      "noCategoriesMessage": "فئات الدعم غير متاحة بعد. حاول لاحقًا أو تواصل مع المسؤول."
+    },
+    "categories": {
+      "BILLING": "الفوترة",
+      "TECHNICAL": "تقني",
+      "DOMAINS": "النطاقات",
+      "SMS": "الرسائل القصيرة",
+      "ACCOUNT": "الحساب",
+      "OTHER": "أخرى"
+    },
+    "priorities": {
+      "LOW": "منخفضة",
+      "MEDIUM": "متوسطة",
+      "HIGH": "عالية",
+      "URGENT": "عاجلة"
+    },
+    "statuses": {
+      "NEW": "جديدة",
+      "OPEN": "مفتوحة",
+      "PENDING": "قيد الانتظار",
+      "ON_HOLD": "معلّقة",
+      "RESOLVED": "تم الحل",
+      "CLOSED": "مغلقة"
+    },
+    "detail": {
+      "title": "تذكرة",
+      "subtitle": "المحادثة",
+      "back": "العودة إلى تذاكري",
+      "loading": "جارٍ تحميل التذكرة…",
+      "notFound": "لم يتم العثور على التذكرة.",
+      "conversation": "المحادثة",
+      "unknownAuthor": "غير معروف",
+      "you": "أنت",
+      "replyTitle": "رد",
+      "replyBody": "رسالتك",
+      "replyRequired": "نص الرد مطلوب",
+      "attachments": "المرفقات",
+      "attachmentsHint": "اختياري. حتى 5 ملفات (JPEG وPNG وWebP وPDF وTXT وDOC/DOCX)، بحد أقصى 5 ميجابايت لكل ملف.",
+      "addFiles": "إضافة ملفات",
+      "sendReply": "إرسال الرد",
+      "sending": "جارٍ الإرسال…",
+      "replySent": "تم إرسال الرد",
+      "closedNotice": "هذه التذكرة مغلقة ولا يمكن الرد عليها.",
+      "meta": {
+        "status": "الحالة",
+        "priority": "الأولوية",
+        "category": "الفئة",
+        "created": "تاريخ الإنشاء"
+      }
+    }
   },
   "sms": {
     "singleSend": {
@@ -765,6 +883,21 @@
         "124": "حالياً يتوفر إرسال OTP فقط ولم يُعرَف قالبك كـ OTP"
       }
     },
+    "ticketCategories": {
+      "title": "فئات التذاكر",
+      "subtitle": "عرّف الفئات المتاحة عند إنشاء تذاكر الدعم. للمسؤول فقط.",
+      "loading": "جارٍ تحميل الفئات...",
+      "name": "اسم الفئة",
+      "code": "الرمز",
+      "codeHint": "اختياري. يُنشأ تلقائياً من الاسم إن تُرك فارغاً.",
+      "add": "إضافة فئة",
+      "added": "تمت إضافة الفئة",
+      "removed": "تمت إزالة الفئة",
+      "inactive": "غير نشطة",
+      "empty": "لا توجد فئات بعد.",
+      "removeTitle": "إزالة الفئة",
+      "removeMessage": "إزالة الفئة «{{name}}»؟ إن كانت مستخدمة في تذاكر موجودة فسيتم تعطيلها بدل الحذف."
+    },
     "totp": {
       "enabledStatus": "مفعّل",
       "setupTitle": "إعداد تطبيق المصادقة",
@@ -962,7 +1095,27 @@
     "SMS_SCHEDULED_ALREADY_SENT": "تم إرسال هذه الرسالة المجدولة مسبقاً",
     "SMS_SCHEDULED_CANCEL_TOO_LATE": "يُسمح بالإلغاء حتى 3 دقائق قبل وقت الإرسال فقط",
     "SMS_SCHEDULED_CANCEL_FAILED": "فشل إلغاء الإرسال المجدول مع مزود الخدمة",
-    "SMS_PACK_ID_REQUIRED": "معرّف حزمة الرسائل القصيرة مطلوب"
+    "SMS_PACK_ID_REQUIRED": "معرّف حزمة الرسائل القصيرة مطلوب",
+    "TICKET_SUBJECT_REQUIRED": "موضوع التذكرة مطلوب",
+    "TICKET_SUBJECT_TOO_LONG": "يجب ألا يتجاوز موضوع التذكرة 200 حرفًا",
+    "TICKET_DESCRIPTION_REQUIRED": "وصف التذكرة مطلوب",
+    "TICKET_DESCRIPTION_TOO_LONG": "يجب ألا يتجاوز وصف التذكرة 10000 حرف",
+    "TICKET_CATEGORY_REQUIRED": "فئة التذكرة مطلوبة",
+    "TICKET_CATEGORY_NOT_FOUND": "فئة التذكرة غير موجودة",
+    "TICKET_CATEGORY_INACTIVE": "فئة التذكرة غير نشطة",
+    "TICKET_CATEGORY_NAME_REQUIRED": "اسم فئة التذكرة مطلوب",
+    "TICKET_CATEGORY_NAME_INVALID": "يجب أن يكون اسم الفئة بين حرفين و100 حرف",
+    "TICKET_CATEGORY_CODE_INVALID": "رمز فئة التذكرة غير صالح",
+    "TICKET_CATEGORY_CODE_EXISTS": "رمز فئة التذكرة موجود مسبقاً",
+    "TICKET_PRIORITY_REQUIRED": "أولوية التذكرة مطلوبة",
+    "TICKET_ATTACHMENTS_LIMIT": "يُسمح بحد أقصى 5 مرفقات لكل تذكرة",
+    "TICKET_ATTACHMENT_INVALID": "مرفق غير صالح. استخدم JPEG أو PNG أو WebP أو PDF أو TXT أو DOC/DOCX حتى 5 ميجابايت",
+    "TICKET_ATTACHMENT_UPLOAD_FAILED": "فشل رفع مرفق التذكرة",
+    "TICKET_NOT_FOUND": "لم يتم العثور على التذكرة",
+    "TICKET_REPLY_BODY_REQUIRED": "نص الرد مطلوب",
+    "TICKET_REPLY_BODY_TOO_LONG": "يجب ألا يتجاوز الرد 10000 حرف",
+    "TICKET_CLOSED_NO_REPLY": "هذه التذكرة مغلقة ولا تقبل الردود",
+    "TICKET_ATTACHMENT_NOT_FOUND": "لم يتم العثور على المرفق"
   },
   "avatar": {
     "title": "تعديل الصورة",

@@ -86,6 +86,10 @@
     "analyzer": "تحلیلگر دامنه",
     "marketplace": "بازار",
     "settings": "تنظیمات",
+    "createTicket": "ایجاد تیکت",
+    "myTickets": "تیکت‌های من",
+    "ticketCategories": "دسته‌بندی تیکت",
+    "support": "پشتیبانی",
     "analytics": "تحلیل‌ها",
     "customers": "مشتریان",
     "users": "کاربران",
@@ -101,6 +105,120 @@
     "smsLiveSends": "گزارش ارسال‌های روز",
     "smsArchiveSends": "گزارش ارسال‌های آرشیو شده",
     "smsDailyPacks": "مجموعه ارسال‌های روز"
+  },
+  "tickets": {
+    "categoriesPage": {
+      "eyebrow": "پشتیبانی",
+      "title": "دسته‌بندی تیکت‌ها",
+      "subtitle": "دسته‌بندی‌های قابل انتخاب هنگام ایجاد تیکت پشتیبانی را مدیریت کنید."
+    },
+    "portal": {
+      "eyebrow": "پورتال پشتیبانی",
+      "navLabel": "بخش‌های پورتال پشتیبانی",
+      "myTickets": "تیکت‌های من",
+      "createTicket": "ایجاد تیکت"
+    },
+    "mine": {
+      "eyebrow": "پشتیبانی",
+      "title": "تیکت‌های من",
+      "subtitle": "وضعیت تیکت‌هایی که ثبت کرده‌اید را پیگیری کنید.",
+      "create": "ایجاد تیکت",
+      "refresh": "بازخوانی",
+      "statusFilter": "فیلتر بر اساس وضعیت",
+      "allStatuses": "همه",
+      "search": "جستجو",
+      "searchPlaceholder": "شناسه تیکت یا موضوع…",
+      "clearSearch": "پاک کردن جستجو",
+      "loading": "در حال بارگذاری تیکت‌ها…",
+      "empty": "تیکتی با این فیلترها یافت نشد.",
+      "pagination": "صفحه‌بندی تیکت‌ها",
+      "resultCount": "{{count}} تیکت",
+      "table": {
+        "id": "شناسه تیکت",
+        "subject": "موضوع",
+        "category": "دسته‌بندی",
+        "priority": "اولویت",
+        "status": "وضعیت",
+        "createdAt": "تاریخ ایجاد"
+      }
+    },
+    "create": {
+      "eyebrow": "پشتیبانی",
+      "title": "ایجاد تیکت",
+      "subtitle": "مشکل خود را توضیح دهید و در صورت نیاز فایل پیوست کنید. در اسرع وقت پیگیری می‌کنیم.",
+      "subject": "موضوع",
+      "subjectRequired": "موضوع الزامی است",
+      "description": "توضیحات",
+      "descriptionRequired": "توضیحات الزامی است",
+      "category": "دسته‌بندی",
+      "categoryRequired": "دسته‌بندی الزامی است",
+      "priority": "اولویت",
+      "priorityRequired": "اولویت الزامی است",
+      "attachments": "پیوست‌ها",
+      "attachmentsHint": "اختیاری. حداکثر ۵ فایل (JPEG، PNG، WebP، PDF، TXT، DOC/DOCX)، هر کدام تا ۵ مگابایت.",
+      "addFiles": "افزودن فایل",
+      "submit": "ثبت تیکت",
+      "submitting": "در حال ثبت...",
+      "successTitle": "تیکت ایجاد شد",
+      "successMessage": "تیکت شما با موفقیت ایجاد شد. این شناسه را برای پیگیری نگه دارید.",
+      "successToast": "تیکت {{number}} ایجاد شد",
+      "ticketId": "شناسه تیکت",
+      "copyId": "کپی شناسه",
+      "idCopied": "شناسه تیکت کپی شد",
+      "createAnother": "ایجاد تیکت دیگر",
+      "viewMyTickets": "مشاهده تیکت‌های من",
+      "loadingCategories": "در حال بارگذاری دسته‌بندی‌ها…",
+      "noCategoriesTitle": "دسته‌بندی آماده نیست",
+      "noCategoriesMessage": "دسته‌بندی‌های پشتیبانی هنوز در دسترس نیست. بعداً دوباره تلاش کنید یا با مدیر سیستم تماس بگیرید."
+    },
+    "categories": {
+      "BILLING": "مالی",
+      "TECHNICAL": "فنی",
+      "DOMAINS": "دامنه",
+      "SMS": "پیامک",
+      "ACCOUNT": "حساب کاربری",
+      "OTHER": "سایر"
+    },
+    "priorities": {
+      "LOW": "کم",
+      "MEDIUM": "متوسط",
+      "HIGH": "بالا",
+      "URGENT": "فوری"
+    },
+    "statuses": {
+      "NEW": "جدید",
+      "OPEN": "باز",
+      "PENDING": "در انتظار",
+      "ON_HOLD": "معلق",
+      "RESOLVED": "حل‌شده",
+      "CLOSED": "بسته"
+    },
+    "detail": {
+      "title": "تیکت",
+      "subtitle": "گفتگو",
+      "back": "بازگشت به تیکت‌های من",
+      "loading": "در حال بارگذاری تیکت…",
+      "notFound": "تیکت یافت نشد.",
+      "conversation": "گفتگو",
+      "unknownAuthor": "نامشخص",
+      "you": "شما",
+      "replyTitle": "پاسخ",
+      "replyBody": "پیام شما",
+      "replyRequired": "متن پاسخ الزامی است",
+      "attachments": "پیوست‌ها",
+      "attachmentsHint": "اختیاری. حداکثر ۵ فایل (JPEG، PNG، WebP، PDF، TXT، DOC/DOCX)، هر کدام تا ۵ مگابایت.",
+      "addFiles": "افزودن فایل",
+      "sendReply": "ارسال پاسخ",
+      "sending": "در حال ارسال…",
+      "replySent": "پاسخ ارسال شد",
+      "closedNotice": "این تیکت بسته شده و امکان پاسخ وجود ندارد.",
+      "meta": {
+        "status": "وضعیت",
+        "priority": "اولویت",
+        "category": "دسته‌بندی",
+        "created": "ایجاد"
+      }
+    }
   },
   "sms": {
     "singleSend": {
@@ -843,6 +961,21 @@
         "124": "در حال حاضر فقط امکان ارسال پیامک OTP وجود دارد و قالب شما OTP شناسایی نشده است"
       }
     },
+    "ticketCategories": {
+      "title": "دسته‌بندی تیکت‌ها",
+      "subtitle": "دسته‌بندی‌های قابل انتخاب هنگام ایجاد تیکت پشتیبانی را تعریف کنید. فقط مدیر.",
+      "loading": "در حال بارگذاری دسته‌بندی‌ها...",
+      "name": "نام دسته‌بندی",
+      "code": "کد",
+      "codeHint": "اختیاری. در صورت خالی بودن از نام ساخته می‌شود.",
+      "add": "افزودن دسته‌بندی",
+      "added": "دسته‌بندی افزوده شد",
+      "removed": "دسته‌بندی حذف شد",
+      "inactive": "غیرفعال",
+      "empty": "هنوز دسته‌بندی‌ای وجود ندارد.",
+      "removeTitle": "حذف دسته‌بندی",
+      "removeMessage": "دسته‌بندی «{{name}}» حذف شود؟ اگر در تیکت‌های موجود استفاده شده باشد، به‌جای حذف غیرفعال می‌شود."
+    },
     "totp": {
       "enabledStatus": "فعال",
       "setupTitle": "راه‌اندازی اپلیکیشن احراز هویت",
@@ -1040,7 +1173,27 @@
     "SMS_SCHEDULED_ALREADY_SENT": "این ارسال زمان‌بندی‌شده قبلاً ارسال شده است",
     "SMS_SCHEDULED_CANCEL_TOO_LATE": "لغو فقط تا ۳ دقیقه قبل از زمان ارسال مجاز است",
     "SMS_SCHEDULED_CANCEL_FAILED": "لغو ارسال زمان‌بندی‌شده با سرویس‌دهنده ناموفق بود",
-    "SMS_PACK_ID_REQUIRED": "شناسه مجموعه پیامک الزامی است"
+    "SMS_PACK_ID_REQUIRED": "شناسه مجموعه پیامک الزامی است",
+    "TICKET_SUBJECT_REQUIRED": "موضوع تیکت الزامی است",
+    "TICKET_SUBJECT_TOO_LONG": "موضوع تیکت حداکثر ۲۰۰ کاراکتر باشد",
+    "TICKET_DESCRIPTION_REQUIRED": "توضیحات تیکت الزامی است",
+    "TICKET_DESCRIPTION_TOO_LONG": "توضیحات تیکت حداکثر ۱۰۰۰۰ کاراکتر باشد",
+    "TICKET_CATEGORY_REQUIRED": "دسته‌بندی تیکت الزامی است",
+    "TICKET_CATEGORY_NOT_FOUND": "دسته‌بندی تیکت یافت نشد",
+    "TICKET_CATEGORY_INACTIVE": "دسته‌بندی تیکت غیرفعال است",
+    "TICKET_CATEGORY_NAME_REQUIRED": "نام دسته‌بندی تیکت الزامی است",
+    "TICKET_CATEGORY_NAME_INVALID": "نام دسته‌بندی باید بین ۲ تا ۱۰۰ کاراکتر باشد",
+    "TICKET_CATEGORY_CODE_INVALID": "کد دسته‌بندی نامعتبر است",
+    "TICKET_CATEGORY_CODE_EXISTS": "کد دسته‌بندی از قبل وجود دارد",
+    "TICKET_PRIORITY_REQUIRED": "اولویت تیکت الزامی است",
+    "TICKET_ATTACHMENTS_LIMIT": "حداکثر ۵ پیوست برای هر تیکت مجاز است",
+    "TICKET_ATTACHMENT_INVALID": "پیوست نامعتبر است. از JPEG، PNG، WebP، PDF، TXT یا DOC/DOCX حداکثر ۵ مگابایت استفاده کنید",
+    "TICKET_ATTACHMENT_UPLOAD_FAILED": "آپلود پیوست تیکت ناموفق بود",
+    "TICKET_NOT_FOUND": "تیکت یافت نشد",
+    "TICKET_REPLY_BODY_REQUIRED": "متن پاسخ الزامی است",
+    "TICKET_REPLY_BODY_TOO_LONG": "پاسخ حداکثر ۱۰۰۰۰ کاراکتر است",
+    "TICKET_CLOSED_NO_REPLY": "این تیکت بسته است و امکان پاسخ ندارد",
+    "TICKET_ATTACHMENT_NOT_FOUND": "پیوست یافت نشد"
   },
   "avatar": {
     "title": "ویرایش آواتار",

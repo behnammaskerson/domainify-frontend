@@ -62,6 +62,57 @@ interface NavGroupChild {
           </a>
         }
 
+        @if (collapsed) {
+          <a class="nav-link"
+             routerLink="/tickets/mine"
+             routerLinkActive="active"
+             (click)="onNavigate()"
+             [matTooltip]="'menu.myTickets' | translate"
+             [matTooltipPosition]="tooltipPosition()">
+            <mat-icon>confirmation_number</mat-icon>
+          </a>
+          <a class="nav-link"
+             routerLink="/tickets/new"
+             routerLinkActive="active"
+             (click)="onNavigate()"
+             [matTooltip]="'menu.createTicket' | translate"
+             [matTooltipPosition]="tooltipPosition()">
+            <mat-icon>add_box</mat-icon>
+          </a>
+          @if (authService.isAdmin()) {
+            <a class="nav-link"
+               routerLink="/tickets/categories"
+               routerLinkActive="active"
+               (click)="onNavigate()"
+               [matTooltip]="'menu.ticketCategories' | translate"
+               [matTooltipPosition]="tooltipPosition()">
+              <mat-icon>category</mat-icon>
+            </a>
+          }
+        } @else {
+          <div class="nav-group" [class.expanded]="supportExpanded">
+            <button type="button"
+                    class="nav-link nav-group-trigger"
+                    (click)="toggleSupportGroup()"
+                    [attr.aria-expanded]="supportExpanded">
+              <mat-icon>support_agent</mat-icon>
+              <span class="nav-group-label">{{ 'menu.support' | translate }}</span>
+              <mat-icon class="chevron">{{ supportExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+            </button>
+            @if (supportExpanded) {
+              @for (child of visibleSupportChildren; track child.route) {
+                <a class="nav-link nav-child"
+                   [routerLink]="child.route"
+                   routerLinkActive="active"
+                   (click)="onNavigate()">
+                  <mat-icon>{{ child.icon }}</mat-icon>
+                  <span>{{ child.labelKey | translate }}</span>
+                </a>
+              }
+            }
+          </div>
+        }
+
         @if (authService.isAdmin()) {
           @if (collapsed) {
             <a class="nav-link"
@@ -361,6 +412,7 @@ export class SidebarComponent implements OnInit {
   translationService = inject(TranslationService);
 
   smsExpanded = false;
+  supportExpanded = false;
 
   tooltipPosition = computed(() => this.translationService.isRtl() ? 'left' : 'right');
 
@@ -374,6 +426,12 @@ export class SidebarComponent implements OnInit {
     { icon: 'description', labelKey: 'menu.reports', route: '/reports' }
   ];
 
+  readonly supportNavChildren: NavGroupChild[] = [
+    { icon: 'confirmation_number', labelKey: 'menu.myTickets', route: '/tickets/mine' },
+    { icon: 'add_box', labelKey: 'menu.createTicket', route: '/tickets/new' },
+    { icon: 'category', labelKey: 'menu.ticketCategories', route: '/tickets/categories' }
+  ];
+
   readonly smsNavChildren: NavGroupChild[] = [
     { icon: 'sms', labelKey: 'menu.singleSmsSend', route: '/sms/single-send' },
     { icon: 'send', labelKey: 'menu.bulkSmsSend', route: '/sms/bulk-send' },
@@ -383,10 +441,17 @@ export class SidebarComponent implements OnInit {
     { icon: 'inbox', labelKey: 'menu.smsReceiveReports', route: '/sms/receive-reports' }
   ];
 
+  get visibleSupportChildren(): NavGroupChild[] {
+    if (this.authService.isAdmin()) {
+      return this.supportNavChildren;
+    }
+    return this.supportNavChildren.filter((child) => child.route !== '/tickets/categories');
+  }
+
   ngOnInit(): void {
-    this.updateSmsExpanded(this.router.url);
+    this.updateGroupExpanded(this.router.url);
     this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
-      this.updateSmsExpanded(this.router.url);
+      this.updateGroupExpanded(this.router.url);
     });
   }
 
@@ -394,11 +459,16 @@ export class SidebarComponent implements OnInit {
     this.smsExpanded = !this.smsExpanded;
   }
 
+  toggleSupportGroup(): void {
+    this.supportExpanded = !this.supportExpanded;
+  }
+
   onNavigate(): void {
     this.closeMobile.emit();
   }
 
-  private updateSmsExpanded(url: string): void {
+  private updateGroupExpanded(url: string): void {
     this.smsExpanded = url.startsWith('/sms');
+    this.supportExpanded = url.startsWith('/tickets');
   }
 }
