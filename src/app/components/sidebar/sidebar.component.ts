@@ -378,7 +378,9 @@ export class SidebarComponent implements OnInit {
     { icon: 'sms', labelKey: 'menu.singleSmsSend', route: '/sms/single-send' },
     { icon: 'send', labelKey: 'menu.bulkSmsSend', route: '/sms/bulk-send' },
     { icon: 'upload_file', labelKey: 'menu.bulkSmsFileSend', route: '/sms/bulk-send-file' },
-    { icon: 'schedule_send', labelKey: 'menu.scheduledSms', route: '/sms/scheduled' }
+    { icon: 'schedule_send', labelKey: 'menu.scheduledSms', route: '/sms/scheduled' },
+    { icon: 'mark_email_read', labelKey: 'menu.smsSendReports', route: '/sms/send-reports' },
+    { icon: 'inbox', labelKey: 'menu.smsReceiveReports', route: '/sms/receive-reports' }
   ];
 
   ngOnInit(): void {

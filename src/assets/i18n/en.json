@@ -95,7 +95,12 @@
     "singleSmsSend": "Send SMS",
     "bulkSmsSend": "Bulk SMS Send",
     "bulkSmsFileSend": "Bulk SMS from File",
-    "scheduledSms": "Scheduled SMS"
+    "scheduledSms": "Scheduled SMS",
+    "smsSendReports": "Send Reports",
+    "smsReceiveReports": "Receive Reports",
+    "smsLiveSends": "Today's Sends",
+    "smsArchiveSends": "Archived Sends",
+    "smsDailyPacks": "Today's Packs"
   },
   "sms": {
     "singleSend": {
@@ -365,6 +370,177 @@
         "scheduledAt": "Scheduled time",
         "status": "Status",
         "cost": "Cost"
+      }
+    },
+    "deliveryStates": {
+      "1": "Delivered",
+      "2": "Not delivered to handset",
+      "3": "Delivered to telecom",
+      "4": "Not delivered to telecom",
+      "5": "Delivered to operator",
+      "6": "Failed",
+      "7": "Blacklisted",
+      "8": "Unknown",
+      "unknown": "Unknown"
+    },
+    "sendReports": {
+      "eyebrow": "SMS Management",
+      "title": "Send Reports",
+      "subtitle": "Review today's sends, archived sends, and today's send packs in one place.",
+      "loading": "Loading SMS configuration...",
+      "configRequired": "Configure the SMS server and API key in Settings before viewing send reports.",
+      "openSettings": "Open SMS settings",
+      "refresh": "Refresh",
+      "tabsLabel": "Send report sections",
+      "tabs": {
+        "live": "Today's Sends",
+        "archive": "Archived Sends",
+        "packs": "Today's Packs"
+      }
+    },
+    "receiveReports": {
+      "eyebrow": "SMS Management",
+      "title": "Receive Reports",
+      "subtitle": "View latest unread inbox messages, today's received SMS, and archived inbox reports.",
+      "loading": "Loading SMS configuration...",
+      "configRequired": "Configure the SMS server and API key in Settings before viewing receive reports.",
+      "openSettings": "Open SMS settings",
+      "refresh": "Refresh",
+      "tabsLabel": "Receive report sections",
+      "clearFilters": "Clear filters",
+      "tabs": {
+        "latest": "Latest Received",
+        "live": "Today's Received",
+        "archive": "Archived Received"
+      },
+      "filters": {
+        "mobile": "Sender mobile",
+        "mobilePlaceholder": "09123456789"
+      },
+      "table": {
+        "receiveReturnId": "Receive ID",
+        "mobile": "Sender mobile",
+        "messageText": "Message",
+        "number": "Inbox line",
+        "receivedDateTime": "Received at"
+      },
+      "latest": {
+        "count": "Count",
+        "onceHint": "Each latest message can be fetched only once; after that it is marked as read and will not appear here again.",
+        "loadingList": "Loading latest received messages...",
+        "empty": "No latest received messages.",
+        "failed": "Unable to fetch latest received messages"
+      },
+      "live": {
+        "sortByNewest": "Sort by date",
+        "sortOldest": "Oldest first",
+        "sortNewest": "Newest first",
+        "loadingList": "Loading today's received messages...",
+        "empty": "No received messages found for today.",
+        "failed": "Unable to fetch today's received messages",
+        "pagination": "Today's received pagination"
+      },
+      "archive": {
+        "fromDate": "From date",
+        "toDate": "To date",
+        "loadingList": "Loading archived received messages...",
+        "empty": "No archived received messages found.",
+        "failed": "Unable to fetch archived received messages",
+        "pagination": "Archived received pagination"
+      }
+    },
+    "liveSends": {
+      "eyebrow": "SMS Management",
+      "title": "Today's Sends",
+      "subtitle": "Report of SMS messages sent today, including delivery status.",
+      "loading": "Loading SMS configuration...",
+      "loadingList": "Loading today's sends...",
+      "configRequired": "Configure the SMS server and API key in Settings before viewing today's sends.",
+      "openSettings": "Open SMS settings",
+      "refresh": "Refresh",
+      "empty": "No SMS sends found for today.",
+      "failed": "Unable to fetch today's sends",
+      "pagination": "Today's sends pagination",
+      "table": {
+        "messageId": "Message ID",
+        "mobile": "Mobile",
+        "messageText": "Message",
+        "lineNumber": "Sender line",
+        "cost": "Cost",
+        "sendDateTime": "Send time",
+        "deliveryState": "Delivery status",
+        "deliveryDateTime": "Delivery time"
+      }
+    },
+    "archiveSends": {
+      "eyebrow": "SMS Management",
+      "title": "Archived Sends",
+      "subtitle": "Report of SMS messages sent in the past (through the end of yesterday).",
+      "loading": "Loading SMS configuration...",
+      "loadingList": "Loading archived sends...",
+      "configRequired": "Configure the SMS server and API key in Settings before viewing archived sends.",
+      "openSettings": "Open SMS settings",
+      "refresh": "Refresh",
+      "fromDate": "From date",
+      "toDate": "To date",
+      "clearFilters": "Clear filters",
+      "empty": "No archived SMS sends found.",
+      "failed": "Unable to fetch archived sends",
+      "pagination": "Archived sends pagination",
+      "table": {
+        "messageId": "Message ID",
+        "mobile": "Mobile",
+        "messageText": "Message",
+        "lineNumber": "Sender line",
+        "cost": "Cost",
+        "sendDateTime": "Send time",
+        "deliveryState": "Delivery status",
+        "deliveryDateTime": "Delivery time"
+      }
+    },
+    "dailyPacks": {
+      "eyebrow": "SMS Management",
+      "title": "Today's Send Packs",
+      "subtitle": "Overview of all SMS send packs created today.",
+      "loading": "Loading SMS configuration...",
+      "loadingList": "Loading today's packs...",
+      "configRequired": "Configure the SMS server and API key in Settings before viewing daily packs.",
+      "openSettings": "Open SMS settings",
+      "refresh": "Refresh",
+      "empty": "No send packs found for today.",
+      "failed": "Unable to fetch today's send packs",
+      "pagination": "Today's packs pagination",
+      "viewReport": "View pack report",
+      "table": {
+        "packId": "Pack ID",
+        "recipientCount": "Recipients",
+        "creationDateTime": "Created at"
+      }
+    },
+    "packReport": {
+      "eyebrow": "SMS Management",
+      "title": "Pack Send Report",
+      "subtitle": "Messages and delivery statuses for pack {{packId}}.",
+      "loading": "Loading SMS configuration...",
+      "loadingList": "Loading pack messages...",
+      "configRequired": "Configure the SMS server and API key in Settings before viewing pack reports.",
+      "openSettings": "Open SMS settings",
+      "back": "Back to send reports",
+      "refresh": "Refresh",
+      "packId": "Pack ID",
+      "packIdRequired": "Pack ID is required.",
+      "messageCount": "{{count}} messages",
+      "empty": "No messages found for this pack.",
+      "failed": "Unable to fetch pack send report",
+      "table": {
+        "messageId": "Message ID",
+        "mobile": "Mobile",
+        "messageText": "Message",
+        "lineNumber": "Sender line",
+        "cost": "Cost",
+        "sendDateTime": "Send time",
+        "deliveryState": "Delivery status",
+        "deliveryDateTime": "Delivery time"
       }
     }
   },
@@ -885,7 +1061,8 @@
     "SMS_SCHEDULED_ALREADY_CANCELLED": "This scheduled SMS has already been cancelled",
     "SMS_SCHEDULED_ALREADY_SENT": "This scheduled SMS has already been sent",
     "SMS_SCHEDULED_CANCEL_TOO_LATE": "Cancellation is only allowed until 3 minutes before send time",
-    "SMS_SCHEDULED_CANCEL_FAILED": "Failed to cancel scheduled SMS with the provider"
+    "SMS_SCHEDULED_CANCEL_FAILED": "Failed to cancel scheduled SMS with the provider",
+    "SMS_PACK_ID_REQUIRED": "SMS pack ID is required"
   },
   "avatar": {
     "title": "Edit avatar",

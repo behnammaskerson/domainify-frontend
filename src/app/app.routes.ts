@@ -79,6 +79,36 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/sms/scheduled-sms.component').then(m => m.ScheduledSmsComponent)
       },
       {
+        path: 'sms/send-reports',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/sms/sms-send-reports.component').then(m => m.SmsSendReportsComponent)
+      },
+      {
+        path: 'sms/live-sends',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/sms/sms-send-reports.component').then(m => m.SmsSendReportsComponent)
+      },
+      {
+        path: 'sms/archive-sends',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/sms/sms-send-reports.component').then(m => m.SmsSendReportsComponent)
+      },
+      {
+        path: 'sms/daily-packs',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/sms/sms-send-reports.component').then(m => m.SmsSendReportsComponent)
+      },
+      {
+        path: 'sms/pack-report/:packId',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/sms/sms-pack-report.component').then(m => m.SmsPackReportComponent)
+      },
+      {
+        path: 'sms/receive-reports',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/sms/sms-receive-reports.component').then(m => m.SmsReceiveReportsComponent)
+      },
+      {
         path: 'customers',
         redirectTo: 'user',
         pathMatch: 'full'

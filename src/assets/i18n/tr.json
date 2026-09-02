@@ -95,7 +95,12 @@
     "singleSmsSend": "SMS Gönder",
     "bulkSmsSend": "Toplu SMS Gönderimi",
     "bulkSmsFileSend": "Dosyadan Toplu SMS",
-    "scheduledSms": "Zamanlanmış SMS"
+    "scheduledSms": "Zamanlanmış SMS",
+    "smsSendReports": "Gönderim Raporları",
+    "smsReceiveReports": "Alım Raporları",
+    "smsLiveSends": "Günün Gönderimleri",
+    "smsArchiveSends": "Arşiv Gönderimleri",
+    "smsDailyPacks": "Günün Paketleri"
   },
   "sms": {
     "singleSend": {
@@ -288,6 +293,177 @@
       "sourceFilter": { "all": "Tüm kaynaklar" },
       "status": { "PENDING": "Beklemede", "CANCELLED": "İptal", "SENT": "Gönderildi" },
       "table": { "source": "Kaynak", "packId": "Paket kimliği", "line": "Gönderici hat", "recipients": "Alıcılar", "message": "Mesaj", "scheduledAt": "Gönderim zamanı", "status": "Durum", "cost": "Maliyet" }
+    },
+    "deliveryStates": {
+      "1": "Ulaştı",
+      "2": "Telefona ulaşmadı",
+      "3": "Telekoma ulaştı",
+      "4": "Telekoma ulaşmadı",
+      "5": "Operatöre ulaştı",
+      "6": "Başarısız",
+      "7": "Kara liste",
+      "8": "Bilinmiyor",
+      "unknown": "Bilinmiyor"
+    },
+    "sendReports": {
+      "eyebrow": "SMS Yönetimi",
+      "title": "Gönderim Raporları",
+      "subtitle": "Günün gönderimleri, arşiv gönderimleri ve günün paketlerini tek yerden inceleyin.",
+      "loading": "SMS yapılandırması yükleniyor...",
+      "configRequired": "Gönderim raporlarını görmeden önce Ayarlar'da SMS sunucusu ve API anahtarını yapılandırın.",
+      "openSettings": "SMS ayarlarını aç",
+      "refresh": "Yenile",
+      "tabsLabel": "Gönderim raporu bölümleri",
+      "tabs": {
+        "live": "Günün Gönderimleri",
+        "archive": "Arşiv Gönderimleri",
+        "packs": "Günün Paketleri"
+      }
+    },
+    "receiveReports": {
+      "eyebrow": "SMS Yönetimi",
+      "title": "Alım Raporları",
+      "subtitle": "En son gelen SMS'ler, günün alımları ve arşiv alımlarını tek yerden görün.",
+      "loading": "SMS yapılandırması yükleniyor...",
+      "configRequired": "Alım raporlarını görmeden önce Ayarlar'da SMS sunucusu ve API anahtarını yapılandırın.",
+      "openSettings": "SMS ayarlarını aç",
+      "refresh": "Yenile",
+      "tabsLabel": "Alım raporu bölümleri",
+      "clearFilters": "Filtreleri temizle",
+      "tabs": {
+        "latest": "En Son Gelenler",
+        "live": "Günün Alımları",
+        "archive": "Arşiv Alımları"
+      },
+      "filters": {
+        "mobile": "Gönderen cep",
+        "mobilePlaceholder": "09123456789"
+      },
+      "table": {
+        "receiveReturnId": "Alım kimliği",
+        "mobile": "Gönderen cep",
+        "messageText": "Mesaj",
+        "number": "Alıcı hat",
+        "receivedDateTime": "Alınma zamanı"
+      },
+      "latest": {
+        "count": "Adet",
+        "onceHint": "Her en son gelen mesaj bu raporla yalnızca bir kez alınabilir; sonrasında okundu işaretlenir ve burada yeniden görünmez.",
+        "loadingList": "En son gelen mesajlar yükleniyor...",
+        "empty": "En son gelen mesaj yok.",
+        "failed": "En son gelen mesajlar alınamadı"
+      },
+      "live": {
+        "sortByNewest": "Tarihe göre sırala",
+        "sortOldest": "Eskiden yeniye",
+        "sortNewest": "Yeniden eskiye",
+        "loadingList": "Günün alımları yükleniyor...",
+        "empty": "Bugün için alınan SMS bulunamadı.",
+        "failed": "Günün alımları alınamadı",
+        "pagination": "Günün alımları sayfalama"
+      },
+      "archive": {
+        "fromDate": "Başlangıç tarihi",
+        "toDate": "Bitiş tarihi",
+        "loadingList": "Arşiv alımları yükleniyor...",
+        "empty": "Arşiv alınmış SMS bulunamadı.",
+        "failed": "Arşiv alımları alınamadı",
+        "pagination": "Arşiv alımları sayfalama"
+      }
+    },
+    "liveSends": {
+      "eyebrow": "SMS Yönetimi",
+      "title": "Günün Gönderimleri",
+      "subtitle": "Bugün gönderilen SMS'lerin teslim durumu dahil raporu.",
+      "loading": "SMS yapılandırması yükleniyor...",
+      "loadingList": "Günün gönderimleri yükleniyor...",
+      "configRequired": "Günün gönderimlerini görüntülemeden önce Ayarlar'da SMS sunucusu ve API anahtarını yapılandırın.",
+      "openSettings": "SMS ayarlarını aç",
+      "refresh": "Yenile",
+      "empty": "Bugün için SMS gönderimi bulunamadı.",
+      "failed": "Günün gönderimleri alınamadı",
+      "pagination": "Günün gönderimleri sayfalama",
+      "table": {
+        "messageId": "Mesaj kimliği",
+        "mobile": "Cep telefonu",
+        "messageText": "Mesaj",
+        "lineNumber": "Gönderici hat",
+        "cost": "Maliyet",
+        "sendDateTime": "Gönderim zamanı",
+        "deliveryState": "Teslim durumu",
+        "deliveryDateTime": "Teslim zamanı"
+      }
+    },
+    "archiveSends": {
+      "eyebrow": "SMS Yönetimi",
+      "title": "Arşiv Gönderimleri",
+      "subtitle": "Geçmişte gönderilen SMS'lerin raporu (dün sonuna kadar).",
+      "loading": "SMS yapılandırması yükleniyor...",
+      "loadingList": "Arşiv gönderimleri yükleniyor...",
+      "configRequired": "Arşiv gönderimlerini görüntülemeden önce Ayarlar'da SMS sunucusu ve API anahtarını yapılandırın.",
+      "openSettings": "SMS ayarlarını aç",
+      "refresh": "Yenile",
+      "fromDate": "Başlangıç tarihi",
+      "toDate": "Bitiş tarihi",
+      "clearFilters": "Filtreleri temizle",
+      "empty": "Arşiv SMS gönderimi bulunamadı.",
+      "failed": "Arşiv gönderimleri alınamadı",
+      "pagination": "Arşiv gönderimleri sayfalama",
+      "table": {
+        "messageId": "Mesaj kimliği",
+        "mobile": "Cep telefonu",
+        "messageText": "Mesaj",
+        "lineNumber": "Gönderici hat",
+        "cost": "Maliyet",
+        "sendDateTime": "Gönderim zamanı",
+        "deliveryState": "Teslim durumu",
+        "deliveryDateTime": "Teslim zamanı"
+      }
+    },
+    "dailyPacks": {
+      "eyebrow": "SMS Yönetimi",
+      "title": "Günün Gönderim Paketleri",
+      "subtitle": "Bugün oluşturulan tüm SMS gönderim paketlerinin özeti.",
+      "loading": "SMS yapılandırması yükleniyor...",
+      "loadingList": "Günün paketleri yükleniyor...",
+      "configRequired": "Günün paketlerini görmeden önce Ayarlar'da SMS sunucusu ve API anahtarını yapılandırın.",
+      "openSettings": "SMS ayarlarını aç",
+      "refresh": "Yenile",
+      "empty": "Bugün için gönderim paketi bulunamadı.",
+      "failed": "Günün gönderim paketleri alınamadı",
+      "pagination": "Günün paketleri sayfalama",
+      "viewReport": "Paket raporunu görüntüle",
+      "table": {
+        "packId": "Paket kimliği",
+        "recipientCount": "Alıcı sayısı",
+        "creationDateTime": "Oluşturma zamanı"
+      }
+    },
+    "packReport": {
+      "eyebrow": "SMS Yönetimi",
+      "title": "Paket Gönderim Raporu",
+      "subtitle": "{{packId}} paketi için mesajlar ve teslim durumları.",
+      "loading": "SMS yapılandırması yükleniyor...",
+      "loadingList": "Paket mesajları yükleniyor...",
+      "configRequired": "Paket raporlarını görmeden önce Ayarlar'da SMS sunucusu ve API anahtarını yapılandırın.",
+      "openSettings": "SMS ayarlarını aç",
+      "back": "Gönderim raporlarına dön",
+      "refresh": "Yenile",
+      "packId": "Paket kimliği",
+      "packIdRequired": "Paket kimliği gerekli.",
+      "messageCount": "{{count}} mesaj",
+      "empty": "Bu paket için mesaj bulunamadı.",
+      "failed": "Paket gönderim raporu alınamadı",
+      "table": {
+        "messageId": "Mesaj kimliği",
+        "mobile": "Cep telefonu",
+        "messageText": "Mesaj",
+        "lineNumber": "Gönderici hat",
+        "cost": "Maliyet",
+        "sendDateTime": "Gönderim zamanı",
+        "deliveryState": "Teslim durumu",
+        "deliveryDateTime": "Teslim zamanı"
+      }
     }
   },
   "dashboard": {
@@ -807,7 +983,8 @@
     "SMS_SCHEDULED_ALREADY_CANCELLED": "Bu zamanlanmış SMS zaten iptal edilmiş",
     "SMS_SCHEDULED_ALREADY_SENT": "Bu zamanlanmış SMS zaten gönderilmiş",
     "SMS_SCHEDULED_CANCEL_TOO_LATE": "İptal yalnızca gönderim zamanından 3 dakika öncesine kadar yapılabilir",
-    "SMS_SCHEDULED_CANCEL_FAILED": "Zamanlanmış SMS sağlayıcı ile iptal edilemedi"
+    "SMS_SCHEDULED_CANCEL_FAILED": "Zamanlanmış SMS sağlayıcı ile iptal edilemedi",
+    "SMS_PACK_ID_REQUIRED": "SMS paket kimliği gerekli"
   },
   "avatar": {
     "title": "Avatarı düzenle",
