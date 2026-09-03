@@ -14,6 +14,7 @@ import { TicketPortalNavComponent } from '../../components/ticket-portal-nav/tic
 import { MarkdownEditorComponent } from '../../components/markdown-editor/markdown-editor.component';
 import { ApiErrorService } from '../../services/api-error.service';
 import {
+  TicketAttachmentPolicy,
   TicketCategory,
   TicketPriority,
   TicketService
@@ -124,7 +125,7 @@ import {
               <div class="attachments-header">
                 <div>
                   <h3>{{ 'tickets.create.attachments' | translate }}</h3>
-                  <p>{{ 'tickets.create.attachmentsHint' | translate }}</p>
+                  <p>{{ attachmentsHint }}</p>
                 </div>
                 <button mat-stroked-button type="button" (click)="fileInput.click()" [disabled]="submitting || files.length >= maxFiles">
                   <mat-icon>attach_file</mat-icon>
@@ -134,7 +135,7 @@ import {
                        type="file"
                        hidden
                        multiple
-                       accept=".jpg,.jpeg,.png,.webp,.pdf,.txt,.doc,.docx,image/jpeg,image/png,image/webp,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                       [attr.accept]="acceptAttr"
                        (change)="onFilesSelected($event)">
               </div>
 
@@ -333,17 +334,22 @@ export class CreateTicketComponent implements OnInit {
   categories: TicketCategory[] = [];
   categoriesLoading = true;
   readonly priorities: TicketPriority[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
-  readonly maxFiles = 5;
-  readonly maxFileBytes = 5 * 1024 * 1024;
-  readonly allowedTypes = new Set([
+  maxFiles = 5;
+  maxFileBytes = 5 * 1024 * 1024;
+  maxFileSizeMb = 5;
+  allowedTypes = new Set<string>([
     'image/jpeg',
     'image/png',
     'image/webp',
     'application/pdf',
     'text/plain',
+    'text/x-log',
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
   ]);
+  allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.pdf', '.txt', '.log', '.doc', '.docx'];
+  acceptAttr = this.allowedExtensions.join(',') + ',' + [...this.allowedTypes].join(',');
+  attachmentsHint = '';
 
   files: File[] = [];
   submitting = false;
@@ -356,6 +362,8 @@ export class CreateTicketComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.refreshAttachmentsHint();
+    this.loadAttachmentPolicy();
     this.ticketService.listActiveCategories().subscribe({
       next: (categories) => {
         this.categories = categories;
@@ -365,6 +373,34 @@ export class CreateTicketComponent implements OnInit {
         this.categoriesLoading = false;
         this.showError(this.apiError.resolve(error));
       }
+    });
+  }
+
+  private loadAttachmentPolicy(): void {
+    this.ticketService.getAttachmentPolicy().subscribe({
+      next: (policy) => this.applyAttachmentPolicy(policy),
+      error: () => this.refreshAttachmentsHint()
+    });
+  }
+
+  private applyAttachmentPolicy(policy: TicketAttachmentPolicy): void {
+    this.maxFiles = Math.max(1, policy.maxAttachments || 5);
+    this.maxFileSizeMb = Math.max(1, policy.maxAttachmentSizeMb || 5);
+    this.maxFileBytes = policy.maxAttachmentBytes || this.maxFileSizeMb * 1024 * 1024;
+    this.allowedTypes = new Set((policy.allowedContentTypes ?? []).map((t) => t.toLowerCase()));
+    this.allowedExtensions = (policy.allowedExtensions ?? []).map((ext) => ext.toLowerCase());
+    this.acceptAttr = [...this.allowedExtensions, ...this.allowedTypes].join(',');
+    this.refreshAttachmentsHint(policy.allowedAttachmentKinds);
+  }
+
+  private refreshAttachmentsHint(kinds?: string[]): void {
+    const typeLabels = (kinds?.length ? kinds : ['IMAGE', 'PDF', 'LOG', 'DOCUMENT'])
+      .map((kind) => this.translate.instant('settings.ticketSettings.kinds.' + kind))
+      .join(', ');
+    this.attachmentsHint = this.translate.instant('tickets.create.attachmentsHint', {
+      max: this.maxFiles,
+      sizeMb: this.maxFileSizeMb,
+      types: typeLabels
     });
   }
 
@@ -439,12 +475,11 @@ export class CreateTicketComponent implements OnInit {
   }
 
   private isAllowedFile(file: File): boolean {
-    if (file.type && this.allowedTypes.has(file.type)) {
+    if (file.type && this.allowedTypes.has(file.type.toLowerCase())) {
       return true;
     }
     const name = file.name.toLowerCase();
-    return ['.jpg', '.jpeg', '.png', '.webp', '.pdf', '.txt', '.doc', '.docx']
-      .some((ext) => name.endsWith(ext));
+    return this.allowedExtensions.some((ext) => name.endsWith(ext));
   }
 
   private showError(message: string): void {

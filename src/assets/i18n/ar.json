@@ -174,7 +174,7 @@
       "priority": "الأولوية",
       "priorityRequired": "الأولوية مطلوبة",
       "attachments": "المرفقات",
-      "attachmentsHint": "اختياري. حتى 5 ملفات (JPEG وPNG وWebP وPDF وTXT وDOC/DOCX)، بحد أقصى 5 ميجابايت لكل ملف.",
+      "attachmentsHint": "اختياري. حتى {{max}} ملفات ({{types}})، بحد أقصى {{sizeMb}} ميجابايت لكل ملف.",
       "addFiles": "إضافة ملفات",
       "submit": "إرسال التذكرة",
       "submitting": "جارٍ الإرسال...",
@@ -254,7 +254,7 @@
       "replyBody": "رسالتك",
       "replyRequired": "نص الرد مطلوب",
       "attachments": "المرفقات",
-      "attachmentsHint": "اختياري. حتى 5 ملفات (JPEG وPNG وWebP وPDF وTXT وDOC/DOCX)، بحد أقصى 5 ميجابايت لكل ملف.",
+      "attachmentsHint": "اختياري. حتى {{max}} ملفات ({{types}})، بحد أقصى {{sizeMb}} ميجابايت لكل ملف.",
       "addFiles": "إضافة ملفات",
       "sendReply": "إرسال الرد",
       "sending": "جارٍ الإرسال…",
@@ -280,6 +280,21 @@
         "priority": "الأولوية",
         "category": "الفئة",
         "created": "تاريخ الإنشاء"
+      }
+    },
+    "attachmentViewer": {
+      "view": "عرض",
+      "download": "تنزيل",
+      "loading": "جارٍ تحميل المرفق…",
+      "loadFailed": "تعذّر تحميل هذا المرفق.",
+      "retry": "إعادة المحاولة",
+      "unsupported": "المعاينة غير متاحة لهذا النوع من الملفات. يمكنك تنزيله بدلاً من ذلك.",
+      "untitled": "مرفق",
+      "types": {
+        "image": "صورة",
+        "pdf": "PDF",
+        "text": "نص / سجل",
+        "file": "ملف"
       }
     },
     "adminInbox": {
@@ -1040,9 +1055,26 @@
     "ticketSettings": {
       "loading": "جارٍ تحميل إعدادات التذاكر…",
       "intro": "تُطبَّق هذه الإعدادات على جميع تذاكر الدعم.",
+      "reopenSection": "مهلة إعادة الفتح",
       "reopenWindowDays": "مهلة إعادة الفتح (أيام)",
       "reopenWindowDaysHint": "عدد الأيام بعد الإغلاق التي يمكن خلالها إعادة فتح التذكرة. النطاق: 1–3650.",
       "reopenWindowDaysInvalid": "أدخل رقماً بين 1 و3650",
+      "attachmentsSection": "المرفقات",
+      "attachmentsIntro": "تُطبَّق الحدود على إنشاء التذاكر والردود (صور، PDF، سجلات، مستندات).",
+      "maxAttachments": "الحد الأقصى للملفات لكل رفع",
+      "maxAttachmentsHint": "من 1 إلى 20 ملفاً في إنشاء أو رد واحد.",
+      "maxAttachmentsInvalid": "أدخل رقماً بين 1 و20",
+      "maxAttachmentSizeMb": "الحد الأقصى لحجم الملف (ميجابايت)",
+      "maxAttachmentSizeMbHint": "حد لكل ملف بالميجابايت. النطاق: 1–50.",
+      "maxAttachmentSizeMbInvalid": "أدخل رقماً بين 1 و50",
+      "allowedKinds": "أنواع الملفات المسموحة",
+      "allowedKindsInvalid": "اختر نوع ملف واحداً على الأقل",
+      "kinds": {
+        "IMAGE": "صور (JPEG وPNG وWebP)",
+        "PDF": "PDF",
+        "LOG": "سجلات / نص (.txt و.log)",
+        "DOCUMENT": "مستندات (DOC وDOCX)"
+      },
       "saving": "جارٍ الحفظ…",
       "saved": "تم حفظ إعدادات التذاكر"
     },
@@ -1256,8 +1288,8 @@
     "TICKET_CATEGORY_CODE_INVALID": "رمز فئة التذكرة غير صالح",
     "TICKET_CATEGORY_CODE_EXISTS": "رمز فئة التذكرة موجود مسبقاً",
     "TICKET_PRIORITY_REQUIRED": "أولوية التذكرة مطلوبة",
-    "TICKET_ATTACHMENTS_LIMIT": "يُسمح بحد أقصى 5 مرفقات لكل تذكرة",
-    "TICKET_ATTACHMENT_INVALID": "مرفق غير صالح. استخدم JPEG أو PNG أو WebP أو PDF أو TXT أو DOC/DOCX حتى 5 ميجابايت",
+    "TICKET_ATTACHMENTS_LIMIT": "عدد المرفقات يتجاوز الحد المسموح",
+    "TICKET_ATTACHMENT_INVALID": "مرفق غير صالح. راجع الأنواع وحدود الحجم في إعدادات التذاكر",
     "TICKET_ATTACHMENT_UPLOAD_FAILED": "فشل رفع مرفق التذكرة",
     "TICKET_NOT_FOUND": "لم يتم العثور على التذكرة",
     "TICKET_REPLY_BODY_REQUIRED": "نص الرد مطلوب",

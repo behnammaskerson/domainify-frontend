@@ -8,16 +8,19 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { TicketPortalNavComponent } from '../../components/ticket-portal-nav/ticket-portal-nav.component';
 import { MarkdownEditorComponent } from '../../components/markdown-editor/markdown-editor.component';
+import { TicketAttachmentViewerDialogComponent } from '../../components/ticket-attachment-viewer-dialog/ticket-attachment-viewer-dialog.component';
 import { LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
 import { MarkdownPipe } from '../../pipes/markdown.pipe';
 import { ApiErrorService } from '../../services/api-error.service';
 import {
   TicketAttachmentMeta,
+  TicketAttachmentPolicy,
   TicketDetail,
   TicketMessage,
   TicketService,
@@ -37,6 +40,7 @@ type TicketDetailMode = 'customer' | 'admin';
     ReactiveFormsModule,
     RouterModule,
     MatButtonModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -245,15 +249,34 @@ type TicketDetailMode = 'customer' | 'admin';
                     @if (message.attachments?.length) {
                       <ul class="attachment-list">
                         @for (file of message.attachments; track file.id) {
-                          <li>
-                            <button type="button"
-                                    class="attachment-btn"
-                                    (click)="downloadAttachment(message, file)"
-                                    [disabled]="!file.id || downloadingId === file.id">
-                              <mat-icon>attach_file</mat-icon>
-                              <span class="file-name">{{ file.fileName }}</span>
-                              <span class="file-size">{{ formatSize(file.sizeBytes || 0) }}</span>
-                            </button>
+                          <li class="attachment-row">
+                            <div class="attachment-info">
+                              <mat-icon class="attachment-icon" aria-hidden="true">{{ attachmentIcon(file) }}</mat-icon>
+                              <div class="attachment-copy">
+                                <span class="file-name" [matTooltip]="file.fileName || ''">{{ file.fileName }}</span>
+                                <span class="file-size">{{ formatSize(file.sizeBytes || 0) }}</span>
+                              </div>
+                            </div>
+                            <div class="attachment-actions">
+                              <button mat-stroked-button
+                                      type="button"
+                                      class="attach-action"
+                                      (click)="viewAttachment(message, file)"
+                                      [disabled]="!file.id || busyAttachmentId === file.id"
+                                      [matTooltip]="'tickets.attachmentViewer.view' | translate">
+                                <mat-icon>visibility</mat-icon>
+                                <span class="action-label">{{ 'tickets.attachmentViewer.view' | translate }}</span>
+                              </button>
+                              <button mat-stroked-button
+                                      type="button"
+                                      class="attach-action"
+                                      (click)="downloadAttachment(message, file)"
+                                      [disabled]="!file.id || busyAttachmentId === file.id"
+                                      [matTooltip]="'tickets.attachmentViewer.download' | translate">
+                                <mat-icon>download</mat-icon>
+                                <span class="action-label">{{ 'tickets.attachmentViewer.download' | translate }}</span>
+                              </button>
+                            </div>
                           </li>
                         }
                       </ul>
@@ -285,7 +308,7 @@ type TicketDetailMode = 'customer' | 'admin';
                 <div class="attachments-header">
                   <div>
                     <h3>{{ 'tickets.detail.attachments' | translate }}</h3>
-                    <p>{{ 'tickets.detail.attachmentsHint' | translate }}</p>
+                    <p>{{ attachmentsHint }}</p>
                   </div>
                   <button mat-stroked-button type="button"
                           (click)="fileInput.click()"
@@ -297,7 +320,7 @@ type TicketDetailMode = 'customer' | 'admin';
                          type="file"
                          hidden
                          multiple
-                         accept=".jpg,.jpeg,.png,.webp,.pdf,.txt,.doc,.docx,image/jpeg,image/png,image/webp,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                         [attr.accept]="acceptAttr"
                          (change)="onFilesSelected($event)">
                 </div>
 
@@ -481,19 +504,28 @@ type TicketDetailMode = 'customer' | 'admin';
     .attachment-list, .file-list {
       list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px;
     }
-    .attachment-btn {
-      display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 10px;
-      border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-primary, #fff);
-      color: inherit; font: inherit; cursor: pointer; text-align: start;
+    .attachment-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 8px;
+      background: var(--bg-primary, #fff); flex-wrap: wrap;
     }
+    .attachment-info { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1 1 180px; }
+    .attachment-icon { color: var(--accent); flex-shrink: 0; }
+    .attachment-copy { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .attachment-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .attach-action mat-icon { font-size: 18px; width: 18px; height: 18px; margin-inline-end: 4px; }
     .file-list li {
       display: flex; align-items: center; gap: 8px; padding: 8px 10px;
       border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary);
     }
     .file-name {
-      flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;
     }
     .file-size { color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; }
+    @media (max-width: 600px) {
+      .action-label { display: none; }
+      .attach-action mat-icon { margin-inline-end: 0; }
+    }
     .attachments {
       display: flex; flex-direction: column; gap: 12px; padding: 14px;
       border: 1px dashed var(--border-color); border-radius: 8px; margin: 14px 0 12px;
@@ -517,22 +549,28 @@ export class TicketDetailComponent implements OnInit {
   private readonly apiError = inject(ApiErrorService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
   private readonly fb = inject(FormBuilder);
 
   @ViewChild('threadEnd') threadEnd?: ElementRef<HTMLElement>;
 
-  readonly maxFiles = 5;
-  readonly maxFileBytes = 5 * 1024 * 1024;
+  maxFiles = 5;
+  maxFileBytes = 5 * 1024 * 1024;
+  maxFileSizeMb = 5;
   readonly dateTimeFormat = SMS_DATETIME_FORMAT;
-  readonly allowedTypes = new Set([
+  allowedTypes = new Set<string>([
     'image/jpeg',
     'image/png',
     'image/webp',
     'application/pdf',
     'text/plain',
+    'text/x-log',
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
   ]);
+  allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.pdf', '.txt', '.log', '.doc', '.docx'];
+  acceptAttr = this.allowedExtensions.join(',') + ',' + [...this.allowedTypes].join(',');
+  attachmentsHint = '';
 
   mode: TicketDetailMode = 'customer';
   ticketId: number | null = null;
@@ -547,7 +585,7 @@ export class TicketDetailComponent implements OnInit {
   statusUpdating = false;
   lifecycleBusy = false;
   tagsSaving = false;
-  downloadingId: number | null = null;
+  busyAttachmentId: number | null = null;
   files: File[] = [];
   statusOptions: TicketStatus[] = [];
   catalogTags: TicketTag[] = [];
@@ -575,6 +613,8 @@ export class TicketDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.mode = this.route.snapshot.data['mode'] === 'admin' ? 'admin' : 'customer';
+    this.refreshAttachmentsHint();
+    this.loadAttachmentPolicy();
     const idParam = this.route.snapshot.paramMap.get('id');
     const id = idParam ? Number(idParam) : NaN;
     if (!Number.isFinite(id) || id <= 0) {
@@ -587,6 +627,34 @@ export class TicketDetailComponent implements OnInit {
     if (this.mode === 'admin') {
       this.loadCatalogTags();
     }
+  }
+
+  private loadAttachmentPolicy(): void {
+    this.ticketService.getAttachmentPolicy().subscribe({
+      next: (policy) => this.applyAttachmentPolicy(policy),
+      error: () => this.refreshAttachmentsHint()
+    });
+  }
+
+  private applyAttachmentPolicy(policy: TicketAttachmentPolicy): void {
+    this.maxFiles = Math.max(1, policy.maxAttachments || 5);
+    this.maxFileSizeMb = Math.max(1, policy.maxAttachmentSizeMb || 5);
+    this.maxFileBytes = policy.maxAttachmentBytes || this.maxFileSizeMb * 1024 * 1024;
+    this.allowedTypes = new Set((policy.allowedContentTypes ?? []).map((t) => t.toLowerCase()));
+    this.allowedExtensions = (policy.allowedExtensions ?? []).map((ext) => ext.toLowerCase());
+    this.acceptAttr = [...this.allowedExtensions, ...this.allowedTypes].join(',');
+    this.refreshAttachmentsHint(policy.allowedAttachmentKinds);
+  }
+
+  private refreshAttachmentsHint(kinds?: string[]): void {
+    const typeLabels = (kinds?.length ? kinds : ['IMAGE', 'PDF', 'LOG', 'DOCUMENT'])
+      .map((kind) => this.translate.instant('settings.ticketSettings.kinds.' + kind))
+      .join(', ');
+    this.attachmentsHint = this.translate.instant('tickets.detail.attachmentsHint', {
+      max: this.maxFiles,
+      sizeMb: this.maxFileSizeMb,
+      types: typeLabels
+    });
   }
 
   trackMessage(index: number, message: TicketMessage): string {
@@ -734,11 +802,51 @@ export class TicketDetailComponent implements OnInit {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
+  attachmentIcon(file: TicketAttachmentMeta): string {
+    const type = (file.contentType || '').toLowerCase();
+    const name = (file.fileName || '').toLowerCase();
+    if (type.startsWith('image/') || /\.(jpe?g|png|webp|gif)$/i.test(name)) {
+      return 'image';
+    }
+    if (type === 'application/pdf' || name.endsWith('.pdf')) {
+      return 'picture_as_pdf';
+    }
+    if (type.startsWith('text/') || /\.(txt|log|md|csv|json|xml)$/i.test(name)) {
+      return 'article';
+    }
+    return 'attach_file';
+  }
+
+  viewAttachment(message: TicketMessage, file: TicketAttachmentMeta): void {
+    if (!this.ticketId || !file.id) {
+      return;
+    }
+    const ticketId = this.ticketId;
+    const attachmentId = file.id;
+    const messageId = message.id;
+    const admin = this.isAdmin;
+
+    this.dialog.open(TicketAttachmentViewerDialogComponent, {
+      width: 'min(920px, 96vw)',
+      maxWidth: '96vw',
+      autoFocus: false,
+      panelClass: 'ticket-attachment-viewer-panel',
+      data: {
+        fileName: file.fileName || 'attachment',
+        contentType: file.contentType,
+        sizeBytes: file.sizeBytes,
+        load: () => messageId == null
+          ? this.ticketService.fetchTicketAttachment(ticketId, attachmentId, admin)
+          : this.ticketService.fetchMessageAttachment(ticketId, messageId, attachmentId, admin)
+      }
+    });
+  }
+
   downloadAttachment(message: TicketMessage, file: TicketAttachmentMeta): void {
     if (!this.ticketId || !file.id) {
       return;
     }
-    this.downloadingId = file.id;
+    this.busyAttachmentId = file.id;
     const fileName = file.fileName || 'attachment';
     const request$ = message.id == null
       ? this.ticketService.downloadTicketAttachment(this.ticketId, file.id, fileName, this.isAdmin)
@@ -746,10 +854,10 @@ export class TicketDetailComponent implements OnInit {
 
     request$.subscribe({
       next: () => {
-        this.downloadingId = null;
+        this.busyAttachmentId = null;
       },
       error: (error) => {
-        this.downloadingId = null;
+        this.busyAttachmentId = null;
         this.showError(this.apiError.resolve(error));
       }
     });
@@ -856,12 +964,11 @@ export class TicketDetailComponent implements OnInit {
   }
 
   private isAllowedFile(file: File): boolean {
-    if (file.type && this.allowedTypes.has(file.type)) {
+    if (file.type && this.allowedTypes.has(file.type.toLowerCase())) {
       return true;
     }
     const name = file.name.toLowerCase();
-    return ['.jpg', '.jpeg', '.png', '.webp', '.pdf', '.txt', '.doc', '.docx']
-      .some((ext) => name.endsWith(ext));
+    return this.allowedExtensions.some((ext) => name.endsWith(ext));
   }
 
   private showError(message: string): void {

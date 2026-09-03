@@ -174,7 +174,7 @@
       "priority": "اولویت",
       "priorityRequired": "اولویت الزامی است",
       "attachments": "پیوست‌ها",
-      "attachmentsHint": "اختیاری. حداکثر ۵ فایل (JPEG، PNG، WebP، PDF، TXT، DOC/DOCX)، هر کدام تا ۵ مگابایت.",
+      "attachmentsHint": "اختیاری. حداکثر {{max}} فایل ({{types}})، هر کدام تا {{sizeMb}} مگابایت.",
       "addFiles": "افزودن فایل",
       "submit": "ثبت تیکت",
       "submitting": "در حال ثبت...",
@@ -254,7 +254,7 @@
       "replyBody": "پیام شما",
       "replyRequired": "متن پاسخ الزامی است",
       "attachments": "پیوست‌ها",
-      "attachmentsHint": "اختیاری. حداکثر ۵ فایل (JPEG، PNG، WebP، PDF، TXT، DOC/DOCX)، هر کدام تا ۵ مگابایت.",
+      "attachmentsHint": "اختیاری. حداکثر {{max}} فایل ({{types}})، هر کدام تا {{sizeMb}} مگابایت.",
       "addFiles": "افزودن فایل",
       "sendReply": "ارسال پاسخ",
       "sending": "در حال ارسال…",
@@ -280,6 +280,21 @@
         "priority": "اولویت",
         "category": "دسته‌بندی",
         "created": "ایجاد"
+      }
+    },
+    "attachmentViewer": {
+      "view": "مشاهده",
+      "download": "دانلود",
+      "loading": "در حال بارگذاری پیوست…",
+      "loadFailed": "بارگذاری این پیوست ممکن نشد.",
+      "retry": "تلاش مجدد",
+      "unsupported": "پیش‌نمایش برای این نوع فایل در دسترس نیست. می‌توانید آن را دانلود کنید.",
+      "untitled": "پیوست",
+      "types": {
+        "image": "تصویر",
+        "pdf": "PDF",
+        "text": "متن / لاگ",
+        "file": "فایل"
       }
     },
     "adminInbox": {
@@ -1118,9 +1133,26 @@
     "ticketSettings": {
       "loading": "در حال بارگذاری تنظیمات تیکت…",
       "intro": "این تنظیمات برای همه تیکت‌های پشتیبانی اعمال می‌شود.",
+      "reopenSection": "مهلت بازگشایی",
       "reopenWindowDays": "مهلت بازگشایی (روز)",
       "reopenWindowDaysHint": "چند روز پس از بستن تیکت می‌توان آن را دوباره باز کرد. بازه: ۱ تا ۳۶۵۰.",
       "reopenWindowDaysInvalid": "عددی بین ۱ تا ۳۶۵۰ وارد کنید",
+      "attachmentsSection": "پیوست‌ها",
+      "attachmentsIntro": "این محدودیت‌ها برای ایجاد تیکت و پاسخ (تصاویر، PDF، لاگ، اسناد) اعمال می‌شود.",
+      "maxAttachments": "حداکثر فایل در هر آپلود",
+      "maxAttachmentsHint": "۱ تا ۲۰ فایل در یک ایجاد یا پاسخ.",
+      "maxAttachmentsInvalid": "عددی بین ۱ تا ۲۰ وارد کنید",
+      "maxAttachmentSizeMb": "حداکثر اندازه فایل (مگابایت)",
+      "maxAttachmentSizeMbHint": "محدودیت هر فایل به مگابایت. بازه: ۱ تا ۵۰.",
+      "maxAttachmentSizeMbInvalid": "عددی بین ۱ تا ۵۰ وارد کنید",
+      "allowedKinds": "انواع فایل مجاز",
+      "allowedKindsInvalid": "حداقل یک نوع فایل را انتخاب کنید",
+      "kinds": {
+        "IMAGE": "تصاویر (JPEG، PNG، WebP)",
+        "PDF": "PDF",
+        "LOG": "لاگ / متن (.txt، .log)",
+        "DOCUMENT": "اسناد (DOC، DOCX)"
+      },
       "saving": "در حال ذخیره…",
       "saved": "تنظیمات تیکت ذخیره شد"
     },
@@ -1334,8 +1366,8 @@
     "TICKET_CATEGORY_CODE_INVALID": "کد دسته‌بندی نامعتبر است",
     "TICKET_CATEGORY_CODE_EXISTS": "کد دسته‌بندی از قبل وجود دارد",
     "TICKET_PRIORITY_REQUIRED": "اولویت تیکت الزامی است",
-    "TICKET_ATTACHMENTS_LIMIT": "حداکثر ۵ پیوست برای هر تیکت مجاز است",
-    "TICKET_ATTACHMENT_INVALID": "پیوست نامعتبر است. از JPEG، PNG، WebP، PDF، TXT یا DOC/DOCX حداکثر ۵ مگابایت استفاده کنید",
+    "TICKET_ATTACHMENTS_LIMIT": "تعداد پیوست‌ها بیش از حد مجاز است",
+    "TICKET_ATTACHMENT_INVALID": "پیوست نامعتبر است. انواع و اندازه مجاز را در تنظیمات تیکت بررسی کنید",
     "TICKET_ATTACHMENT_UPLOAD_FAILED": "آپلود پیوست تیکت ناموفق بود",
     "TICKET_NOT_FOUND": "تیکت یافت نشد",
     "TICKET_REPLY_BODY_REQUIRED": "متن پاسخ الزامی است",

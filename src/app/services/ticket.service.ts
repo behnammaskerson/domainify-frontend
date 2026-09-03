@@ -89,8 +89,22 @@ export interface TicketDetail {
   allowedNextStatuses?: TicketStatus[];
 }
 
+export type TicketAttachmentKind = 'IMAGE' | 'PDF' | 'LOG' | 'DOCUMENT';
+
 export interface TicketSettings {
   reopenWindowDays: number;
+  maxAttachments: number;
+  maxAttachmentSizeMb: number;
+  allowedAttachmentKinds: TicketAttachmentKind[];
+}
+
+export interface TicketAttachmentPolicy {
+  maxAttachments: number;
+  maxAttachmentSizeMb: number;
+  maxAttachmentBytes: number;
+  allowedAttachmentKinds: TicketAttachmentKind[];
+  allowedContentTypes: string[];
+  allowedExtensions: string[];
 }
 
 export interface TicketStatusDefinition {
@@ -323,11 +337,33 @@ export class TicketService {
     return this.http.put<TicketSettings>(`${this.API_URL}/admin/ticket-settings`, settings);
   }
 
-  downloadTicketAttachment(ticketId: number, attachmentId: number, fileName: string, admin = false): Observable<void> {
+  getAttachmentPolicy(): Observable<TicketAttachmentPolicy> {
+    return this.http.get<TicketAttachmentPolicy>(`${this.API_URL}/tickets/attachment-policy`);
+  }
+
+  fetchTicketAttachment(ticketId: number, attachmentId: number, admin = false): Observable<Blob> {
     const base = admin
       ? `${this.API_URL}/admin/tickets/${ticketId}/attachments/${attachmentId}`
       : `${this.API_URL}/tickets/mine/${ticketId}/attachments/${attachmentId}`;
-    return this.http.get(base, { responseType: 'blob' }).pipe(map((blob) => this.saveBlob(blob, fileName)));
+    return this.http.get(base, { responseType: 'blob' });
+  }
+
+  fetchMessageAttachment(
+    ticketId: number,
+    messageId: number,
+    attachmentId: number,
+    admin = false
+  ): Observable<Blob> {
+    const base = admin
+      ? `${this.API_URL}/admin/tickets/${ticketId}/messages/${messageId}/attachments/${attachmentId}`
+      : `${this.API_URL}/tickets/mine/${ticketId}/messages/${messageId}/attachments/${attachmentId}`;
+    return this.http.get(base, { responseType: 'blob' });
+  }
+
+  downloadTicketAttachment(ticketId: number, attachmentId: number, fileName: string, admin = false): Observable<void> {
+    return this.fetchTicketAttachment(ticketId, attachmentId, admin).pipe(
+      map((blob) => this.saveBlob(blob, fileName))
+    );
   }
 
   downloadMessageAttachment(
@@ -337,10 +373,9 @@ export class TicketService {
     fileName: string,
     admin = false
   ): Observable<void> {
-    const base = admin
-      ? `${this.API_URL}/admin/tickets/${ticketId}/messages/${messageId}/attachments/${attachmentId}`
-      : `${this.API_URL}/tickets/mine/${ticketId}/messages/${messageId}/attachments/${attachmentId}`;
-    return this.http.get(base, { responseType: 'blob' }).pipe(map((blob) => this.saveBlob(blob, fileName)));
+    return this.fetchMessageAttachment(ticketId, messageId, attachmentId, admin).pipe(
+      map((blob) => this.saveBlob(blob, fileName))
+    );
   }
 
   create(payload: CreateTicketPayload): Observable<Ticket> {
@@ -355,7 +390,7 @@ export class TicketService {
     return this.http.post<Ticket>(`${this.API_URL}/tickets`, formData);
   }
 
-  private saveBlob(blob: Blob, fileName: string): void {
+  saveBlob(blob: Blob, fileName: string): void {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;

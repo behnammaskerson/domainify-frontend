@@ -174,7 +174,7 @@
       "priority": "Priority",
       "priorityRequired": "Priority is required",
       "attachments": "Attachments",
-      "attachmentsHint": "Optional. Up to 5 files (JPEG, PNG, WebP, PDF, TXT, DOC/DOCX), max 5MB each.",
+      "attachmentsHint": "Optional. Up to {{max}} files ({{types}}), max {{sizeMb}}MB each.",
       "addFiles": "Add files",
       "submit": "Submit ticket",
       "submitting": "Submitting...",
@@ -254,7 +254,7 @@
       "replyBody": "Your message",
       "replyRequired": "Reply text is required",
       "attachments": "Attachments",
-      "attachmentsHint": "Optional. Up to 5 files (JPEG, PNG, WebP, PDF, TXT, DOC/DOCX), max 5MB each.",
+      "attachmentsHint": "Optional. Up to {{max}} files ({{types}}), max {{sizeMb}}MB each.",
       "addFiles": "Add files",
       "sendReply": "Send reply",
       "sending": "Sending…",
@@ -280,6 +280,21 @@
         "priority": "Priority",
         "category": "Category",
         "created": "Created"
+      }
+    },
+    "attachmentViewer": {
+      "view": "View",
+      "download": "Download",
+      "loading": "Loading attachment…",
+      "loadFailed": "Could not load this attachment.",
+      "retry": "Retry",
+      "unsupported": "Preview is not available for this file type. You can download it instead.",
+      "untitled": "Attachment",
+      "types": {
+        "image": "Image",
+        "pdf": "PDF",
+        "text": "Text / log",
+        "file": "File"
       }
     },
     "adminInbox": {
@@ -1140,9 +1155,26 @@
     "ticketSettings": {
       "loading": "Loading ticket settings…",
       "intro": "These settings apply to all support tickets.",
+      "reopenSection": "Reopen window",
       "reopenWindowDays": "Reopen window (days)",
       "reopenWindowDaysHint": "How many days after closing a ticket it can be reopened. Range: 1–3650.",
       "reopenWindowDaysInvalid": "Enter a number between 1 and 3650",
+      "attachmentsSection": "Attachments",
+      "attachmentsIntro": "Limits apply to ticket create and reply uploads (images, PDF, logs, documents).",
+      "maxAttachments": "Max files per upload",
+      "maxAttachmentsHint": "1–20 files in a single create or reply.",
+      "maxAttachmentsInvalid": "Enter a number between 1 and 20",
+      "maxAttachmentSizeMb": "Max file size (MB)",
+      "maxAttachmentSizeMbHint": "Per-file limit in megabytes. Range: 1–50.",
+      "maxAttachmentSizeMbInvalid": "Enter a number between 1 and 50",
+      "allowedKinds": "Allowed file types",
+      "allowedKindsInvalid": "Select at least one file type",
+      "kinds": {
+        "IMAGE": "Images (JPEG, PNG, WebP)",
+        "PDF": "PDF",
+        "LOG": "Logs / text (.txt, .log)",
+        "DOCUMENT": "Documents (DOC, DOCX)"
+      },
       "saving": "Saving…",
       "saved": "Ticket settings saved"
     },
@@ -1356,8 +1388,8 @@
     "TICKET_CATEGORY_CODE_INVALID": "Ticket category code is invalid",
     "TICKET_CATEGORY_CODE_EXISTS": "Ticket category code already exists",
     "TICKET_PRIORITY_REQUIRED": "Ticket priority is required",
-    "TICKET_ATTACHMENTS_LIMIT": "Maximum 5 attachments allowed per ticket",
-    "TICKET_ATTACHMENT_INVALID": "Invalid attachment. Use JPEG, PNG, WebP, PDF, TXT, or DOC/DOCX under 5MB",
+    "TICKET_ATTACHMENTS_LIMIT": "Too many attachments for this upload",
+    "TICKET_ATTACHMENT_INVALID": "Invalid attachment. Check allowed types and size limits in Ticket Settings",
     "TICKET_ATTACHMENT_UPLOAD_FAILED": "Failed to upload ticket attachment",
     "TICKET_NOT_FOUND": "Ticket was not found",
     "TICKET_REPLY_BODY_REQUIRED": "Reply text is required",

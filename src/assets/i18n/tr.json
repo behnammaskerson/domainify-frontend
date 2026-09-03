@@ -174,7 +174,7 @@
       "priority": "Öncelik",
       "priorityRequired": "Öncelik gerekli",
       "attachments": "Ekler",
-      "attachmentsHint": "İsteğe bağlı. En fazla 5 dosya (JPEG, PNG, WebP, PDF, TXT, DOC/DOCX), her biri en fazla 5MB.",
+      "attachmentsHint": "İsteğe bağlı. En fazla {{max}} dosya ({{types}}), her biri en fazla {{sizeMb}}MB.",
       "addFiles": "Dosya ekle",
       "submit": "Bileti gönder",
       "submitting": "Gönderiliyor...",
@@ -254,7 +254,7 @@
       "replyBody": "Mesajınız",
       "replyRequired": "Yanıt metni gerekli",
       "attachments": "Ekler",
-      "attachmentsHint": "İsteğe bağlı. En fazla 5 dosya (JPEG, PNG, WebP, PDF, TXT, DOC/DOCX), her biri en fazla 5MB.",
+      "attachmentsHint": "İsteğe bağlı. En fazla {{max}} dosya ({{types}}), her biri en fazla {{sizeMb}}MB.",
       "addFiles": "Dosya ekle",
       "sendReply": "Yanıtı gönder",
       "sending": "Gönderiliyor…",
@@ -280,6 +280,21 @@
         "priority": "Öncelik",
         "category": "Kategori",
         "created": "Oluşturulma"
+      }
+    },
+    "attachmentViewer": {
+      "view": "Görüntüle",
+      "download": "İndir",
+      "loading": "Ek yükleniyor…",
+      "loadFailed": "Bu ek yüklenemedi.",
+      "retry": "Yeniden dene",
+      "unsupported": "Bu dosya türü için önizleme yok. Bunun yerine indirebilirsiniz.",
+      "untitled": "Ek",
+      "types": {
+        "image": "Görsel",
+        "pdf": "PDF",
+        "text": "Metin / günlük",
+        "file": "Dosya"
       }
     },
     "adminInbox": {
@@ -1062,9 +1077,26 @@
     "ticketSettings": {
       "loading": "Bilet ayarları yükleniyor…",
       "intro": "Bu ayarlar tüm destek biletleri için geçerlidir.",
+      "reopenSection": "Yeniden açma süresi",
       "reopenWindowDays": "Yeniden açma süresi (gün)",
       "reopenWindowDaysHint": "Kapatıldıktan sonra biletin kaç gün içinde yeniden açılabileceği. Aralık: 1–3650.",
       "reopenWindowDaysInvalid": "1 ile 3650 arasında bir sayı girin",
+      "attachmentsSection": "Ekler",
+      "attachmentsIntro": "Sınırlar bilet oluşturma ve yanıtlara uygulanır (görseller, PDF, günlükler, belgeler).",
+      "maxAttachments": "Yükleme başına en fazla dosya",
+      "maxAttachmentsHint": "Tek oluşturma veya yanıtta 1–20 dosya.",
+      "maxAttachmentsInvalid": "1 ile 20 arasında bir sayı girin",
+      "maxAttachmentSizeMb": "En fazla dosya boyutu (MB)",
+      "maxAttachmentSizeMbHint": "Dosya başına MB sınırı. Aralık: 1–50.",
+      "maxAttachmentSizeMbInvalid": "1 ile 50 arasında bir sayı girin",
+      "allowedKinds": "İzin verilen dosya türleri",
+      "allowedKindsInvalid": "En az bir dosya türü seçin",
+      "kinds": {
+        "IMAGE": "Görseller (JPEG, PNG, WebP)",
+        "PDF": "PDF",
+        "LOG": "Günlük / metin (.txt, .log)",
+        "DOCUMENT": "Belgeler (DOC, DOCX)"
+      },
       "saving": "Kaydediliyor…",
       "saved": "Bilet ayarları kaydedildi"
     },
@@ -1278,8 +1310,8 @@
     "TICKET_CATEGORY_CODE_INVALID": "Bilet kategori kodu geçersiz",
     "TICKET_CATEGORY_CODE_EXISTS": "Bilet kategori kodu zaten mevcut",
     "TICKET_PRIORITY_REQUIRED": "Bilet önceliği gerekli",
-    "TICKET_ATTACHMENTS_LIMIT": "Bilet başına en fazla 5 ek dosyaya izin verilir",
-    "TICKET_ATTACHMENT_INVALID": "Geçersiz ek. 5MB altında JPEG, PNG, WebP, PDF, TXT veya DOC/DOCX kullanın",
+    "TICKET_ATTACHMENTS_LIMIT": "Bu yükleme için çok fazla ek dosya",
+    "TICKET_ATTACHMENT_INVALID": "Geçersiz ek. İzin verilen türleri ve boyut sınırlarını Bilet Ayarları'ndan kontrol edin",
     "TICKET_ATTACHMENT_UPLOAD_FAILED": "Bilet eki yüklenemedi",
     "TICKET_NOT_FOUND": "Bilet bulunamadı",
     "TICKET_REPLY_BODY_REQUIRED": "Yanıt metni gerekli",

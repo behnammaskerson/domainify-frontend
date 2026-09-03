@@ -533,6 +533,16 @@ body.dark-theme {
     overflow-x: hidden;
   }
 
+  .ticket-attachment-viewer-panel .mat-mdc-dialog-container,
+  .ticket-attachment-viewer-panel .mat-mdc-dialog-surface {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .ticket-attachment-viewer-panel .mat-mdc-dialog-surface {
+    max-height: 90vh;
+  }
+
   .mat-mdc-select-panel {
     background-color: var(--bg-primary) !important;
   }
