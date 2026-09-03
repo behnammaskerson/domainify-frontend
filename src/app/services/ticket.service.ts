@@ -93,6 +93,7 @@ export interface TicketMessage {
   mine?: boolean;
   staff?: boolean;
   initial?: boolean;
+  internalNote?: boolean;
   createdAt?: string;
   attachments?: TicketAttachmentMeta[];
 }
@@ -204,6 +205,7 @@ export interface CreateTicketPayload {
 
 export interface ReplyTicketPayload {
   body: string;
+  internalNote?: boolean;
   attachments?: File[];
 }
 
@@ -316,6 +318,9 @@ export class TicketService {
   replyAsAdmin(id: number, payload: ReplyTicketPayload): Observable<TicketDetail> {
     const formData = new FormData();
     formData.append('body', payload.body);
+    if (payload.internalNote) {
+      formData.append('internalNote', 'true');
+    }
     for (const file of payload.attachments ?? []) {
       formData.append('attachments', file, file.name);
     }

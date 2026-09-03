@@ -11,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { TicketPortalNavComponent } from '../../components/ticket-portal-nav/ticket-portal-nav.component';
@@ -54,6 +55,7 @@ type TicketDetailMode = 'customer' | 'admin';
     MatSelectModule,
     MatSnackBarModule,
     MatTooltipModule,
+    MatCheckboxModule,
     TranslateModule,
     PageHeroComponent,
     TicketPortalNavComponent,
@@ -413,13 +415,16 @@ type TicketDetailMode = 'customer' | 'admin';
                 {{ 'tickets.detail.messageCount' | translate:{ count: (messages.length | localeDigits) } }}
               </span>
             </div>
-            <p class="thread-hint">{{ 'tickets.detail.threadHint' | translate }}</p>
+            <p class="thread-hint">
+              {{ (isAdmin ? 'tickets.detail.threadHintAdmin' : 'tickets.detail.threadHint') | translate }}
+            </p>
 
             <ol class="timeline" aria-live="polite">
               @for (message of messages; track trackMessage($index, message); let i = $index; let last = $last) {
                 <li class="timeline-item"
                     [class.mine]="message.mine"
                     [class.staff]="message.staff"
+                    [class.internal]="message.internalNote"
                     [class.initial]="message.initial"
                     [class.last]="last">
                   <div class="timeline-rail" aria-hidden="true">
@@ -439,6 +444,9 @@ type TicketDetailMode = 'customer' | 'admin';
                           <span class="role-tag staff">{{ 'tickets.detail.supportStaff' | translate }}</span>
                         } @else {
                           <span class="role-tag customer">{{ 'tickets.detail.customer' | translate }}</span>
+                        }
+                        @if (message.internalNote) {
+                          <span class="role-tag internal">{{ 'tickets.detail.internalNoteBadge' | translate }}</span>
                         }
                         @if (message.mine) {
                           <span class="you-tag">{{ 'tickets.detail.you' | translate }}</span>
@@ -505,6 +513,15 @@ type TicketDetailMode = 'customer' | 'admin';
                 <p class="field-error">{{ 'tickets.detail.replyRequired' | translate }}</p>
               }
 
+              @if (isAdmin) {
+                <label class="internal-note-toggle">
+                  <mat-checkbox formControlName="internalNote">
+                    {{ 'tickets.detail.internalNote' | translate }}
+                  </mat-checkbox>
+                  <span class="internal-note-hint">{{ 'tickets.detail.internalNoteHint' | translate }}</span>
+                </label>
+              }
+
               <div class="attachments">
                 <div class="attachments-header">
                   <div>
@@ -544,7 +561,13 @@ type TicketDetailMode = 'customer' | 'admin';
               <div class="actions">
                 <button mat-flat-button color="primary" type="submit"
                         [disabled]="submitting || replyForm.invalid">
-                  {{ (submitting ? 'tickets.detail.sending' : 'tickets.detail.sendReply') | translate }}
+                  {{
+                    (submitting
+                      ? 'tickets.detail.sending'
+                      : (isAdmin && replyForm.controls.internalNote.value
+                          ? 'tickets.detail.sendInternalNote'
+                          : 'tickets.detail.sendReply')) | translate
+                  }}
                 </button>
               </div>
             </form>
@@ -777,6 +800,31 @@ type TicketDetailMode = 'customer' | 'admin';
       border-color: color-mix(in srgb, #0f766e 30%, var(--border-color));
       background: color-mix(in srgb, #0f766e 7%, transparent);
     }
+    .timeline-item.internal .timeline-dot {
+      background: #b45309;
+      border-color: color-mix(in srgb, #b45309 40%, white);
+    }
+    .timeline-item.internal .message {
+      border-color: color-mix(in srgb, #b45309 35%, var(--border-color));
+      background: color-mix(in srgb, #b45309 8%, transparent);
+      border-style: dashed;
+    }
+    .role-tag.internal {
+      background: color-mix(in srgb, #b45309 14%, transparent);
+      color: #b45309;
+    }
+    .internal-note-toggle {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin: 12px 0 4px;
+    }
+    .internal-note-hint {
+      margin-inline-start: 32px;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
     .message-header {
       display: flex; justify-content: space-between; gap: 12px; align-items: baseline;
       margin-bottom: 8px; font-size: 0.85rem;
@@ -909,7 +957,8 @@ export class TicketDetailComponent implements OnInit {
   freeformTag = '';
 
   readonly replyForm = this.fb.nonNullable.group({
-    body: ['', [Validators.required, Validators.maxLength(10000)]]
+    body: ['', [Validators.required, Validators.maxLength(10000)]],
+    internalNote: [false]
   });
 
   get isAdmin(): boolean {
@@ -1469,6 +1518,7 @@ export class TicketDetailComponent implements OnInit {
     this.submitting = true;
     const payload = {
       body: this.replyForm.controls.body.value.trim(),
+      internalNote: this.isAdmin ? this.replyForm.controls.internalNote.value : false,
       attachments: this.files
     };
     const request$ = this.isAdmin
@@ -1478,7 +1528,7 @@ export class TicketDetailComponent implements OnInit {
     request$.subscribe({
       next: (detail) => {
         this.applyDetail(detail);
-        this.replyForm.reset({ body: '' });
+        this.replyForm.reset({ body: '', internalNote: false });
         this.files = [];
         this.submitting = false;
         this.snackBar.open(this.translate.instant('tickets.detail.replySent'), undefined, { duration: 3000 });

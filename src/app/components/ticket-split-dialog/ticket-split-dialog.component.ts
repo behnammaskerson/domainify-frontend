@@ -71,6 +71,9 @@ export interface TicketSplitDialogResult {
               <div class="message-option">
                 <div class="message-meta">
                   <strong>{{ message.authorName || message.authorEmail || '—' }}</strong>
+                  @if (message.internalNote) {
+                    <span class="internal-badge">{{ 'tickets.detail.internalNoteBadge' | translate }}</span>
+                  }
                   <time dir="ltr">{{ message.createdAt | localeDate:dateTimeFormat }}</time>
                 </div>
                 <p class="message-preview">{{ previewBody(message.body) }}</p>
@@ -168,6 +171,17 @@ export interface TicketSplitDialogResult {
       gap: 8px;
       align-items: baseline;
       font-size: 0.82rem;
+    }
+
+    .internal-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #b45309;
+      background: color-mix(in srgb, #b45309 12%, transparent);
+      padding: 2px 6px;
+      border-radius: 4px;
     }
 
     .message-meta time {
