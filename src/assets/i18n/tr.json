@@ -89,6 +89,8 @@
     "createTicket": "Bilet Oluştur",
     "myTickets": "Biletlerim",
     "ticketCategories": "Bilet Kategorileri",
+    "ticketTags": "Bilet Etiketleri",
+    "ticketSettings": "Bilet Ayarları",
     "ticketStatusWorkflow": "Durum İş Akışı",
     "ticketInbox": "Bilet Gelen Kutusu",
     "support": "Destek",
@@ -118,6 +120,16 @@
       "eyebrow": "Destek",
       "title": "Durum İş Akışı",
       "subtitle": "Yeni → Açık → Beklemede → Askıda → Çözüldü → Kapalı yolunu ve izin verilen geçişleri yapılandırın."
+    },
+    "tagsPage": {
+      "eyebrow": "Destek",
+      "title": "Bilet Etiketleri",
+      "subtitle": "Önceden tanımlı etiketleri yönetin. Bilet düzenlerken serbest etiket de eklenebilir."
+    },
+    "settingsPage": {
+      "eyebrow": "Destek",
+      "title": "Bilet Ayarları",
+      "subtitle": "Yeniden açma süresini ve diğer bilet davranışlarını yapılandırın."
     },
     "portal": {
       "eyebrow": "Destek portalı",
@@ -250,6 +262,18 @@
       "statusUpdated": "Durum güncellendi",
       "workflowHint": "Durum değişiklikleri yapılandırılmış iş akışını izler.",
       "manageWorkflow": "İş akışını yönet",
+      "tagsTitle": "Etiketler",
+      "tagsHint": "Önceden tanımlı etiketleri seçin veya serbest etiket yazın.",
+      "manageTags": "Etiketleri yönet",
+      "noTags": "Henüz etiket yok",
+      "addTag": "Yeni etiket",
+      "addTagAction": "Ekle",
+      "closeTicket": "Bileti kapat",
+      "reopen": "Yeniden aç",
+      "closedSuccess": "Bilet kapatıldı",
+      "reopenedSuccess": "Bilet yeniden açıldı",
+      "reopenUntil": "{{date}} tarihine kadar yeniden açabilirsiniz",
+      "reopenExpired": "Bu bilet için yeniden açma süresi doldu.",
       "closedNotice": "Bu bilet kapalı. Artık yanıt veremezsiniz.",
       "meta": {
         "status": "Durum",
@@ -1024,6 +1048,26 @@
       "saving": "Kaydediliyor…",
       "saved": "Durum iş akışı kaydedildi"
     },
+    "ticketTags": {
+      "loading": "Etiketler yükleniyor…",
+      "intro": "Önceden tanımlı etiketler biletlerde hızlı seçenek olarak görünür. Temsilciler serbest etiket de ekleyebilir.",
+      "name": "Etiket adı",
+      "add": "Etiket ekle",
+      "added": "Etiket eklendi",
+      "removed": "Etiket kaldırıldı",
+      "empty": "Henüz etiket yok.",
+      "removeTitle": "Etiketi kaldır",
+      "removeMessage": "\"{{name}}\" etiketi kaldırılsın mı? Biletlerde kullanılan etiketler silinemez."
+    },
+    "ticketSettings": {
+      "loading": "Bilet ayarları yükleniyor…",
+      "intro": "Bu ayarlar tüm destek biletleri için geçerlidir.",
+      "reopenWindowDays": "Yeniden açma süresi (gün)",
+      "reopenWindowDaysHint": "Kapatıldıktan sonra biletin kaç gün içinde yeniden açılabileceği. Aralık: 1–3650.",
+      "reopenWindowDaysInvalid": "1 ile 3650 arasında bir sayı girin",
+      "saving": "Kaydediliyor…",
+      "saved": "Bilet ayarları kaydedildi"
+    },
     "totp": {
       "enabledStatus": "Etkin",
       "setupTitle": "Kimlik doğrulama uygulamasını ayarla",
@@ -1245,7 +1289,16 @@
     "TICKET_STATUS_INVALID": "Bilet durumu geçersiz",
     "TICKET_STATUS_TRANSITION_INVALID": "Bu durum değişikliğine iş akışında izin verilmiyor",
     "TICKET_STATUS_WORKFLOW_INVALID": "Durum iş akışı yapılandırması geçersiz",
-    "TICKET_STATUS_NEW_REQUIRED": "Yeni durumu aktif kalmalıdır"
+    "TICKET_STATUS_NEW_REQUIRED": "Yeni durumu aktif kalmalıdır",
+    "TICKET_TAG_NAME_REQUIRED": "Etiket adı gerekli",
+    "TICKET_TAG_NAME_INVALID": "Etiket adı geçersiz",
+    "TICKET_TAG_EXISTS": "Etiket zaten var",
+    "TICKET_TAG_NOT_FOUND": "Etiket bulunamadı",
+    "TICKET_TAG_IN_USE": "Etiket biletlerde kullanılıyor ve silinemez",
+    "TICKET_ALREADY_CLOSED": "Bilet zaten kapalı",
+    "TICKET_NOT_CLOSED": "Bilet kapalı değil",
+    "TICKET_REOPEN_WINDOW_EXPIRED": "Bu bilet için yeniden açma süresi doldu",
+    "TICKET_SETTINGS_INVALID": "Bilet ayarları geçersiz"
   },
   "avatar": {
     "title": "Avatarı düzenle",

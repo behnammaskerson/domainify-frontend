@@ -361,8 +361,12 @@ const UNASSIGNED_VALUE = '__unassigned__';
   `,
   styles: [`
     .inbox-shell {
-      background: transparent;
       min-height: 60vh;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      background: transparent;
     }
 
     .inbox-shell ::ng-deep .mat-drawer-backdrop.mat-drawer-shown {
@@ -370,7 +374,8 @@ const UNASSIGNED_VALUE = '__unassigned__';
     }
 
     .filters-sidenav {
-      width: min(100vw - 24px, 380px);
+      width: min(380px, 100%);
+      max-width: 100%;
       background: var(--bg-primary);
       border-inline-start: 1px solid var(--border-color);
     }
@@ -447,6 +452,10 @@ const UNASSIGNED_VALUE = '__unassigned__';
       display: flex;
       flex-direction: column;
       gap: 16px;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .filter-bar {
@@ -513,9 +522,19 @@ const UNASSIGNED_VALUE = '__unassigned__';
       width: min(100%, 280px);
     }
 
-    .table-wrap { overflow: hidden; }
-    .table-scroll { overflow-x: auto; }
-    .tickets-table { width: 100%; }
+    .table-wrap {
+      overflow: hidden;
+      max-width: 100%;
+      min-width: 0;
+    }
+    .table-scroll {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    .tickets-table {
+      width: 100%;
+      min-width: 960px;
+    }
 
     .ticket-id {
       font-size: 0.85rem;

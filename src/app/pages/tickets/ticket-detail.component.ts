@@ -1,10 +1,11 @@
 import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -20,7 +21,8 @@ import {
   TicketDetail,
   TicketMessage,
   TicketService,
-  TicketStatus
+  TicketStatus,
+  TicketTag
 } from '../../services/ticket.service';
 import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
 
@@ -31,11 +33,13 @@ type TicketDetailMode = 'customer' | 'admin';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     RouterModule,
     MatButtonModule,
     MatFormFieldModule,
     MatIconModule,
+    MatInputModule,
     MatSelectModule,
     MatSnackBarModule,
     MatTooltipModule,
@@ -54,6 +58,18 @@ type TicketDetailMode = 'customer' | 'admin';
         [title]="ticket?.subject || ('tickets.detail.title' | translate)"
         [subtitle]="ticket?.publicNumber || ('tickets.detail.subtitle' | translate)">
         <div heroActions>
+          @if (ticket && canReopen) {
+            <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="reopenTicket()">
+              <mat-icon>lock_open</mat-icon>
+              {{ 'tickets.detail.reopen' | translate }}
+            </button>
+          }
+          @if (ticket && canClose) {
+            <button mat-stroked-button type="button" color="warn" [disabled]="lifecycleBusy" (click)="closeTicket()">
+              <mat-icon>lock</mat-icon>
+              {{ 'tickets.detail.closeTicket' | translate }}
+            </button>
+          }
           <a mat-stroked-button [routerLink]="backLink">
             <mat-icon>arrow_back</mat-icon>
             {{ (isAdmin ? 'tickets.detail.backInbox' : 'tickets.detail.back') | translate }}
@@ -119,10 +135,69 @@ type TicketDetailMode = 'customer' | 'admin';
           </div>
 
           @if (isAdmin) {
+            <div class="tags-card panel-surface">
+              <div class="tags-header">
+                <div>
+                  <h2>{{ 'tickets.detail.tagsTitle' | translate }}</h2>
+                  <p>{{ 'tickets.detail.tagsHint' | translate }}</p>
+                </div>
+                <a routerLink="/tickets/tags">{{ 'tickets.detail.manageTags' | translate }}</a>
+              </div>
+              <div class="selected-tags">
+                @for (tag of selectedTags; track trackTag(tag)) {
+                  <button type="button" class="tag-chip selected" (click)="removeTag(tag)" [disabled]="tagsSaving">
+                    {{ tag.name }}
+                    <mat-icon>close</mat-icon>
+                  </button>
+                } @empty {
+                  <span class="muted-inline">{{ 'tickets.detail.noTags' | translate }}</span>
+                }
+              </div>
+              <div class="tag-picker">
+                @for (tag of availableCatalogTags; track tag.id) {
+                  <button type="button" class="tag-chip" (click)="addCatalogTag(tag)" [disabled]="tagsSaving">
+                    <mat-icon>add</mat-icon>
+                    {{ tag.name }}
+                  </button>
+                }
+              </div>
+              <div class="freeform-row">
+                <mat-form-field appearance="outline" class="freeform-field" subscriptSizing="dynamic">
+                  <mat-label>{{ 'tickets.detail.addTag' | translate }}</mat-label>
+                  <input matInput
+                         [(ngModel)]="freeformTag"
+                         [ngModelOptions]="{standalone: true}"
+                         maxlength="64"
+                         (keydown.enter)="$event.preventDefault(); addFreeformTag()">
+                </mat-form-field>
+                <button mat-stroked-button type="button" [disabled]="tagsSaving || !freeformTag.trim()" (click)="addFreeformTag()">
+                  {{ 'tickets.detail.addTagAction' | translate }}
+                </button>
+              </div>
+            </div>
+          } @else if (ticket.tags?.length) {
+            <div class="tags-card panel-surface readonly-tags">
+              <h2>{{ 'tickets.detail.tagsTitle' | translate }}</h2>
+              <div class="selected-tags">
+                @for (tag of ticket.tags; track tag.id) {
+                  <span class="tag-chip selected">{{ tag.name }}</span>
+                }
+              </div>
+            </div>
+          }
+
+          @if (isAdmin) {
             <p class="workflow-hint panel-surface">
               <mat-icon>account_tree</mat-icon>
               <span>{{ 'tickets.detail.workflowHint' | translate }}</span>
               <a routerLink="/tickets/status-workflow">{{ 'tickets.detail.manageWorkflow' | translate }}</a>
+            </p>
+          }
+
+          @if (canReopen && reopenUntil) {
+            <p class="reopen-hint panel-surface">
+              <mat-icon>schedule</mat-icon>
+              <span>{{ 'tickets.detail.reopenUntil' | translate:{ date: (reopenUntil | localeDate:dateTimeFormat) } }}</span>
             </p>
           }
 
@@ -253,6 +328,13 @@ type TicketDetailMode = 'customer' | 'admin';
             <div class="closed-notice panel-surface">
               <mat-icon>lock</mat-icon>
               <p>{{ 'tickets.detail.closedNotice' | translate }}</p>
+              @if (canReopen) {
+                <button mat-flat-button color="primary" type="button" [disabled]="lifecycleBusy" (click)="reopenTicket()">
+                  {{ 'tickets.detail.reopen' | translate }}
+                </button>
+              } @else if (ticket.status === 'CLOSED') {
+                <p class="reopen-expired">{{ 'tickets.detail.reopenExpired' | translate }}</p>
+              }
             </div>
           }
         }
@@ -260,7 +342,15 @@ type TicketDetailMode = 'customer' | 'admin';
     </div>
   `,
   styles: [`
-    .page-body { display: flex; flex-direction: column; gap: 0; }
+    .page-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
     .muted { color: var(--text-muted); padding: 12px 4px; }
     .empty-state, .closed-notice {
       display: flex; flex-direction: column; align-items: center; gap: 10px;
@@ -283,6 +373,34 @@ type TicketDetailMode = 'customer' | 'admin';
     .workflow-hint mat-icon { font-size: 18px; width: 18px; height: 18px; }
     .workflow-hint a { color: var(--primary); font-weight: 600; text-decoration: none; }
     .workflow-hint a:hover { text-decoration: underline; }
+    .reopen-hint {
+      display: flex; align-items: center; gap: 8px; padding: 10px 14px; margin-bottom: 16px;
+      color: var(--text-muted); font-size: 0.85rem;
+    }
+    .reopen-hint mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    .tags-card { padding: 16px; margin-bottom: 16px; }
+    .tags-header {
+      display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 12px;
+    }
+    .tags-header h2, .readonly-tags h2 { margin: 0 0 4px; font-size: 1.05rem; }
+    .tags-header p { margin: 0; color: var(--text-muted); font-size: 0.82rem; }
+    .tags-header a { color: var(--primary); font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .selected-tags, .tag-picker {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;
+    }
+    .tag-chip {
+      display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px;
+      border: 1px solid var(--border-color); background: var(--bg-secondary); font: inherit; cursor: pointer;
+    }
+    .tag-chip.selected {
+      background: color-mix(in srgb, var(--primary) 12%, transparent);
+      border-color: color-mix(in srgb, var(--primary) 35%, var(--border-color));
+    }
+    .tag-chip mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    .freeform-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+    .freeform-field { flex: 1 1 220px; }
+    .muted-inline { color: var(--text-muted); font-size: 0.85rem; }
+    .reopen-expired { margin: 0; color: var(--text-muted); font-size: 0.85rem; }
     .status-pill, .priority-pill {
       display: inline-flex; align-items: center; width: fit-content;
       padding: 3px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600;
@@ -421,12 +539,20 @@ export class TicketDetailComponent implements OnInit {
   ticket: TicketDetail['ticket'] | null = null;
   messages: TicketMessage[] = [];
   canReply = false;
+  canClose = false;
+  canReopen = false;
+  reopenUntil: string | null = null;
   loading = true;
   submitting = false;
   statusUpdating = false;
+  lifecycleBusy = false;
+  tagsSaving = false;
   downloadingId: number | null = null;
   files: File[] = [];
   statusOptions: TicketStatus[] = [];
+  catalogTags: TicketTag[] = [];
+  selectedTags: TicketTag[] = [];
+  freeformTag = '';
 
   readonly replyForm = this.fb.nonNullable.group({
     body: ['', [Validators.required, Validators.maxLength(10000)]]
@@ -440,6 +566,13 @@ export class TicketDetailComponent implements OnInit {
     return this.isAdmin ? '/admin/tickets/inbox' : '/tickets/mine';
   }
 
+  get availableCatalogTags(): TicketTag[] {
+    const selected = new Set(
+      this.selectedTags.map((tag) => (tag.name || '').toLowerCase()).filter(Boolean)
+    );
+    return this.catalogTags.filter((tag) => !selected.has((tag.name || '').toLowerCase()));
+  }
+
   ngOnInit(): void {
     this.mode = this.route.snapshot.data['mode'] === 'admin' ? 'admin' : 'customer';
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -451,10 +584,119 @@ export class TicketDetailComponent implements OnInit {
     }
     this.ticketId = id;
     this.load();
+    if (this.mode === 'admin') {
+      this.loadCatalogTags();
+    }
   }
 
   trackMessage(index: number, message: TicketMessage): string {
     return message.id != null ? `m-${message.id}` : `initial-${index}`;
+  }
+
+  trackTag(tag: TicketTag): number | string {
+    return tag.id ?? tag.name;
+  }
+
+  closeTicket(): void {
+    if (!this.ticketId || !this.canClose || this.lifecycleBusy) {
+      return;
+    }
+    this.lifecycleBusy = true;
+    const request$ = this.isAdmin
+      ? this.ticketService.closeAdminTicket(this.ticketId)
+      : this.ticketService.closeMineTicket(this.ticketId);
+    request$.subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.lifecycleBusy = false;
+        this.snackBar.open(this.translate.instant('tickets.detail.closedSuccess'), undefined, { duration: 3000 });
+      },
+      error: (error) => {
+        this.lifecycleBusy = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  reopenTicket(): void {
+    if (!this.ticketId || !this.canReopen || this.lifecycleBusy) {
+      return;
+    }
+    this.lifecycleBusy = true;
+    const request$ = this.isAdmin
+      ? this.ticketService.reopenAdminTicket(this.ticketId)
+      : this.ticketService.reopenMineTicket(this.ticketId);
+    request$.subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.lifecycleBusy = false;
+        this.snackBar.open(this.translate.instant('tickets.detail.reopenedSuccess'), undefined, { duration: 3000 });
+      },
+      error: (error) => {
+        this.lifecycleBusy = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  addCatalogTag(tag: TicketTag): void {
+    if (this.selectedTags.some((t) => t.id === tag.id || t.name?.toLowerCase() === tag.name?.toLowerCase())) {
+      return;
+    }
+    this.selectedTags = [...this.selectedTags, tag];
+    this.persistTags();
+  }
+
+  addFreeformTag(): void {
+    const name = this.freeformTag.trim();
+    if (!name) {
+      return;
+    }
+    if (this.selectedTags.some((t) => t.name?.toLowerCase() === name.toLowerCase())) {
+      this.freeformTag = '';
+      return;
+    }
+    this.selectedTags = [...this.selectedTags, { id: -Date.now(), name }];
+    this.freeformTag = '';
+    this.persistTags();
+  }
+
+  removeTag(tag: TicketTag): void {
+    this.selectedTags = this.selectedTags.filter((t) => {
+      if (tag.id != null && tag.id > 0 && t.id === tag.id) {
+        return false;
+      }
+      return t.name?.toLowerCase() !== tag.name?.toLowerCase();
+    });
+    this.persistTags();
+  }
+
+  private persistTags(): void {
+    if (!this.ticketId || !this.isAdmin || this.tagsSaving) {
+      return;
+    }
+    this.tagsSaving = true;
+    const tagIds = this.selectedTags.filter((t) => t.id != null && t.id > 0).map((t) => t.id!);
+    const names = this.selectedTags.filter((t) => t.id == null || t.id <= 0).map((t) => t.name!).filter(Boolean);
+    this.ticketService.updateAdminTicketTags(this.ticketId, { tagIds, names }).subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.tagsSaving = false;
+        this.loadCatalogTags();
+      },
+      error: (error) => {
+        this.tagsSaving = false;
+        this.showError(this.apiError.resolve(error));
+        this.selectedTags = [...(this.ticket?.tags ?? [])];
+      }
+    });
+  }
+
+  private loadCatalogTags(): void {
+    this.ticketService.listAdminTags().subscribe({
+      next: (tags) => { this.catalogTags = tags ?? []; },
+      error: () => { this.catalogTags = []; }
+    });
   }
 
   onFilesSelected(event: Event): void {
@@ -600,7 +842,11 @@ export class TicketDetailComponent implements OnInit {
       return (a.id ?? 0) - (b.id ?? 0);
     });
     this.canReply = !!detail.canReply;
+    this.canClose = !!detail.canClose;
+    this.canReopen = !!detail.canReopen;
+    this.reopenUntil = detail.reopenUntil ?? null;
     this.statusOptions = (detail.allowedNextStatuses ?? []).filter((status) => status !== detail.ticket?.status);
+    this.selectedTags = [...(detail.ticket?.tags ?? [])];
   }
 
   private scrollToLatest(): void {

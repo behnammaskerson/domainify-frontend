@@ -169,11 +169,19 @@ import {
       display: flex;
       flex-direction: column;
       gap: 4px;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .page-body {
       display: flex;
       flex-direction: column;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .form-card {

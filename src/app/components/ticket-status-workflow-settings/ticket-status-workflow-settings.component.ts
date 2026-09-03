@@ -152,7 +152,12 @@ import {
     .status-pill[data-status='ON_HOLD'] { background: color-mix(in srgb, #d97706 12%, transparent); }
     .status-pill[data-status='RESOLVED'] { background: color-mix(in srgb, #16a34a 12%, transparent); }
     .status-pill[data-status='CLOSED'] { background: color-mix(in srgb, #64748b 12%, transparent); }
-    .matrix-wrap { overflow: auto; border: 1px solid var(--border-color); border-radius: 8px; }
+    .matrix-wrap {
+      overflow: auto;
+      max-width: 100%;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
     .matrix {
       width: 100%; border-collapse: collapse; min-width: 560px; background: var(--bg-primary, #fff);
     }

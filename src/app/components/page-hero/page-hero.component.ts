@@ -65,7 +65,9 @@ import { TranslateModule } from '@ngx-translate/core';
       position: relative;
       overflow: hidden;
       margin: 0 0 28px;
-      padding: clamp(28px, 4vh, 44px) clamp(20px, 4vw, 40px);
+      max-width: 100%;
+      box-sizing: border-box;
+      padding: clamp(28px, 4vh, 44px) var(--page-pad-x, 24px);
       color: #f7f1e4;
       background:
         radial-gradient(90% 120% at 8% 0%, rgba(212, 175, 55, 0.26), transparent 55%),
@@ -127,9 +129,10 @@ import { TranslateModule } from '@ngx-translate/core';
       justify-content: space-between;
       gap: 24px;
       flex-wrap: wrap;
-      max-width: 1200px;
-      margin: 0 auto;
-      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      margin: 0;
+      box-sizing: border-box;
       animation: heroReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 

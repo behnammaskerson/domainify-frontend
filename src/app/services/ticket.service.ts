@@ -45,6 +45,7 @@ export interface Ticket {
   assigneeName?: string;
   dueAt?: string;
   overdue?: boolean;
+  closedAt?: string;
   tags?: TicketTag[];
   createdAt?: string;
   updatedAt?: string;
@@ -81,7 +82,15 @@ export interface TicketDetail {
   ticket: Ticket;
   messages: TicketMessage[];
   canReply: boolean;
+  canClose?: boolean;
+  canReopen?: boolean;
+  reopenUntil?: string;
+  reopenWindowDays?: number;
   allowedNextStatuses?: TicketStatus[];
+}
+
+export interface TicketSettings {
+  reopenWindowDays: number;
 }
 
 export interface TicketStatusDefinition {
@@ -266,12 +275,52 @@ export class TicketService {
     return this.http.patch<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/status`, { status });
   }
 
+  closeAdminTicket(id: number): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/close`, {});
+  }
+
+  reopenAdminTicket(id: number): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/reopen`, {});
+  }
+
+  closeMineTicket(id: number): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/tickets/mine/${id}/close`, {});
+  }
+
+  reopenMineTicket(id: number): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/tickets/mine/${id}/reopen`, {});
+  }
+
+  updateAdminTicketTags(id: number, payload: { tagIds?: number[]; names?: string[] }): Observable<TicketDetail> {
+    return this.http.put<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/tags`, payload);
+  }
+
+  listAdminManagedTags(): Observable<TicketTag[]> {
+    return this.http.get<TicketTag[]>(`${this.API_URL}/admin/ticket-tags`);
+  }
+
+  createAdminTag(name: string): Observable<TicketTag> {
+    return this.http.post<TicketTag>(`${this.API_URL}/admin/ticket-tags`, { name });
+  }
+
+  deleteAdminTag(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/admin/ticket-tags/${id}`);
+  }
+
   getStatusWorkflow(): Observable<TicketStatusWorkflow> {
     return this.http.get<TicketStatusWorkflow>(`${this.API_URL}/admin/ticket-status-workflow`);
   }
 
   saveStatusWorkflow(workflow: TicketStatusWorkflow): Observable<TicketStatusWorkflow> {
     return this.http.put<TicketStatusWorkflow>(`${this.API_URL}/admin/ticket-status-workflow`, workflow);
+  }
+
+  getTicketSettings(): Observable<TicketSettings> {
+    return this.http.get<TicketSettings>(`${this.API_URL}/admin/ticket-settings`);
+  }
+
+  saveTicketSettings(settings: TicketSettings): Observable<TicketSettings> {
+    return this.http.put<TicketSettings>(`${this.API_URL}/admin/ticket-settings`, settings);
   }
 
   downloadTicketAttachment(ticketId: number, attachmentId: number, fileName: string, admin = false): Observable<void> {

@@ -410,7 +410,12 @@ interface UploadedContactsFile {
     </div>
   `,
   styles: [`
-    .bulk-wrap { max-width: 820px; }
+    .bulk-wrap {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
     .muted { color: var(--text-muted); font-size: 0.9rem; }
 
     .notice-card {
@@ -758,7 +763,7 @@ interface UploadedContactsFile {
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 201;
-      width: min(420px, calc(100vw - 32px));
+      width: min(420px, calc(100% - 32px));
       padding: 24px;
       border-radius: var(--radius-md);
       border: 1px solid var(--border-color);

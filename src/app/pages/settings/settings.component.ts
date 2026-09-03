@@ -570,7 +570,8 @@ interface SettingsNavItem {
   `,
   styles: [`
     .settings-wrap {
-      max-width: 760px;
+      width: 100%;
+      max-width: none;
     }
 
     .settings-nav {

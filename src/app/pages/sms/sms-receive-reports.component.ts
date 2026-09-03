@@ -369,6 +369,20 @@ type ReceiveTab = 'latest' | 'live' | 'archive';
     </div>
   `,
   styles: [`
+    .page {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    .page-body {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
     .notice-card {
       display: flex;
       flex-direction: column;

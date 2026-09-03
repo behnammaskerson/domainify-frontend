@@ -308,7 +308,10 @@ import { DatetimeFilterFieldComponent } from '../../components/datetime-filter-f
   `,
   styles: [`
     .single-wrap {
-      max-width: 820px;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .muted {

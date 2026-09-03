@@ -89,6 +89,8 @@
     "createTicket": "إنشاء تذكرة",
     "myTickets": "تذاكري",
     "ticketCategories": "فئات التذاكر",
+    "ticketTags": "وسوم التذاكر",
+    "ticketSettings": "إعدادات التذاكر",
     "ticketStatusWorkflow": "سير عمل الحالة",
     "ticketInbox": "صندوق التذاكر",
     "support": "الدعم",
@@ -118,6 +120,16 @@
       "eyebrow": "الدعم",
       "title": "سير عمل الحالة",
       "subtitle": "اضبط المسار جديد → مفتوحة → قيد الانتظار → معلّقة → تم الحل → مغلقة والانتقالات المسموحة."
+    },
+    "tagsPage": {
+      "eyebrow": "الدعم",
+      "title": "وسوم التذاكر",
+      "subtitle": "أدر الوسوم المعرفة مسبقاً. يمكن أيضاً إضافة وسوم حرة عند تعديل التذكرة."
+    },
+    "settingsPage": {
+      "eyebrow": "الدعم",
+      "title": "إعدادات التذاكر",
+      "subtitle": "اضبط مهلة إعادة الفتح وسلوك التذاكر الآخر."
     },
     "portal": {
       "eyebrow": "بوابة الدعم",
@@ -250,6 +262,18 @@
       "statusUpdated": "تم تحديث الحالة",
       "workflowHint": "تتبع تغييرات الحالة سير العمل المضبوط.",
       "manageWorkflow": "إدارة سير العمل",
+      "tagsTitle": "الوسوم",
+      "tagsHint": "اختر وسوماً معرفة مسبقاً أو اكتب وسماً حراً.",
+      "manageTags": "إدارة الوسوم",
+      "noTags": "لا توجد وسوم بعد",
+      "addTag": "وسم جديد",
+      "addTagAction": "إضافة",
+      "closeTicket": "إغلاق التذكرة",
+      "reopen": "إعادة الفتح",
+      "closedSuccess": "تم إغلاق التذكرة",
+      "reopenedSuccess": "أُعيد فتح التذكرة",
+      "reopenUntil": "يمكنك إعادة الفتح حتى {{date}}",
+      "reopenExpired": "انتهت مهلة إعادة فتح هذه التذكرة.",
       "closedNotice": "هذه التذكرة مغلقة ولا يمكن الرد عليها.",
       "meta": {
         "status": "الحالة",
@@ -1002,6 +1026,26 @@
       "saving": "جارٍ الحفظ…",
       "saved": "تم حفظ سير عمل الحالة"
     },
+    "ticketTags": {
+      "loading": "جارٍ تحميل الوسوم…",
+      "intro": "تظهر الوسوم المعرفة مسبقاً كاختيارات سريعة على التذاكر. يمكن للوكلاء إضافة وسوم حرة أيضاً.",
+      "name": "اسم الوسم",
+      "add": "إضافة وسم",
+      "added": "تمت إضافة الوسم",
+      "removed": "تمت إزالة الوسم",
+      "empty": "لا توجد وسوم بعد.",
+      "removeTitle": "إزالة الوسم",
+      "removeMessage": "إزالة الوسم «{{name}}»؟ لا يمكن حذف الوسوم المستخدمة في التذاكر."
+    },
+    "ticketSettings": {
+      "loading": "جارٍ تحميل إعدادات التذاكر…",
+      "intro": "تُطبَّق هذه الإعدادات على جميع تذاكر الدعم.",
+      "reopenWindowDays": "مهلة إعادة الفتح (أيام)",
+      "reopenWindowDaysHint": "عدد الأيام بعد الإغلاق التي يمكن خلالها إعادة فتح التذكرة. النطاق: 1–3650.",
+      "reopenWindowDaysInvalid": "أدخل رقماً بين 1 و3650",
+      "saving": "جارٍ الحفظ…",
+      "saved": "تم حفظ إعدادات التذاكر"
+    },
     "totp": {
       "enabledStatus": "مفعّل",
       "setupTitle": "إعداد تطبيق المصادقة",
@@ -1223,7 +1267,16 @@
     "TICKET_STATUS_INVALID": "حالة التذكرة غير صالحة",
     "TICKET_STATUS_TRANSITION_INVALID": "تغيير الحالة هذا غير مسموح في سير العمل",
     "TICKET_STATUS_WORKFLOW_INVALID": "إعدادات سير عمل الحالة غير صالحة",
-    "TICKET_STATUS_NEW_REQUIRED": "يجب أن تبقى حالة «جديدة» نشطة"
+    "TICKET_STATUS_NEW_REQUIRED": "يجب أن تبقى حالة «جديدة» نشطة",
+    "TICKET_TAG_NAME_REQUIRED": "اسم الوسم مطلوب",
+    "TICKET_TAG_NAME_INVALID": "اسم الوسم غير صالح",
+    "TICKET_TAG_EXISTS": "الوسم موجود مسبقاً",
+    "TICKET_TAG_NOT_FOUND": "لم يتم العثور على الوسم",
+    "TICKET_TAG_IN_USE": "الوسم مستخدم في تذاكر ولا يمكن حذفه",
+    "TICKET_ALREADY_CLOSED": "التذكرة مغلقة مسبقاً",
+    "TICKET_NOT_CLOSED": "التذكرة غير مغلقة",
+    "TICKET_REOPEN_WINDOW_EXPIRED": "انتهت مهلة إعادة فتح هذه التذكرة",
+    "TICKET_SETTINGS_INVALID": "إعدادات التذاكر غير صالحة"
   },
   "avatar": {
     "title": "تعديل الصورة",

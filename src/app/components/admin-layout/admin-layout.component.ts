@@ -42,6 +42,9 @@ import { UsersService } from '../../services/users.service';
     .admin-layout {
       display: flex;
       min-height: 100vh;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
       background: var(--bg-secondary);
     }
 
@@ -61,9 +64,21 @@ import { UsersService } from '../../services/users.service';
 
     .content {
       flex: 1;
+      min-width: 0;
+      max-width: 100%;
       padding: 0;
+      overflow-x: hidden;
       overflow-y: auto;
       background: var(--bg-secondary);
+    }
+
+    /* Routed page hosts: never expand past the content column */
+    .content > :not(router-outlet) {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .overlay {

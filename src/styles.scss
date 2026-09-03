@@ -1107,18 +1107,44 @@ a {
 .stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
 .stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
 
-// Page system primitives
+// Page system primitives (match Users: full-width body + side gutters, no page x-scroll)
 .page {
   --page-pad-x: 24px;
   --page-pad-y: 0px;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+  box-sizing: border-box;
 }
 
 .page-body {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
   padding: 0 var(--page-pad-x) 40px;
+  box-sizing: border-box;
+  overflow-x: clip;
   animation: fadeIn 0.45s ease-out;
+}
+
+/* Filter-drawer shells (Users / Tickets inbox) — stay inside the content column */
+.users-shell,
+.inbox-shell {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+.users-shell .mat-drawer-inner-container,
+.inbox-shell .mat-drawer-inner-container,
+.users-shell .mat-sidenav-content,
+.inbox-shell .mat-sidenav-content {
+  max-width: 100%;
+  min-width: 0;
 }
 
 .section {
@@ -1217,12 +1243,17 @@ a {
 }
 
 .panel-surface.table-wrap .table-scroll {
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-width: 100%;
   max-height: min(70vh, 720px);
+  -webkit-overflow-scrolling: touch;
 }
 
 .panel-surface.table-wrap .users-table.mat-mdc-table,
-.panel-surface.table-wrap table.users-table {
+.panel-surface.table-wrap table.users-table,
+.panel-surface.table-wrap .tickets-table.mat-mdc-table,
+.panel-surface.table-wrap table.tickets-table {
   width: 100%;
   min-width: 960px;
   background: var(--bg-primary) !important;

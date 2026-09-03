@@ -271,6 +271,20 @@ type SourceFilter = 'all' | ScheduledSmsSourceType;
     </div>
   `,
   styles: [`
+    .page {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    .page-body {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
     .filter-bar {
       display: flex;
       flex-direction: column;

@@ -192,12 +192,20 @@ type StatusFilter = 'ALL' | TicketStatus;
       display: flex;
       flex-direction: column;
       gap: 20px;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .page-body {
       display: flex;
       flex-direction: column;
       gap: 16px;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .filter-bar {
@@ -240,14 +248,18 @@ type StatusFilter = 'ALL' | TicketStatus;
 
     .table-wrap {
       overflow: hidden;
+      max-width: 100%;
+      min-width: 0;
     }
 
     .table-scroll {
       overflow-x: auto;
+      max-width: 100%;
     }
 
     .tickets-table {
       width: 100%;
+      min-width: 960px;
     }
 
     .ticket-id {

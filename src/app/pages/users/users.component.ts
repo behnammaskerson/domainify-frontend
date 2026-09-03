@@ -724,6 +724,10 @@ export class UserFormDialogComponent {
   styles: [`
     .users-shell {
       min-height: calc(100vh - 220px);
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      overflow: hidden;
       background: transparent;
     }
 
@@ -732,7 +736,8 @@ export class UserFormDialogComponent {
     }
 
     .filters-sidenav {
-      width: min(100vw - 24px, 380px);
+      width: min(380px, 100%);
+      max-width: 100%;
       background: var(--bg-primary);
       border-inline-start: 1px solid var(--border-color);
       box-shadow: var(--shadow-lg, 0 12px 40px rgba(20, 17, 13, 0.18));
@@ -974,7 +979,8 @@ export class UserFormDialogComponent {
       }
 
       .filters-sidenav {
-        width: min(100vw, 100%);
+        width: 100%;
+        max-width: 100%;
       }
     }
 
