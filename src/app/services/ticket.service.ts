@@ -39,9 +39,29 @@ export interface Ticket {
   channel?: TicketChannel;
   requesterId?: number;
   requesterEmail?: string;
+  requesterName?: string;
+  assigneeId?: number;
+  assigneeEmail?: string;
+  assigneeName?: string;
+  dueAt?: string;
+  overdue?: boolean;
+  tags?: TicketTag[];
   createdAt?: string;
   updatedAt?: string;
   attachments?: TicketAttachmentMeta[];
+}
+
+export type TicketInboxView = 'ALL' | 'UNASSIGNED' | 'MINE' | 'MENTIONS' | 'OVERDUE';
+
+export interface TicketTag {
+  id: number;
+  name: string;
+}
+
+export interface TicketAssigneeOption {
+  id: number;
+  name: string;
+  email: string;
 }
 
 export interface TicketMessage {
@@ -51,6 +71,8 @@ export interface TicketMessage {
   authorName?: string;
   authorEmail?: string;
   mine?: boolean;
+  staff?: boolean;
+  initial?: boolean;
   createdAt?: string;
   attachments?: TicketAttachmentMeta[];
 }
@@ -59,6 +81,24 @@ export interface TicketDetail {
   ticket: Ticket;
   messages: TicketMessage[];
   canReply: boolean;
+  allowedNextStatuses?: TicketStatus[];
+}
+
+export interface TicketStatusDefinition {
+  status: TicketStatus;
+  label?: string | null;
+  active: boolean;
+  sortOrder: number;
+}
+
+export interface TicketStatusTransition {
+  from: TicketStatus;
+  to: TicketStatus;
+}
+
+export interface TicketStatusWorkflow {
+  statuses: TicketStatusDefinition[];
+  transitions: TicketStatusTransition[];
 }
 
 export interface PagedTickets {
@@ -72,6 +112,23 @@ export interface PagedTickets {
 export interface MyTicketsParams {
   status?: TicketStatus;
   q?: string;
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+export interface AdminInboxParams {
+  view?: TicketInboxView;
+  q?: string;
+  status?: TicketStatus;
+  priority?: TicketPriority;
+  categoryId?: number;
+  assigneeId?: number;
+  unassigned?: boolean;
+  createdFrom?: string;
+  createdTo?: string;
+  tagId?: number;
+  customer?: string;
   page?: number;
   size?: number;
   sort?: string;
@@ -131,8 +188,60 @@ export class TicketService {
     return this.http.get<PagedTickets>(`${this.API_URL}/tickets/mine`, { params: httpParams });
   }
 
+  listAdminInbox(params?: AdminInboxParams): Observable<PagedTickets> {
+    let httpParams = new HttpParams();
+    httpParams = httpParams.set('view', params?.view ?? 'ALL');
+    if (params?.q?.trim()) {
+      httpParams = httpParams.set('q', params.q.trim());
+    }
+    if (params?.status) {
+      httpParams = httpParams.set('status', params.status);
+    }
+    if (params?.priority) {
+      httpParams = httpParams.set('priority', params.priority);
+    }
+    if (params?.categoryId != null) {
+      httpParams = httpParams.set('categoryId', String(params.categoryId));
+    }
+    if (params?.unassigned) {
+      httpParams = httpParams.set('unassigned', 'true');
+    } else if (params?.assigneeId != null) {
+      httpParams = httpParams.set('assigneeId', String(params.assigneeId));
+    }
+    if (params?.createdFrom) {
+      httpParams = httpParams.set('createdFrom', params.createdFrom);
+    }
+    if (params?.createdTo) {
+      httpParams = httpParams.set('createdTo', params.createdTo);
+    }
+    if (params?.tagId != null) {
+      httpParams = httpParams.set('tagId', String(params.tagId));
+    }
+    if (params?.customer?.trim()) {
+      httpParams = httpParams.set('customer', params.customer.trim());
+    }
+    httpParams = httpParams.set('page', String(params?.page ?? 0));
+    httpParams = httpParams.set('size', String(params?.size ?? 10));
+    if (params?.sort) {
+      httpParams = httpParams.set('sort', params.sort);
+    }
+    return this.http.get<PagedTickets>(`${this.API_URL}/admin/tickets/inbox`, { params: httpParams });
+  }
+
+  listAdminAssignees(): Observable<TicketAssigneeOption[]> {
+    return this.http.get<TicketAssigneeOption[]>(`${this.API_URL}/admin/tickets/assignees`);
+  }
+
+  listAdminTags(): Observable<TicketTag[]> {
+    return this.http.get<TicketTag[]>(`${this.API_URL}/admin/tickets/tags`);
+  }
+
   getMine(id: number): Observable<TicketDetail> {
     return this.http.get<TicketDetail>(`${this.API_URL}/tickets/mine/${id}`);
+  }
+
+  getAdminTicket(id: number): Observable<TicketDetail> {
+    return this.http.get<TicketDetail>(`${this.API_URL}/admin/tickets/${id}`);
   }
 
   reply(id: number, payload: ReplyTicketPayload): Observable<TicketDetail> {
@@ -144,22 +253,45 @@ export class TicketService {
     return this.http.post<TicketDetail>(`${this.API_URL}/tickets/mine/${id}/replies`, formData);
   }
 
-  downloadTicketAttachment(ticketId: number, attachmentId: number, fileName: string): Observable<void> {
-    return this.http.get(`${this.API_URL}/tickets/mine/${ticketId}/attachments/${attachmentId}`, {
-      responseType: 'blob'
-    }).pipe(map((blob) => this.saveBlob(blob, fileName)));
+  replyAsAdmin(id: number, payload: ReplyTicketPayload): Observable<TicketDetail> {
+    const formData = new FormData();
+    formData.append('body', payload.body);
+    for (const file of payload.attachments ?? []) {
+      formData.append('attachments', file, file.name);
+    }
+    return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/replies`, formData);
+  }
+
+  updateAdminTicketStatus(id: number, status: TicketStatus): Observable<TicketDetail> {
+    return this.http.patch<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/status`, { status });
+  }
+
+  getStatusWorkflow(): Observable<TicketStatusWorkflow> {
+    return this.http.get<TicketStatusWorkflow>(`${this.API_URL}/admin/ticket-status-workflow`);
+  }
+
+  saveStatusWorkflow(workflow: TicketStatusWorkflow): Observable<TicketStatusWorkflow> {
+    return this.http.put<TicketStatusWorkflow>(`${this.API_URL}/admin/ticket-status-workflow`, workflow);
+  }
+
+  downloadTicketAttachment(ticketId: number, attachmentId: number, fileName: string, admin = false): Observable<void> {
+    const base = admin
+      ? `${this.API_URL}/admin/tickets/${ticketId}/attachments/${attachmentId}`
+      : `${this.API_URL}/tickets/mine/${ticketId}/attachments/${attachmentId}`;
+    return this.http.get(base, { responseType: 'blob' }).pipe(map((blob) => this.saveBlob(blob, fileName)));
   }
 
   downloadMessageAttachment(
     ticketId: number,
     messageId: number,
     attachmentId: number,
-    fileName: string
+    fileName: string,
+    admin = false
   ): Observable<void> {
-    return this.http.get(
-      `${this.API_URL}/tickets/mine/${ticketId}/messages/${messageId}/attachments/${attachmentId}`,
-      { responseType: 'blob' }
-    ).pipe(map((blob) => this.saveBlob(blob, fileName)));
+    const base = admin
+      ? `${this.API_URL}/admin/tickets/${ticketId}/messages/${messageId}/attachments/${attachmentId}`
+      : `${this.API_URL}/tickets/mine/${ticketId}/messages/${messageId}/attachments/${attachmentId}`;
+    return this.http.get(base, { responseType: 'blob' }).pipe(map((blob) => this.saveBlob(blob, fileName)));
   }
 
   create(payload: CreateTicketPayload): Observable<Ticket> {

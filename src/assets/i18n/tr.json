@@ -89,6 +89,8 @@
     "createTicket": "Bilet Oluştur",
     "myTickets": "Biletlerim",
     "ticketCategories": "Bilet Kategorileri",
+    "ticketStatusWorkflow": "Durum İş Akışı",
+    "ticketInbox": "Bilet Gelen Kutusu",
     "support": "Destek",
     "analytics": "Analitik",
     "customers": "Müşteriler",
@@ -111,6 +113,11 @@
       "eyebrow": "Destek",
       "title": "Bilet Kategorileri",
       "subtitle": "Destek bileti oluştururken kullanılacak kategorileri yönetin."
+    },
+    "statusWorkflowPage": {
+      "eyebrow": "Destek",
+      "title": "Durum İş Akışı",
+      "subtitle": "Yeni → Açık → Beklemede → Askıda → Çözüldü → Kapalı yolunu ve izin verilen geçişleri yapılandırın."
     },
     "portal": {
       "eyebrow": "Destek portalı",
@@ -193,13 +200,42 @@
       "RESOLVED": "Çözüldü",
       "CLOSED": "Kapalı"
     },
+    "markdown": {
+      "toolbar": "Biçimlendirme",
+      "editor": "Markdown düzenleyici",
+      "write": "Yaz",
+      "preview": "Önizleme",
+      "bold": "Kalın",
+      "italic": "İtalik",
+      "code": "Satır içi kod",
+      "link": "Bağlantı",
+      "list": "Madde listesi",
+      "quote": "Alıntı",
+      "hint": "Markdown desteklenir: **kalın**, *italik*, `kod`, listeler, bağlantılar",
+      "emptyPreview": "Henüz önizlenecek bir şey yok.",
+      "replyPlaceholder": "Yanıtınızı Markdown ile yazın…",
+      "descriptionPlaceholder": "Sorunu Markdown ile açıklayın…",
+      "placeholders": {
+        "bold": "kalın",
+        "italic": "italik",
+        "code": "kod",
+        "linkText": "bağlantı metni",
+        "url": "https://"
+      }
+    },
     "detail": {
       "title": "Bilet",
       "subtitle": "Konuşma",
       "back": "Biletlerime dön",
+      "backInbox": "Gelen kutusuna dön",
       "loading": "Bilet yükleniyor…",
       "notFound": "Bilet bulunamadı.",
       "conversation": "Konuşma",
+      "threadHint": "Mesajlar eskiden yeniye kronolojik sırayla gösterilir.",
+      "messageCount": "{{count}} mesaj",
+      "originalRequest": "İlk talep",
+      "supportStaff": "Destek",
+      "customer": "Müşteri",
       "unknownAuthor": "Bilinmiyor",
       "you": "Siz",
       "replyTitle": "Yanıtla",
@@ -211,12 +247,66 @@
       "sendReply": "Yanıtı gönder",
       "sending": "Gönderiliyor…",
       "replySent": "Yanıt gönderildi",
+      "statusUpdated": "Durum güncellendi",
+      "workflowHint": "Durum değişiklikleri yapılandırılmış iş akışını izler.",
+      "manageWorkflow": "İş akışını yönet",
       "closedNotice": "Bu bilet kapalı. Artık yanıt veremezsiniz.",
       "meta": {
         "status": "Durum",
         "priority": "Öncelik",
         "category": "Kategori",
         "created": "Oluşturulma"
+      }
+    },
+    "adminInbox": {
+      "eyebrow": "Destek konsolu",
+      "title": "Bilet Gelen Kutusu",
+      "subtitle": "Müşteri destek biletlerini yönetin ve önceliklendirin.",
+      "refresh": "Yenile",
+      "viewsLabel": "Gelen kutusu görünümleri",
+      "views": {
+        "all": "Tümü",
+        "unassigned": "Atanmamış",
+        "mine": "Benim",
+        "mentions": "Bahsetmeler",
+        "overdue": "Gecikmiş"
+      },
+      "search": "Ara",
+      "searchPlaceholder": "Bilet kimliği, konu veya müşteri…",
+      "clearSearch": "Aramayı temizle",
+      "loading": "Biletler yükleniyor…",
+      "empty": "Bu görünümde bilet yok.",
+      "pagination": "Gelen kutusu sayfalama",
+      "resultCount": "{{count}} bilet",
+      "unassigned": "Atanmamış",
+      "filters": {
+        "title": "Gelişmiş filtreler",
+        "activeCount": "{{count}} aktif",
+        "ticket": "Bilet",
+        "people": "Kişiler",
+        "dates": "Tarih aralığı",
+        "status": "Durum",
+        "priority": "Öncelik",
+        "category": "Kategori",
+        "tag": "Etiket",
+        "assignee": "Atanan",
+        "customer": "Müşteri",
+        "customerPlaceholder": "Ad veya e-posta…",
+        "createdFrom": "Oluşturulma başlangıç",
+        "createdTo": "Oluşturulma bitiş",
+        "any": "Tümü",
+        "clearAll": "Tümünü temizle",
+        "done": "Tamam"
+      },
+      "table": {
+        "id": "Bilet kimliği",
+        "subject": "Konu",
+        "requester": "Müşteri",
+        "assignee": "Atanan",
+        "priority": "Öncelik",
+        "status": "Durum",
+        "dueAt": "Son tarih",
+        "updatedAt": "Güncellendi"
       }
     }
   },
@@ -920,6 +1010,20 @@
       "removeTitle": "Kategoriyi kaldır",
       "removeMessage": "\"{{name}}\" kategorisi kaldırılsın mı? Mevcut biletlerde kullanılıyorsa silinmez, pasifleştirilir."
     },
+    "ticketStatusWorkflow": {
+      "loading": "Durum iş akışı yükleniyor…",
+      "intro": "Aktif durumları ve temsilcilerin kullanabileceği geçişleri özelleştirin.",
+      "statusesTitle": "Durumlar",
+      "customLabel": "Özel etiket",
+      "active": "Aktif",
+      "inactive": "Pasif",
+      "transitionsTitle": "İzin verilen geçişler",
+      "transitionsHint": "Satır durumundan sütun durumuna geçişe izin vermek için hücreyi işaretleyin.",
+      "fromTo": "Kimden \\ Kime",
+      "resetDefaults": "Varsayılana dön",
+      "saving": "Kaydediliyor…",
+      "saved": "Durum iş akışı kaydedildi"
+    },
     "totp": {
       "enabledStatus": "Etkin",
       "setupTitle": "Kimlik doğrulama uygulamasını ayarla",
@@ -1137,7 +1241,11 @@
     "TICKET_REPLY_BODY_REQUIRED": "Yanıt metni gerekli",
     "TICKET_REPLY_BODY_TOO_LONG": "Yanıt en fazla 10000 karakter olabilir",
     "TICKET_CLOSED_NO_REPLY": "Bu bilet kapalı ve yanıt kabul etmiyor",
-    "TICKET_ATTACHMENT_NOT_FOUND": "Ek bulunamadı"
+    "TICKET_ATTACHMENT_NOT_FOUND": "Ek bulunamadı",
+    "TICKET_STATUS_INVALID": "Bilet durumu geçersiz",
+    "TICKET_STATUS_TRANSITION_INVALID": "Bu durum değişikliğine iş akışında izin verilmiyor",
+    "TICKET_STATUS_WORKFLOW_INVALID": "Durum iş akışı yapılandırması geçersiz",
+    "TICKET_STATUS_NEW_REQUIRED": "Yeni durumu aktif kalmalıdır"
   },
   "avatar": {
     "title": "Avatarı düzenle",

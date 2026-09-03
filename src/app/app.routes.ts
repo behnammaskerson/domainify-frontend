@@ -50,6 +50,17 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent)
       },
       {
+        path: 'admin/tickets/inbox',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/tickets/admin-tickets-inbox.component').then(m => m.AdminTicketsInboxComponent)
+      },
+      {
+        path: 'admin/tickets/:id',
+        canActivate: [AdminGuard],
+        data: { mode: 'admin' },
+        loadComponent: () => import('./pages/tickets/ticket-detail.component').then(m => m.TicketDetailComponent)
+      },
+      {
         path: 'tickets',
         pathMatch: 'full',
         redirectTo: 'tickets/mine'
@@ -60,6 +71,7 @@ export const routes: Routes = [
       },
       {
         path: 'tickets/mine/:id',
+        data: { mode: 'customer' },
         loadComponent: () => import('./pages/tickets/ticket-detail.component').then(m => m.TicketDetailComponent)
       },
       {
@@ -70,6 +82,11 @@ export const routes: Routes = [
         path: 'tickets/categories',
         canActivate: [AdminGuard],
         loadComponent: () => import('./pages/tickets/ticket-categories-page.component').then(m => m.TicketCategoriesPageComponent)
+      },
+      {
+        path: 'tickets/status-workflow',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/tickets/ticket-status-workflow-page.component').then(m => m.TicketStatusWorkflowPageComponent)
       },
       {
         path: 'analytics',

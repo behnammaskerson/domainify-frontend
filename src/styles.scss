@@ -1443,6 +1443,51 @@ body.dark-theme .panel-surface.table-wrap .users-table .mat-mdc-row:hover .mat-m
   color: inherit !important;
 }
 
+/* Page-hero sits on a dark surface — force readable button labels in light theme */
+.hero-actions {
+  .mat-mdc-outlined-button,
+  .mat-mdc-button,
+  a.mat-mdc-outlined-button,
+  a.mat-mdc-button {
+    --mdc-outlined-button-label-text-color: #f7f1e4 !important;
+    --mdc-outlined-button-outline-color: rgba(247, 241, 228, 0.45) !important;
+    --mdc-text-button-label-text-color: #f7f1e4 !important;
+    --mat-outlined-button-state-layer-color: #f7f1e4 !important;
+    --mat-text-button-state-layer-color: #f7f1e4 !important;
+    color: #f7f1e4 !important;
+  }
+
+  .mat-mdc-outlined-button .mat-icon,
+  .mat-mdc-button .mat-icon,
+  a.mat-mdc-outlined-button .mat-icon,
+  a.mat-mdc-button .mat-icon {
+    color: inherit !important;
+  }
+
+  .mat-mdc-outlined-button:hover,
+  a.mat-mdc-outlined-button:hover {
+    --mdc-outlined-button-outline-color: rgba(245, 215, 107, 0.7) !important;
+    background: rgba(247, 241, 228, 0.08) !important;
+  }
+
+  .mat-mdc-unelevated-button.mat-primary,
+  .mat-mdc-flat-button.mat-primary,
+  a.mat-mdc-unelevated-button.mat-primary,
+  a.mat-mdc-flat-button.mat-primary {
+    --mdc-filled-button-container-color: #f5d76b !important;
+    --mdc-filled-button-label-text-color: #14110d !important;
+    background: #f5d76b !important;
+    color: #14110d !important;
+  }
+
+  .mat-mdc-unelevated-button.mat-primary .mat-icon,
+  .mat-mdc-flat-button.mat-primary .mat-icon,
+  a.mat-mdc-unelevated-button.mat-primary .mat-icon,
+  a.mat-mdc-flat-button.mat-primary .mat-icon {
+    color: inherit !important;
+  }
+}
+
 .filter-bar {
   display: flex;
   align-items: center;
@@ -1650,6 +1695,98 @@ body.dark-theme .choice-btn.active {
   font-weight: 800;
   letter-spacing: 0.06em;
   color: var(--accent);
+}
+
+/* Ticket Markdown bodies (replies + descriptions) */
+.markdown-body {
+  word-break: break-word;
+  line-height: 1.55;
+}
+
+.markdown-body > *:first-child {
+  margin-top: 0;
+}
+
+.markdown-body > *:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body p {
+  margin: 0 0 0.75em;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin: 0.9em 0 0.4em;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0 0 0.75em;
+  padding-inline-start: 1.4em;
+}
+
+.markdown-body blockquote {
+  margin: 0 0 0.75em;
+  padding: 0.35em 0.85em;
+  border-inline-start: 3px solid var(--border-color);
+  color: var(--text-muted);
+}
+
+.markdown-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.88em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--bg-secondary) 70%, transparent);
+  border: 1px solid var(--border-color);
+}
+
+.markdown-body pre {
+  margin: 0 0 0.75em;
+  padding: 10px 12px;
+  overflow: auto;
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.markdown-body pre code {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.markdown-body a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 0.75em;
+  font-size: 0.9em;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid var(--border-color);
+  padding: 6px 8px;
+  text-align: start;
+}
+
+.markdown-body hr {
+  border: 0;
+  border-top: 1px solid var(--border-color);
+  margin: 1em 0;
 }
 
 @media (max-width: 1100px) {

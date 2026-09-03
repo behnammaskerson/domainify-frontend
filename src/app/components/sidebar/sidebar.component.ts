@@ -81,6 +81,14 @@ interface NavGroupChild {
           </a>
           @if (authService.isAdmin()) {
             <a class="nav-link"
+               routerLink="/admin/tickets/inbox"
+               routerLinkActive="active"
+               (click)="onNavigate()"
+               [matTooltip]="'menu.ticketInbox' | translate"
+               [matTooltipPosition]="tooltipPosition()">
+              <mat-icon>inbox</mat-icon>
+            </a>
+            <a class="nav-link"
                routerLink="/tickets/categories"
                routerLinkActive="active"
                (click)="onNavigate()"
@@ -429,7 +437,9 @@ export class SidebarComponent implements OnInit {
   readonly supportNavChildren: NavGroupChild[] = [
     { icon: 'confirmation_number', labelKey: 'menu.myTickets', route: '/tickets/mine' },
     { icon: 'add_box', labelKey: 'menu.createTicket', route: '/tickets/new' },
-    { icon: 'category', labelKey: 'menu.ticketCategories', route: '/tickets/categories' }
+    { icon: 'inbox', labelKey: 'menu.ticketInbox', route: '/admin/tickets/inbox' },
+    { icon: 'category', labelKey: 'menu.ticketCategories', route: '/tickets/categories' },
+    { icon: 'account_tree', labelKey: 'menu.ticketStatusWorkflow', route: '/tickets/status-workflow' }
   ];
 
   readonly smsNavChildren: NavGroupChild[] = [
@@ -445,7 +455,10 @@ export class SidebarComponent implements OnInit {
     if (this.authService.isAdmin()) {
       return this.supportNavChildren;
     }
-    return this.supportNavChildren.filter((child) => child.route !== '/tickets/categories');
+    return this.supportNavChildren.filter((child) =>
+      child.route !== '/tickets/categories'
+      && child.route !== '/admin/tickets/inbox'
+      && child.route !== '/tickets/status-workflow');
   }
 
   ngOnInit(): void {
@@ -469,6 +482,6 @@ export class SidebarComponent implements OnInit {
 
   private updateGroupExpanded(url: string): void {
     this.smsExpanded = url.startsWith('/sms');
-    this.supportExpanded = url.startsWith('/tickets');
+    this.supportExpanded = url.startsWith('/tickets') || url.startsWith('/admin/tickets');
   }
 }

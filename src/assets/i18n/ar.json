@@ -89,6 +89,8 @@
     "createTicket": "إنشاء تذكرة",
     "myTickets": "تذاكري",
     "ticketCategories": "فئات التذاكر",
+    "ticketStatusWorkflow": "سير عمل الحالة",
+    "ticketInbox": "صندوق التذاكر",
     "support": "الدعم",
     "analytics": "التحليلات",
     "customers": "العملاء",
@@ -111,6 +113,11 @@
       "eyebrow": "الدعم",
       "title": "فئات التذاكر",
       "subtitle": "أدِر الفئات المتاحة عند إنشاء تذاكر الدعم."
+    },
+    "statusWorkflowPage": {
+      "eyebrow": "الدعم",
+      "title": "سير عمل الحالة",
+      "subtitle": "اضبط المسار جديد → مفتوحة → قيد الانتظار → معلّقة → تم الحل → مغلقة والانتقالات المسموحة."
     },
     "portal": {
       "eyebrow": "بوابة الدعم",
@@ -193,13 +200,42 @@
       "RESOLVED": "تم الحل",
       "CLOSED": "مغلقة"
     },
+    "markdown": {
+      "toolbar": "التنسيق",
+      "editor": "محرر Markdown",
+      "write": "كتابة",
+      "preview": "معاينة",
+      "bold": "عريض",
+      "italic": "مائل",
+      "code": "رمز مضمّن",
+      "link": "رابط",
+      "list": "قائمة نقطية",
+      "quote": "اقتباس",
+      "hint": "Markdown مدعوم: **عريض**، *مائل*، `رمز`، قوائم وروابط",
+      "emptyPreview": "لا يوجد شيء للمعاينة بعد.",
+      "replyPlaceholder": "اكتب ردك بـ Markdown…",
+      "descriptionPlaceholder": "صف المشكلة بـ Markdown…",
+      "placeholders": {
+        "bold": "عريض",
+        "italic": "مائل",
+        "code": "رمز",
+        "linkText": "نص الرابط",
+        "url": "https://"
+      }
+    },
     "detail": {
       "title": "تذكرة",
       "subtitle": "المحادثة",
       "back": "العودة إلى تذاكري",
+      "backInbox": "العودة إلى الصندوق",
       "loading": "جارٍ تحميل التذكرة…",
       "notFound": "لم يتم العثور على التذكرة.",
       "conversation": "المحادثة",
+      "threadHint": "تُعرض الرسائل بالترتيب الزمني من الأقدم إلى الأحدث.",
+      "messageCount": "{{count}} رسالة",
+      "originalRequest": "الطلب الأصلي",
+      "supportStaff": "الدعم",
+      "customer": "العميل",
       "unknownAuthor": "غير معروف",
       "you": "أنت",
       "replyTitle": "رد",
@@ -211,12 +247,66 @@
       "sendReply": "إرسال الرد",
       "sending": "جارٍ الإرسال…",
       "replySent": "تم إرسال الرد",
+      "statusUpdated": "تم تحديث الحالة",
+      "workflowHint": "تتبع تغييرات الحالة سير العمل المضبوط.",
+      "manageWorkflow": "إدارة سير العمل",
       "closedNotice": "هذه التذكرة مغلقة ولا يمكن الرد عليها.",
       "meta": {
         "status": "الحالة",
         "priority": "الأولوية",
         "category": "الفئة",
         "created": "تاريخ الإنشاء"
+      }
+    },
+    "adminInbox": {
+      "eyebrow": "وحدة الدعم",
+      "title": "صندوق التذاكر",
+      "subtitle": "إدارة وتصنيف تذاكر دعم العملاء.",
+      "refresh": "تحديث",
+      "viewsLabel": "عروض الصندوق",
+      "views": {
+        "all": "الكل",
+        "unassigned": "غير مُعيَّنة",
+        "mine": "تذاكري",
+        "mentions": "الإشارات",
+        "overdue": "متأخرة"
+      },
+      "search": "بحث",
+      "searchPlaceholder": "معرّف التذكرة أو الموضوع أو العميل…",
+      "clearSearch": "مسح البحث",
+      "loading": "جارٍ تحميل التذاكر…",
+      "empty": "لا توجد تذاكر في هذا العرض.",
+      "pagination": "ترقيم صفحات الصندوق",
+      "resultCount": "{{count}} تذكرة",
+      "unassigned": "غير مُعيَّنة",
+      "filters": {
+        "title": "عوامل تصفية متقدمة",
+        "activeCount": "{{count}} نشط",
+        "ticket": "التذكرة",
+        "people": "الأشخاص",
+        "dates": "نطاق التاريخ",
+        "status": "الحالة",
+        "priority": "الأولوية",
+        "category": "الفئة",
+        "tag": "وسم",
+        "assignee": "المُعيَّن",
+        "customer": "العميل",
+        "customerPlaceholder": "الاسم أو البريد…",
+        "createdFrom": "من تاريخ الإنشاء",
+        "createdTo": "إلى تاريخ الإنشاء",
+        "any": "الكل",
+        "clearAll": "مسح الكل",
+        "done": "تم"
+      },
+      "table": {
+        "id": "معرّف التذكرة",
+        "subject": "الموضوع",
+        "requester": "العميل",
+        "assignee": "المُعيَّن",
+        "priority": "الأولوية",
+        "status": "الحالة",
+        "dueAt": "الاستحقاق",
+        "updatedAt": "آخر تحديث"
       }
     }
   },
@@ -898,6 +988,20 @@
       "removeTitle": "إزالة الفئة",
       "removeMessage": "إزالة الفئة «{{name}}»؟ إن كانت مستخدمة في تذاكر موجودة فسيتم تعطيلها بدل الحذف."
     },
+    "ticketStatusWorkflow": {
+      "loading": "جارٍ تحميل سير عمل الحالة…",
+      "intro": "خصّص الحالات النشطة والانتقالات المسموحة للوكلاء.",
+      "statusesTitle": "الحالات",
+      "customLabel": "تسمية مخصصة",
+      "active": "نشطة",
+      "inactive": "غير نشطة",
+      "transitionsTitle": "الانتقالات المسموحة",
+      "transitionsHint": "فعّل خانة للسماح بالانتقال من حالة الصف إلى حالة العمود.",
+      "fromTo": "من \\ إلى",
+      "resetDefaults": "إعادة الافتراضي",
+      "saving": "جارٍ الحفظ…",
+      "saved": "تم حفظ سير عمل الحالة"
+    },
     "totp": {
       "enabledStatus": "مفعّل",
       "setupTitle": "إعداد تطبيق المصادقة",
@@ -1115,7 +1219,11 @@
     "TICKET_REPLY_BODY_REQUIRED": "نص الرد مطلوب",
     "TICKET_REPLY_BODY_TOO_LONG": "يجب ألا يتجاوز الرد 10000 حرف",
     "TICKET_CLOSED_NO_REPLY": "هذه التذكرة مغلقة ولا تقبل الردود",
-    "TICKET_ATTACHMENT_NOT_FOUND": "لم يتم العثور على المرفق"
+    "TICKET_ATTACHMENT_NOT_FOUND": "لم يتم العثور على المرفق",
+    "TICKET_STATUS_INVALID": "حالة التذكرة غير صالحة",
+    "TICKET_STATUS_TRANSITION_INVALID": "تغيير الحالة هذا غير مسموح في سير العمل",
+    "TICKET_STATUS_WORKFLOW_INVALID": "إعدادات سير عمل الحالة غير صالحة",
+    "TICKET_STATUS_NEW_REQUIRED": "يجب أن تبقى حالة «جديدة» نشطة"
   },
   "avatar": {
     "title": "تعديل الصورة",

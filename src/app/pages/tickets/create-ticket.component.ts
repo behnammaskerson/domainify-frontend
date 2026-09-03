@@ -11,6 +11,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { TicketPortalNavComponent } from '../../components/ticket-portal-nav/ticket-portal-nav.component';
+import { MarkdownEditorComponent } from '../../components/markdown-editor/markdown-editor.component';
 import { ApiErrorService } from '../../services/api-error.service';
 import {
   TicketCategory,
@@ -33,7 +34,8 @@ import {
     MatSnackBarModule,
     TranslateModule,
     PageHeroComponent,
-    TicketPortalNavComponent
+    TicketPortalNavComponent,
+    MarkdownEditorComponent
   ],
   template: `
     <div class="page">
@@ -105,16 +107,18 @@ import {
               </mat-form-field>
             </div>
 
-            <mat-form-field appearance="outline" class="full">
-              <mat-label>{{ 'tickets.create.description' | translate }}</mat-label>
-              <textarea matInput
-                        formControlName="description"
-                        rows="8"
-                        maxlength="10000"></textarea>
-              @if (form.controls.description.touched && form.controls.description.hasError('required')) {
-                <mat-error>{{ 'tickets.create.descriptionRequired' | translate }}</mat-error>
-              }
-            </mat-form-field>
+            <label class="field-label">{{ 'tickets.create.description' | translate }}</label>
+            <app-markdown-editor
+              formControlName="description"
+              [rows]="8"
+              [maxLength]="10000"
+              labelKey="tickets.create.description"
+              placeholderKey="tickets.markdown.descriptionPlaceholder"
+              [invalid]="form.controls.description.touched && form.controls.description.invalid">
+            </app-markdown-editor>
+            @if (form.controls.description.touched && form.controls.description.hasError('required')) {
+              <p class="field-error">{{ 'tickets.create.descriptionRequired' | translate }}</p>
+            }
 
             <div class="attachments">
               <div class="attachments-header">
@@ -214,6 +218,20 @@ import {
 
     .full {
       width: 100%;
+    }
+
+    .field-label {
+      display: block;
+      margin: 8px 0 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .field-error {
+      margin: 6px 0 0;
+      font-size: 0.75rem;
+      color: var(--mat-form-field-error-text-color, #f44336);
     }
 
     .attachments {

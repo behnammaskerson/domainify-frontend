@@ -89,6 +89,8 @@
     "createTicket": "Create Ticket",
     "myTickets": "My Tickets",
     "ticketCategories": "Ticket Categories",
+    "ticketStatusWorkflow": "Status Workflow",
+    "ticketInbox": "Ticket Inbox",
     "support": "Support",
     "analytics": "Analytics",
     "customers": "Customers",
@@ -111,6 +113,11 @@
       "eyebrow": "Support",
       "title": "Ticket Categories",
       "subtitle": "Define categories available when creating support tickets."
+    },
+    "statusWorkflowPage": {
+      "eyebrow": "Support",
+      "title": "Status Workflow",
+      "subtitle": "Configure New → Open → Pending → On Hold → Resolved → Closed and allowed transitions."
     },
     "portal": {
       "eyebrow": "Support portal",
@@ -193,13 +200,42 @@
       "RESOLVED": "Resolved",
       "CLOSED": "Closed"
     },
+    "markdown": {
+      "toolbar": "Formatting",
+      "editor": "Markdown editor",
+      "write": "Write",
+      "preview": "Preview",
+      "bold": "Bold",
+      "italic": "Italic",
+      "code": "Inline code",
+      "link": "Link",
+      "list": "Bullet list",
+      "quote": "Quote",
+      "hint": "Markdown supported: **bold**, *italic*, `code`, lists, links",
+      "emptyPreview": "Nothing to preview yet.",
+      "replyPlaceholder": "Write your reply in Markdown…",
+      "descriptionPlaceholder": "Describe the issue in Markdown…",
+      "placeholders": {
+        "bold": "bold",
+        "italic": "italic",
+        "code": "code",
+        "linkText": "link text",
+        "url": "https://"
+      }
+    },
     "detail": {
       "title": "Ticket",
       "subtitle": "Conversation",
       "back": "Back to my tickets",
+      "backInbox": "Back to inbox",
       "loading": "Loading ticket…",
       "notFound": "Ticket not found.",
       "conversation": "Conversation",
+      "threadHint": "Messages are shown in chronological order, oldest first.",
+      "messageCount": "{{count}} messages",
+      "originalRequest": "Original request",
+      "supportStaff": "Support",
+      "customer": "Customer",
       "unknownAuthor": "Unknown",
       "you": "You",
       "replyTitle": "Reply",
@@ -211,12 +247,66 @@
       "sendReply": "Send reply",
       "sending": "Sending…",
       "replySent": "Reply sent",
+      "statusUpdated": "Status updated",
+      "workflowHint": "Status changes follow the configured workflow.",
+      "manageWorkflow": "Manage workflow",
       "closedNotice": "This ticket is closed. You can no longer reply.",
       "meta": {
         "status": "Status",
         "priority": "Priority",
         "category": "Category",
         "created": "Created"
+      }
+    },
+    "adminInbox": {
+      "eyebrow": "Support console",
+      "title": "Ticket Inbox",
+      "subtitle": "Manage and triage customer support tickets.",
+      "refresh": "Refresh",
+      "viewsLabel": "Inbox views",
+      "views": {
+        "all": "All",
+        "unassigned": "Unassigned",
+        "mine": "Mine",
+        "mentions": "Mentions",
+        "overdue": "Overdue"
+      },
+      "search": "Search",
+      "searchPlaceholder": "Ticket ID, subject, or customer…",
+      "clearSearch": "Clear search",
+      "loading": "Loading tickets…",
+      "empty": "No tickets in this view.",
+      "pagination": "Inbox pagination",
+      "resultCount": "{{count}} tickets",
+      "unassigned": "Unassigned",
+      "filters": {
+        "title": "Advanced filters",
+        "activeCount": "{{count}} active",
+        "ticket": "Ticket",
+        "people": "People",
+        "dates": "Date range",
+        "status": "Status",
+        "priority": "Priority",
+        "category": "Category",
+        "tag": "Tag",
+        "assignee": "Assignee",
+        "customer": "Customer",
+        "customerPlaceholder": "Name or email…",
+        "createdFrom": "Created from",
+        "createdTo": "Created to",
+        "any": "Any",
+        "clearAll": "Clear all",
+        "done": "Done"
+      },
+      "table": {
+        "id": "Ticket ID",
+        "subject": "Subject",
+        "requester": "Customer",
+        "assignee": "Assignee",
+        "priority": "Priority",
+        "status": "Status",
+        "dueAt": "Due",
+        "updatedAt": "Updated"
       }
     }
   },
@@ -998,6 +1088,20 @@
       "removeTitle": "Remove category",
       "removeMessage": "Remove category \"{{name}}\"? If it is used by existing tickets, it will be deactivated instead of deleted."
     },
+    "ticketStatusWorkflow": {
+      "loading": "Loading status workflow…",
+      "intro": "Customize which statuses are active and which transitions agents may use.",
+      "statusesTitle": "Statuses",
+      "customLabel": "Custom label",
+      "active": "Active",
+      "inactive": "Inactive",
+      "transitionsTitle": "Allowed transitions",
+      "transitionsHint": "Check a cell to allow moving from the row status to the column status.",
+      "fromTo": "From \\ To",
+      "resetDefaults": "Reset defaults",
+      "saving": "Saving…",
+      "saved": "Status workflow saved"
+    },
     "totp": {
       "enabledStatus": "Enabled",
       "setupTitle": "Set up authenticator app",
@@ -1215,7 +1319,11 @@
     "TICKET_REPLY_BODY_REQUIRED": "Reply text is required",
     "TICKET_REPLY_BODY_TOO_LONG": "Reply must be at most 10000 characters",
     "TICKET_CLOSED_NO_REPLY": "This ticket is closed and cannot accept replies",
-    "TICKET_ATTACHMENT_NOT_FOUND": "Attachment was not found"
+    "TICKET_ATTACHMENT_NOT_FOUND": "Attachment was not found",
+    "TICKET_STATUS_INVALID": "Ticket status is invalid",
+    "TICKET_STATUS_TRANSITION_INVALID": "That status change is not allowed by the workflow",
+    "TICKET_STATUS_WORKFLOW_INVALID": "Ticket status workflow configuration is invalid",
+    "TICKET_STATUS_NEW_REQUIRED": "The New status must remain active"
   },
   "avatar": {
     "title": "Edit avatar",
