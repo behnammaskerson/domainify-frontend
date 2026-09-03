@@ -53,6 +53,9 @@ export interface Ticket {
   mergedIntoId?: number;
   mergedIntoPublicNumber?: string;
   mergedSourcePublicNumbers?: string[];
+  splitFromId?: number;
+  splitFromPublicNumber?: string;
+  splitChildPublicNumbers?: string[];
   tags?: TicketTag[];
   createdAt?: string;
   updatedAt?: string;
@@ -96,9 +99,15 @@ export interface TicketDetail {
   canSoftDelete?: boolean;
   canRestore?: boolean;
   canMerge?: boolean;
+  canSplit?: boolean;
   reopenUntil?: string;
   reopenWindowDays?: number;
   allowedNextStatuses?: TicketStatus[];
+}
+
+export interface SplitTicketResult {
+  source: TicketDetail;
+  newTicket: Ticket;
 }
 
 export type TicketAttachmentKind = 'IMAGE' | 'PDF' | 'LOG' | 'DOCUMENT';
@@ -330,6 +339,13 @@ export class TicketService {
     return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${targetId}/merge`, {
       sourceTicketId
     });
+  }
+
+  splitAdminTicket(
+    sourceId: number,
+    payload: { subject: string; messageIds: number[] }
+  ): Observable<SplitTicketResult> {
+    return this.http.post<SplitTicketResult>(`${this.API_URL}/admin/tickets/${sourceId}/split`, payload);
   }
 
   closeMineTicket(id: number): Observable<TicketDetail> {

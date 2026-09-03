@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,6 +16,7 @@ import { TicketPortalNavComponent } from '../../components/ticket-portal-nav/tic
 import { MarkdownEditorComponent } from '../../components/markdown-editor/markdown-editor.component';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { TicketMergeDialogComponent } from '../../components/ticket-merge-dialog/ticket-merge-dialog.component';
+import { TicketSplitDialogComponent } from '../../components/ticket-split-dialog/ticket-split-dialog.component';
 import { TicketAttachmentViewerDialogComponent } from '../../components/ticket-attachment-viewer-dialog/ticket-attachment-viewer-dialog.component';
 import { LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
 import { MarkdownPipe } from '../../pipes/markdown.pipe';
@@ -64,6 +65,12 @@ type TicketDetailMode = 'customer' | 'admin';
         [title]="ticket?.subject || ('tickets.detail.title' | translate)"
         [subtitle]="ticket?.publicNumber || ('tickets.detail.subtitle' | translate)">
         <div heroActions>
+          @if (ticket && canSplit) {
+            <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="splitTicket()">
+              <mat-icon>call_split</mat-icon>
+              {{ 'tickets.detail.split' | translate }}
+            </button>
+          }
           @if (ticket && canMerge) {
             <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="mergeTicket()">
               <mat-icon>merge_type</mat-icon>
@@ -169,6 +176,35 @@ type TicketDetailMode = 'customer' | 'admin';
               <span class="meta-created-value" dir="ltr">{{ ticket.createdAt | localeDate:dateTimeFormat }}</span>
             </div>
           </div>
+
+          @if (ticket.splitFromPublicNumber) {
+            <p class="lifecycle-banner panel-surface merge-banner">
+              <mat-icon>call_split</mat-icon>
+              <span>
+                {{ 'tickets.detail.splitFromNotice' | translate }}
+                @if (isAdmin && ticket.splitFromId) {
+                  <a [routerLink]="['/admin/tickets', ticket.splitFromId]">
+                    {{ ticket.splitFromPublicNumber }}
+                  </a>
+                } @else {
+                  <strong dir="ltr">{{ ticket.splitFromPublicNumber }}</strong>
+                }
+              </span>
+            </p>
+          }
+
+          @if (ticket.splitChildPublicNumbers; as splitChildren) {
+            @if (splitChildren.length) {
+              <p class="lifecycle-banner panel-surface merge-banner">
+                <mat-icon>call_split</mat-icon>
+                <span>
+                  {{ 'tickets.detail.splitChildrenNotice' | translate: {
+                    numbers: splitChildren.join(', ')
+                  } }}
+                </span>
+              </p>
+            }
+          }
 
           @if (ticket.mergedIntoPublicNumber) {
             <p class="lifecycle-banner panel-surface merge-banner">
@@ -641,6 +677,7 @@ type TicketDetailMode = 'customer' | 'admin';
 })
 export class TicketDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly ticketService = inject(TicketService);
   private readonly apiError = inject(ApiErrorService);
   private readonly snackBar = inject(MatSnackBar);
@@ -680,6 +717,7 @@ export class TicketDetailComponent implements OnInit {
   canSoftDelete = false;
   canRestore = false;
   canMerge = false;
+  canSplit = false;
   reopenUntil: string | null = null;
   loading = true;
   submitting = false;
@@ -869,6 +907,49 @@ export class TicketDetailComponent implements OnInit {
             this.lifecycleBusy = false;
             this.scrollToLatest();
             this.snackBar.open(this.translate.instant('tickets.detail.mergedSuccess'), undefined, { duration: 3000 });
+          },
+          error: (error) => {
+            this.lifecycleBusy = false;
+            this.showError(this.apiError.resolve(error));
+          }
+        });
+      });
+  }
+
+  splitTicket(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canSplit || this.lifecycleBusy) {
+      return;
+    }
+    this.dialog
+      .open(TicketSplitDialogComponent, {
+        width: '640px',
+        maxWidth: '95vw',
+        data: {
+          sourcePublicNumber: this.ticket?.publicNumber,
+          messages: this.messages
+        }
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (!result?.messageIds.length || !this.ticketId) {
+          return;
+        }
+        this.lifecycleBusy = true;
+        this.ticketService.splitAdminTicket(this.ticketId, result).subscribe({
+          next: (splitResult) => {
+            this.applyDetail(splitResult.source);
+            this.lifecycleBusy = false;
+            const newId = splitResult.newTicket?.id;
+            const snack = this.snackBar.open(
+              this.translate.instant('tickets.detail.splitSuccess'),
+              newId ? this.translate.instant('tickets.detail.splitOpenNew') : undefined,
+              { duration: 8000 }
+            );
+            if (newId) {
+              snack.onAction().subscribe(() => {
+                void this.router.navigate(['/admin/tickets', newId]);
+              });
+            }
           },
           error: (error) => {
             this.lifecycleBusy = false;
@@ -1178,6 +1259,7 @@ export class TicketDetailComponent implements OnInit {
     this.canSoftDelete = !!detail.canSoftDelete;
     this.canRestore = !!detail.canRestore;
     this.canMerge = !!detail.canMerge;
+    this.canSplit = !!detail.canSplit;
     this.reopenUntil = detail.reopenUntil ?? null;
     this.statusOptions = (detail.allowedNextStatuses ?? []).filter((status) => status !== detail.ticket?.status);
     this.selectedTags = [...(detail.ticket?.tags ?? [])];
