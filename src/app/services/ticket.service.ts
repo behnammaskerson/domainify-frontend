@@ -6,6 +6,14 @@ export type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 export type TicketStatus = 'NEW' | 'OPEN' | 'PENDING' | 'ON_HOLD' | 'RESOLVED' | 'CLOSED';
 export type TicketChannel = 'PORTAL' | 'EMAIL';
 
+export interface RelatedTicket {
+  id: number;
+  publicNumber?: string;
+  subject?: string;
+  status?: TicketStatus;
+  requesterName?: string;
+}
+
 export interface TicketCategory {
   id: number;
   code: string;
@@ -56,6 +64,7 @@ export interface Ticket {
   splitFromId?: number;
   splitFromPublicNumber?: string;
   splitChildPublicNumbers?: string[];
+  relatedTickets?: RelatedTicket[];
   tags?: TicketTag[];
   createdAt?: string;
   updatedAt?: string;
@@ -100,6 +109,7 @@ export interface TicketDetail {
   canRestore?: boolean;
   canMerge?: boolean;
   canSplit?: boolean;
+  canLinkRelated?: boolean;
   reopenUntil?: string;
   reopenWindowDays?: number;
   allowedNextStatuses?: TicketStatus[];
@@ -346,6 +356,18 @@ export class TicketService {
     payload: { subject: string; messageIds: number[] }
   ): Observable<SplitTicketResult> {
     return this.http.post<SplitTicketResult>(`${this.API_URL}/admin/tickets/${sourceId}/split`, payload);
+  }
+
+  linkAdminRelatedTickets(ticketId: number, relatedTicketIds: number[]): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${ticketId}/related`, {
+      relatedTicketIds
+    });
+  }
+
+  unlinkAdminRelatedTicket(ticketId: number, relatedTicketId: number): Observable<TicketDetail> {
+    return this.http.delete<TicketDetail>(
+      `${this.API_URL}/admin/tickets/${ticketId}/related/${relatedTicketId}`
+    );
   }
 
   closeMineTicket(id: number): Observable<TicketDetail> {

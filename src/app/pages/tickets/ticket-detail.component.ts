@@ -1,4 +1,5 @@
-import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -17,6 +18,7 @@ import { MarkdownEditorComponent } from '../../components/markdown-editor/markdo
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { TicketMergeDialogComponent } from '../../components/ticket-merge-dialog/ticket-merge-dialog.component';
 import { TicketSplitDialogComponent } from '../../components/ticket-split-dialog/ticket-split-dialog.component';
+import { TicketLinkDialogComponent } from '../../components/ticket-link-dialog/ticket-link-dialog.component';
 import { TicketAttachmentViewerDialogComponent } from '../../components/ticket-attachment-viewer-dialog/ticket-attachment-viewer-dialog.component';
 import { LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
 import { MarkdownPipe } from '../../pipes/markdown.pipe';
@@ -28,7 +30,8 @@ import {
   TicketMessage,
   TicketService,
   TicketStatus,
-  TicketTag
+  TicketTag,
+  RelatedTicket
 } from '../../services/ticket.service';
 import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
 
@@ -297,6 +300,49 @@ type TicketDetailMode = 'customer' | 'admin';
           }
 
           @if (isAdmin) {
+            <div class="related-card panel-surface">
+              <div class="tags-header">
+                <div>
+                  <h2>{{ 'tickets.detail.relatedTitle' | translate }}</h2>
+                  <p>{{ 'tickets.detail.relatedHint' | translate }}</p>
+                </div>
+                @if (canLinkRelated) {
+                  <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="linkRelatedTickets()">
+                    <mat-icon>link</mat-icon>
+                    {{ 'tickets.detail.linkRelated' | translate }}
+                  </button>
+                }
+              </div>
+              @if (relatedTickets.length === 0) {
+                <p class="muted-inline">{{ 'tickets.detail.noRelated' | translate }}</p>
+              } @else {
+                <ul class="related-list">
+                  @for (related of relatedTickets; track related.id) {
+                    <li class="related-item">
+                      <a class="related-link" [routerLink]="['/admin/tickets', related.id]">
+                        <span class="related-number" dir="ltr">{{ related.publicNumber }}</span>
+                        <span class="related-subject">{{ related.subject }}</span>
+                        <span class="status-pill" [attr.data-status]="related.status">
+                          {{ ('tickets.statuses.' + related.status) | translate }}
+                        </span>
+                      </a>
+                      @if (canLinkRelated) {
+                        <button mat-icon-button
+                                type="button"
+                                [disabled]="lifecycleBusy"
+                                [matTooltip]="'tickets.detail.unlinkRelated' | translate"
+                                (click)="unlinkRelatedTicket(related.id)">
+                          <mat-icon>link_off</mat-icon>
+                        </button>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          }
+
+          @if (isAdmin) {
             <p class="workflow-hint panel-surface">
               <mat-icon>account_tree</mat-icon>
               <span>{{ 'tickets.detail.workflowHint' | translate }}</span>
@@ -534,6 +580,49 @@ type TicketDetailMode = 'customer' | 'admin';
     }
     .merge-banner a:hover { text-decoration: underline; }
     .tags-card { padding: 16px; margin-bottom: 16px; }
+    .related-card { padding: 16px; margin-bottom: 16px; }
+    .related-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .related-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .related-link {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      text-decoration: none;
+      color: inherit;
+      min-width: 0;
+    }
+    .related-link:hover { background: color-mix(in srgb, var(--primary) 6%, transparent); }
+    .related-number {
+      font-weight: 600;
+      color: var(--primary);
+      white-space: nowrap;
+    }
+    .related-subject {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
     .tags-header {
       display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 12px;
     }
@@ -678,6 +767,7 @@ type TicketDetailMode = 'customer' | 'admin';
 export class TicketDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly ticketService = inject(TicketService);
   private readonly apiError = inject(ApiErrorService);
   private readonly snackBar = inject(MatSnackBar);
@@ -718,6 +808,7 @@ export class TicketDetailComponent implements OnInit {
   canRestore = false;
   canMerge = false;
   canSplit = false;
+  canLinkRelated = false;
   reopenUntil: string | null = null;
   loading = true;
   submitting = false;
@@ -743,6 +834,10 @@ export class TicketDetailComponent implements OnInit {
     return this.isAdmin ? '/admin/tickets/inbox' : '/tickets/mine';
   }
 
+  get relatedTickets(): RelatedTicket[] {
+    return this.ticket?.relatedTickets ?? [];
+  }
+
   get availableCatalogTags(): TicketTag[] {
     const selected = new Set(
       this.selectedTags.map((tag) => (tag.name || '').toLowerCase()).filter(Boolean)
@@ -754,18 +849,22 @@ export class TicketDetailComponent implements OnInit {
     this.mode = this.route.snapshot.data['mode'] === 'admin' ? 'admin' : 'customer';
     this.refreshAttachmentsHint();
     this.loadAttachmentPolicy();
-    const idParam = this.route.snapshot.paramMap.get('id');
-    const id = idParam ? Number(idParam) : NaN;
-    if (!Number.isFinite(id) || id <= 0) {
-      this.loading = false;
-      this.ticket = null;
-      return;
-    }
-    this.ticketId = id;
-    this.load();
     if (this.mode === 'admin') {
       this.loadCatalogTags();
     }
+
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const idParam = params.get('id');
+      const id = idParam ? Number(idParam) : NaN;
+      if (!Number.isFinite(id) || id <= 0) {
+        this.loading = false;
+        this.ticket = null;
+        this.ticketId = null;
+        return;
+      }
+      this.ticketId = id;
+      this.load();
+    });
   }
 
   private loadAttachmentPolicy(): void {
@@ -957,6 +1056,62 @@ export class TicketDetailComponent implements OnInit {
           }
         });
       });
+  }
+
+  linkRelatedTickets(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canLinkRelated || this.lifecycleBusy) {
+      return;
+    }
+    const excludedIds = [
+      this.ticketId,
+      ...this.relatedTickets.map((t) => t.id)
+    ];
+    this.dialog
+      .open(TicketLinkDialogComponent, {
+        width: '780px',
+        maxWidth: '90vw',
+        data: {
+          targetTicketId: this.ticketId,
+          targetPublicNumber: this.ticket?.publicNumber,
+          excludedTicketIds: excludedIds
+        }
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (!result?.relatedTicketIds.length || !this.ticketId) {
+          return;
+        }
+        this.lifecycleBusy = true;
+        this.ticketService.linkAdminRelatedTickets(this.ticketId, result.relatedTicketIds).subscribe({
+          next: (detail) => {
+            this.applyDetail(detail);
+            this.lifecycleBusy = false;
+            this.snackBar.open(this.translate.instant('tickets.detail.linkedSuccess'), undefined, { duration: 3000 });
+          },
+          error: (error) => {
+            this.lifecycleBusy = false;
+            this.showError(this.apiError.resolve(error));
+          }
+        });
+      });
+  }
+
+  unlinkRelatedTicket(relatedId: number): void {
+    if (!this.isAdmin || !this.ticketId || !this.canLinkRelated || this.lifecycleBusy) {
+      return;
+    }
+    this.lifecycleBusy = true;
+    this.ticketService.unlinkAdminRelatedTicket(this.ticketId, relatedId).subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.lifecycleBusy = false;
+        this.snackBar.open(this.translate.instant('tickets.detail.unlinkedSuccess'), undefined, { duration: 3000 });
+      },
+      error: (error) => {
+        this.lifecycleBusy = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
   }
 
   softDeleteTicket(): void {
@@ -1260,6 +1415,7 @@ export class TicketDetailComponent implements OnInit {
     this.canRestore = !!detail.canRestore;
     this.canMerge = !!detail.canMerge;
     this.canSplit = !!detail.canSplit;
+    this.canLinkRelated = !!detail.canLinkRelated;
     this.reopenUntil = detail.reopenUntil ?? null;
     this.statusOptions = (detail.allowedNextStatuses ?? []).filter((status) => status !== detail.ticket?.status);
     this.selectedTags = [...(detail.ticket?.tags ?? [])];
