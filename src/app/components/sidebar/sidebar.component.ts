@@ -440,6 +440,7 @@ export class SidebarComponent implements OnInit {
     { icon: 'inbox', labelKey: 'menu.ticketInbox', route: '/admin/tickets/inbox' },
     { icon: 'category', labelKey: 'menu.ticketCategories', route: '/tickets/categories' },
     { icon: 'label', labelKey: 'menu.ticketTags', route: '/tickets/tags' },
+    { icon: 'quickreply', labelKey: 'menu.ticketReplyTemplates', route: '/tickets/reply-templates' },
     { icon: 'tune', labelKey: 'menu.ticketSettings', route: '/tickets/settings' },
     { icon: 'account_tree', labelKey: 'menu.ticketStatusWorkflow', route: '/tickets/status-workflow' }
   ];
@@ -460,6 +461,7 @@ export class SidebarComponent implements OnInit {
     return this.supportNavChildren.filter((child) =>
       child.route !== '/tickets/categories'
       && child.route !== '/tickets/tags'
+      && child.route !== '/tickets/reply-templates'
       && child.route !== '/tickets/settings'
       && child.route !== '/admin/tickets/inbox'
       && child.route !== '/tickets/status-workflow');

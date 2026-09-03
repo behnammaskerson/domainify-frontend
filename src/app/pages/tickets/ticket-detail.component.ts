@@ -15,7 +15,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { TicketPortalNavComponent } from '../../components/ticket-portal-nav/ticket-portal-nav.component';
-import { MarkdownEditorComponent } from '../../components/markdown-editor/markdown-editor.component';
+import { MarkdownEditorComponent, MentionCandidate } from '../../components/markdown-editor/markdown-editor.component';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { TicketMergeDialogComponent } from '../../components/ticket-merge-dialog/ticket-merge-dialog.component';
 import { TicketSplitDialogComponent } from '../../components/ticket-split-dialog/ticket-split-dialog.component';
@@ -34,8 +34,11 @@ import {
   TicketService,
   TicketStatus,
   TicketTag,
+  TicketAssigneeOption,
+  TicketReplyTemplate,
   RelatedTicket
 } from '../../services/ticket.service';
+import { renderReplyTemplate, toMentionHandle } from '../../utils/reply-template.util';
 import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
 
 type TicketDetailMode = 'customer' | 'admin';
@@ -495,7 +498,9 @@ type TicketDetailMode = 'customer' | 'admin';
                           [maxLength]="10000"
                           labelKey="tickets.detail.editMessageBody"
                           placeholderKey="tickets.markdown.replyPlaceholder"
-                          [invalid]="editMessageForm.controls.body.touched && editMessageForm.controls.body.invalid">
+                          [invalid]="editMessageForm.controls.body.touched && editMessageForm.controls.body.invalid"
+                          [mentionEnabled]="mentionEnabledForEdit(message)"
+                          [mentionCandidates]="mentionCandidates">
                         </app-markdown-editor>
                         <div class="edit-actions">
                           <button mat-button type="button" (click)="cancelEditMessage()" [disabled]="messageActionBusy !== null">
@@ -557,6 +562,19 @@ type TicketDetailMode = 'customer' | 'admin';
           @if (canReply) {
             <form class="reply-card panel-surface" [formGroup]="replyForm" (ngSubmit)="submitReply()">
               <h2>{{ 'tickets.detail.replyTitle' | translate }}</h2>
+
+              @if (isAdmin && replyTemplates.length) {
+                <mat-form-field appearance="outline" class="template-picker">
+                  <mat-label>{{ 'tickets.detail.replyTemplate' | translate }}</mat-label>
+                  <mat-select [(value)]="selectedTemplateId" (selectionChange)="applyReplyTemplate($event.value)">
+                    <mat-option [value]="null">{{ 'tickets.detail.replyTemplateNone' | translate }}</mat-option>
+                    @for (template of replyTemplates; track template.id) {
+                      <mat-option [value]="template.id">{{ template.title }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              }
+
               <label class="reply-label">{{ 'tickets.detail.replyBody' | translate }}</label>
               <app-markdown-editor
                 formControlName="body"
@@ -564,7 +582,9 @@ type TicketDetailMode = 'customer' | 'admin';
                 [maxLength]="10000"
                 labelKey="tickets.detail.replyBody"
                 placeholderKey="tickets.markdown.replyPlaceholder"
-                [invalid]="replyForm.controls.body.touched && replyForm.controls.body.invalid">
+                [invalid]="replyForm.controls.body.touched && replyForm.controls.body.invalid"
+                [mentionEnabled]="mentionEnabledForReply"
+                [mentionCandidates]="mentionCandidates">
               </app-markdown-editor>
               @if (replyForm.controls.body.touched && replyForm.controls.body.hasError('required')) {
                 <p class="field-error">{{ 'tickets.detail.replyRequired' | translate }}</p>
@@ -575,7 +595,7 @@ type TicketDetailMode = 'customer' | 'admin';
                   <mat-checkbox formControlName="internalNote">
                     {{ 'tickets.detail.internalNote' | translate }}
                   </mat-checkbox>
-                  <span class="internal-note-hint">{{ 'tickets.detail.internalNoteHint' | translate }}</span>
+                  <span class="internal-note-hint">{{ 'tickets.detail.internalNoteMentionHint' | translate }}</span>
                 </label>
               }
 
@@ -930,6 +950,10 @@ type TicketDetailMode = 'customer' | 'admin';
     .reply-label {
       display: block; margin: 12px 0 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
     }
+    .template-picker {
+      width: 100%;
+      margin-bottom: 4px;
+    }
     .field-error {
       margin: 6px 0 0; font-size: 0.75rem; color: var(--mat-form-field-error-text-color, #f44336);
     }
@@ -1033,6 +1057,9 @@ export class TicketDetailComponent implements OnInit {
   files: File[] = [];
   statusOptions: TicketStatus[] = [];
   catalogTags: TicketTag[] = [];
+  replyTemplates: TicketReplyTemplate[] = [];
+  assignees: TicketAssigneeOption[] = [];
+  selectedTemplateId: number | null = null;
   selectedTags: TicketTag[] = [];
   freeformTag = '';
   editingMessageId: number | null = null;
@@ -1050,6 +1077,23 @@ export class TicketDetailComponent implements OnInit {
 
   get isAdmin(): boolean {
     return this.mode === 'admin';
+  }
+
+  get mentionCandidates(): MentionCandidate[] {
+    return this.assignees.map((assignee) => ({
+      id: assignee.id,
+      name: assignee.name,
+      email: assignee.email,
+      handle: toMentionHandle(assignee.name)
+    }));
+  }
+
+  get mentionEnabledForReply(): boolean {
+    return this.isAdmin && this.replyForm.controls.internalNote.value;
+  }
+
+  mentionEnabledForEdit(message: TicketMessage): boolean {
+    return this.isAdmin && !!message.internalNote;
   }
 
   get backLink(): string {
@@ -1073,6 +1117,8 @@ export class TicketDetailComponent implements OnInit {
     this.loadAttachmentPolicy();
     if (this.mode === 'admin') {
       this.loadCatalogTags();
+      this.loadReplyTemplates();
+      this.loadAssignees();
     }
 
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
@@ -1500,6 +1546,38 @@ export class TicketDetailComponent implements OnInit {
     });
   }
 
+  private loadReplyTemplates(): void {
+    this.ticketService.listActiveReplyTemplates().subscribe({
+      next: (templates) => { this.replyTemplates = templates ?? []; },
+      error: () => { this.replyTemplates = []; }
+    });
+  }
+
+  private loadAssignees(): void {
+    this.ticketService.listAdminAssignees().subscribe({
+      next: (assignees) => { this.assignees = assignees ?? []; },
+      error: () => { this.assignees = []; }
+    });
+  }
+
+  applyReplyTemplate(templateId: number | null): void {
+    if (!templateId || !this.ticket) {
+      return;
+    }
+    const template = this.replyTemplates.find((item) => item.id === templateId);
+    if (!template) {
+      return;
+    }
+    const rendered = renderReplyTemplate(template.body, {
+      name: this.ticket.requesterName || '',
+      ticketId: this.ticket.publicNumber || '',
+      domain: ''
+    });
+    this.replyForm.controls.body.setValue(rendered);
+    this.replyForm.controls.body.markAsDirty();
+    this.replyForm.controls.body.markAsTouched();
+  }
+
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const selected = Array.from(input.files ?? []);
@@ -1616,6 +1694,7 @@ export class TicketDetailComponent implements OnInit {
       next: (detail) => {
         this.applyDetail(detail);
         this.replyForm.reset({ body: '', internalNote: false });
+        this.selectedTemplateId = null;
         this.files = [];
         this.submitting = false;
         this.snackBar.open(this.translate.instant('tickets.detail.replySent'), undefined, { duration: 3000 });

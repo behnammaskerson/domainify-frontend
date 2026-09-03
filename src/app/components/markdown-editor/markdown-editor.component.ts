@@ -20,6 +20,13 @@ import { MarkdownPipe } from '../../pipes/markdown.pipe';
 
 type EditorMode = 'write' | 'preview';
 
+export interface MentionCandidate {
+  id: number;
+  name: string;
+  email: string;
+  handle: string;
+}
+
 @Component({
   selector: 'app-markdown-editor',
   standalone: true,
@@ -93,19 +100,34 @@ type EditorMode = 'write' | 'preview';
       </div>
 
       @if (mode === 'write') {
-        <textarea #area
-                  class="md-textarea"
-                  [attr.rows]="rows"
-                  [attr.maxlength]="maxLength"
-                  [attr.aria-label]="labelKey ? (labelKey | translate) : ('tickets.markdown.editor' | translate)"
-                  [placeholder]="placeholderKey ? (placeholderKey | translate) : ''"
-                  [disabled]="disabled"
-                  [value]="value"
-                  (input)="onInput($event)"
-                  (select)="captureSelection()"
-                  (keyup)="captureSelection()"
-                  (mouseup)="captureSelection()"
-                  (blur)="onBlur()"></textarea>
+        <div class="md-write-wrap">
+          <textarea #area
+                    class="md-textarea"
+                    [attr.rows]="rows"
+                    [attr.maxlength]="maxLength"
+                    [attr.aria-label]="labelKey ? (labelKey | translate) : ('tickets.markdown.editor' | translate)"
+                    [placeholder]="placeholderKey ? (placeholderKey | translate) : ''"
+                    [disabled]="disabled"
+                    [value]="value"
+                    (input)="onInput($event)"
+                    (keydown)="onKeyDown($event)"
+                    (keyup)="onKeyUp($event)"
+                    (select)="captureSelection()"
+                    (mouseup)="captureSelection()"
+                    (blur)="onBlur()"></textarea>
+          @if (mentionOpen && filteredMentionCandidates.length) {
+            <ul class="mention-menu" role="listbox">
+              @for (candidate of filteredMentionCandidates; track candidate.id; let i = $index) {
+                <li role="option"
+                    [class.active]="i === mentionActiveIndex"
+                    (mousedown)="selectMention($event, candidate)">
+                  <strong>{{ candidate.name }}</strong>
+                  <span class="mention-meta" dir="ltr">{{ '@' + candidate.handle }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </div>
       } @else {
         <div class="md-preview markdown-body" [attr.aria-label]="'tickets.markdown.preview' | translate">
           @if (value.trim()) {
@@ -117,7 +139,9 @@ type EditorMode = 'write' | 'preview';
       }
 
       <div class="md-footer">
-        <span class="md-hint">{{ 'tickets.markdown.hint' | translate }}</span>
+        <span class="md-hint">
+          {{ (mentionEnabled ? 'tickets.markdown.mentionHint' : 'tickets.markdown.hint') | translate }}
+        </span>
         @if (maxLength) {
           <span class="md-count" dir="ltr">{{ value.length }} / {{ maxLength }}</span>
         }
@@ -157,6 +181,7 @@ type EditorMode = 'write' | 'preview';
       gap: 0;
     }
     .md-tools button mat-icon { font-size: 20px; width: 20px; height: 20px; }
+    .md-write-wrap { position: relative; }
     .md-textarea, .md-preview {
       min-height: 140px;
       padding: 12px 14px;
@@ -171,6 +196,37 @@ type EditorMode = 'write' | 'preview';
       background: transparent;
       color: inherit;
       box-sizing: border-box;
+    }
+    .mention-menu {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 8px;
+      margin: 0;
+      padding: 4px 0;
+      list-style: none;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-primary, #fff);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      max-height: 180px;
+      overflow: auto;
+      z-index: 2;
+    }
+    .mention-menu li {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .mention-menu li.active,
+    .mention-menu li:hover {
+      background: var(--bg-secondary);
+    }
+    .mention-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
     }
     .md-preview { overflow: auto; }
     .md-empty { margin: 0; color: var(--text-muted); font-size: 0.9rem; }
@@ -197,15 +253,35 @@ export class MarkdownEditorComponent implements ControlValueAccessor {
   @Input() labelKey = '';
   @Input() placeholderKey = '';
   @Input() invalid = false;
+  @Input() mentionEnabled = false;
+  @Input() mentionCandidates: MentionCandidate[] = [];
 
   value = '';
   disabled = false;
   mode: EditorMode = 'write';
+  mentionOpen = false;
+  mentionQuery = '';
+  mentionStart = -1;
+  mentionActiveIndex = 0;
 
   private selectionStart = 0;
   private selectionEnd = 0;
   private onChange: (value: string) => void = () => undefined;
   private onTouchedFn: () => void = () => undefined;
+
+  get filteredMentionCandidates(): MentionCandidate[] {
+    const query = this.mentionQuery.toLowerCase();
+    return this.mentionCandidates
+      .filter((candidate) => {
+        if (!query) {
+          return true;
+        }
+        return candidate.name.toLowerCase().includes(query)
+          || candidate.email.toLowerCase().includes(query)
+          || candidate.handle.includes(query);
+      })
+      .slice(0, 8);
+  }
 
   writeValue(value: string | null): void {
     this.value = value ?? '';
@@ -228,11 +304,45 @@ export class MarkdownEditorComponent implements ControlValueAccessor {
     this.value = target.value ?? '';
     this.captureSelectionFrom(target);
     this.onChange(this.value);
+    this.updateMentionState();
+  }
+
+  onKeyDown(event: KeyboardEvent): void {
+    if (!this.mentionOpen || !this.mentionEnabled) {
+      return;
+    }
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      const count = this.filteredMentionCandidates.length;
+      if (count) {
+        this.mentionActiveIndex = (this.mentionActiveIndex + 1) % count;
+      }
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      const count = this.filteredMentionCandidates.length;
+      if (count) {
+        this.mentionActiveIndex = (this.mentionActiveIndex - 1 + count) % count;
+      }
+    } else if (event.key === 'Enter' || event.key === 'Tab') {
+      const candidate = this.filteredMentionCandidates[this.mentionActiveIndex];
+      if (candidate) {
+        event.preventDefault();
+        this.insertMention(candidate);
+      }
+    } else if (event.key === 'Escape') {
+      this.closeMentionMenu();
+    }
+  }
+
+  onKeyUp(_event?: KeyboardEvent): void {
+    this.captureSelection();
+    this.updateMentionState();
   }
 
   onBlur(): void {
     this.captureSelection();
     this.onTouchedFn();
+    setTimeout(() => this.closeMentionMenu(), 150);
   }
 
   captureSelection(): void {
@@ -242,10 +352,14 @@ export class MarkdownEditorComponent implements ControlValueAccessor {
     }
   }
 
-  /** Keep textarea focus/selection when clicking toolbar buttons. */
   preserveSelection(event: MouseEvent): void {
     event.preventDefault();
     this.captureSelection();
+  }
+
+  selectMention(event: MouseEvent, candidate: MentionCandidate): void {
+    event.preventDefault();
+    this.insertMention(candidate);
   }
 
   applyWrap(before: string, after: string, placeholderKey: string): void {
@@ -289,6 +403,59 @@ export class MarkdownEditorComponent implements ControlValueAccessor {
     const next = this.value.slice(0, lineStart) + prefix + this.value.slice(lineStart);
     const cursor = start + prefix.length;
     this.commit(next, cursor, cursor);
+  }
+
+  private insertMention(candidate: MentionCandidate): void {
+    const area = this.areaRef?.nativeElement;
+    if (!area || this.mentionStart < 0) {
+      return;
+    }
+    const cursor = area.selectionStart ?? this.selectionEnd;
+    const mentionText = `@${candidate.email}`;
+    const next = this.value.slice(0, this.mentionStart) + mentionText + ' ' + this.value.slice(cursor);
+    const cursorPos = this.mentionStart + mentionText.length + 1;
+    this.closeMentionMenu();
+    this.commit(next, cursorPos, cursorPos);
+  }
+
+  private updateMentionState(): void {
+    if (!this.mentionEnabled || this.disabled || this.mode === 'preview') {
+      this.closeMentionMenu();
+      return;
+    }
+    const area = this.areaRef?.nativeElement;
+    if (!area) {
+      this.closeMentionMenu();
+      return;
+    }
+    const pos = area.selectionStart ?? 0;
+    const textBefore = this.value.slice(0, pos);
+    const atIndex = textBefore.lastIndexOf('@');
+    if (atIndex < 0) {
+      this.closeMentionMenu();
+      return;
+    }
+    const charBefore = atIndex > 0 ? textBefore.charAt(atIndex - 1) : ' ';
+    if (charBefore && !/\s|[([{]/.test(charBefore)) {
+      this.closeMentionMenu();
+      return;
+    }
+    const query = textBefore.slice(atIndex + 1);
+    if (/\s/.test(query)) {
+      this.closeMentionMenu();
+      return;
+    }
+    this.mentionStart = atIndex;
+    this.mentionQuery = query;
+    this.mentionOpen = true;
+    this.mentionActiveIndex = 0;
+  }
+
+  private closeMentionMenu(): void {
+    this.mentionOpen = false;
+    this.mentionQuery = '';
+    this.mentionStart = -1;
+    this.mentionActiveIndex = 0;
   }
 
   private captureSelectionFrom(area: HTMLTextAreaElement): void {

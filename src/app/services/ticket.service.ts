@@ -78,6 +78,21 @@ export interface TicketTag {
   name: string;
 }
 
+export interface TicketReplyTemplate {
+  id: number;
+  title: string;
+  body: string;
+  active: boolean;
+  sortOrder: number;
+}
+
+export interface TicketReplyTemplateRequest {
+  title: string;
+  body: string;
+  active?: boolean;
+  sortOrder?: number;
+}
+
 export interface TicketAssigneeOption {
   id: number;
   name: string;
@@ -473,6 +488,26 @@ export class TicketService {
 
   deleteAdminTag(id: number): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/admin/ticket-tags/${id}`);
+  }
+
+  listAdminReplyTemplates(): Observable<TicketReplyTemplate[]> {
+    return this.http.get<TicketReplyTemplate[]>(`${this.API_URL}/admin/ticket-reply-templates`);
+  }
+
+  listActiveReplyTemplates(): Observable<TicketReplyTemplate[]> {
+    return this.http.get<TicketReplyTemplate[]>(`${this.API_URL}/admin/ticket-reply-templates/active`);
+  }
+
+  createAdminReplyTemplate(payload: TicketReplyTemplateRequest): Observable<TicketReplyTemplate> {
+    return this.http.post<TicketReplyTemplate>(`${this.API_URL}/admin/ticket-reply-templates`, payload);
+  }
+
+  updateAdminReplyTemplate(id: number, payload: TicketReplyTemplateRequest): Observable<TicketReplyTemplate> {
+    return this.http.put<TicketReplyTemplate>(`${this.API_URL}/admin/ticket-reply-templates/${id}`, payload);
+  }
+
+  deleteAdminReplyTemplate(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/admin/ticket-reply-templates/${id}`);
   }
 
   getStatusWorkflow(): Observable<TicketStatusWorkflow> {
