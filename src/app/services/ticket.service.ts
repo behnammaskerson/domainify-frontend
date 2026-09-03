@@ -94,6 +94,13 @@ export interface TicketMessage {
   staff?: boolean;
   initial?: boolean;
   internalNote?: boolean;
+  edited?: boolean;
+  deleted?: boolean;
+  canEdit?: boolean;
+  canDelete?: boolean;
+  hasRevisions?: boolean;
+  editedAt?: string;
+  deletedAt?: string;
   createdAt?: string;
   attachments?: TicketAttachmentMeta[];
 }
@@ -207,6 +214,17 @@ export interface ReplyTicketPayload {
   body: string;
   internalNote?: boolean;
   attachments?: File[];
+}
+
+export interface TicketMessageRevision {
+  id: number;
+  actorId?: number;
+  actorName?: string;
+  actorEmail?: string;
+  action: 'EDIT' | 'DELETE';
+  previousBody?: string;
+  newBody?: string | null;
+  createdAt?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -325,6 +343,52 @@ export class TicketService {
       formData.append('attachments', file, file.name);
     }
     return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/replies`, formData);
+  }
+
+  editMessage(ticketId: number, messageId: number, body: string): Observable<TicketDetail> {
+    return this.http.patch<TicketDetail>(
+      `${this.API_URL}/tickets/mine/${ticketId}/messages/${messageId}`,
+      { body }
+    );
+  }
+
+  editMessageAsAdmin(ticketId: number, messageId: number, body: string): Observable<TicketDetail> {
+    return this.http.patch<TicketDetail>(
+      `${this.API_URL}/admin/tickets/${ticketId}/messages/${messageId}`,
+      { body }
+    );
+  }
+
+  deleteMessage(ticketId: number, messageId: number): Observable<TicketDetail> {
+    return this.http.delete<TicketDetail>(
+      `${this.API_URL}/tickets/mine/${ticketId}/messages/${messageId}`
+    );
+  }
+
+  deleteMessageAsAdmin(ticketId: number, messageId: number): Observable<TicketDetail> {
+    return this.http.delete<TicketDetail>(
+      `${this.API_URL}/admin/tickets/${ticketId}/messages/${messageId}`
+    );
+  }
+
+  listMessageRevisions(ticketId: number, messageId: number): Observable<TicketMessageRevision[]> {
+    return this.http.get<TicketMessageRevision[]>(
+      `${this.API_URL}/admin/tickets/${ticketId}/messages/${messageId}/revisions`
+    );
+  }
+
+  listDescriptionRevisions(ticketId: number): Observable<TicketMessageRevision[]> {
+    return this.http.get<TicketMessageRevision[]>(
+      `${this.API_URL}/admin/tickets/${ticketId}/description/revisions`
+    );
+  }
+
+  editDescription(id: number, body: string): Observable<TicketDetail> {
+    return this.http.patch<TicketDetail>(`${this.API_URL}/tickets/mine/${id}/description`, { body });
+  }
+
+  editDescriptionAsAdmin(id: number, body: string): Observable<TicketDetail> {
+    return this.http.patch<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/description`, { body });
   }
 
   updateAdminTicketStatus(id: number, status: TicketStatus): Observable<TicketDetail> {

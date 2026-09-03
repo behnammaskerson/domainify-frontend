@@ -208,7 +208,7 @@ export class TicketSplitDialogComponent {
   readonly data = inject<TicketSplitDialogData>(MAT_DIALOG_DATA);
 
   readonly dateTimeFormat = SMS_DATETIME_FORMAT;
-  readonly replyMessages = (this.data.messages ?? []).filter((m) => !m.initial && m.id != null);
+  readonly replyMessages = (this.data.messages ?? []).filter((m) => !m.initial && m.id != null && !m.deleted);
   readonly selectedIds = new Set<number>();
 
   readonly form = this.fb.nonNullable.group({

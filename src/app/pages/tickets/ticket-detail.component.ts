@@ -20,6 +20,7 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-
 import { TicketMergeDialogComponent } from '../../components/ticket-merge-dialog/ticket-merge-dialog.component';
 import { TicketSplitDialogComponent } from '../../components/ticket-split-dialog/ticket-split-dialog.component';
 import { TicketLinkDialogComponent } from '../../components/ticket-link-dialog/ticket-link-dialog.component';
+import { TicketMessageRevisionsDialogComponent } from '../../components/ticket-message-revisions-dialog/ticket-message-revisions-dialog.component';
 import { DatetimeFilterFieldComponent } from '../../components/datetime-filter-field/datetime-filter-field.component';
 import { TicketAttachmentViewerDialogComponent } from '../../components/ticket-attachment-viewer-dialog/ticket-attachment-viewer-dialog.component';
 import { LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
@@ -425,6 +426,7 @@ type TicketDetailMode = 'customer' | 'admin';
                     [class.mine]="message.mine"
                     [class.staff]="message.staff"
                     [class.internal]="message.internalNote"
+                    [class.deleted]="message.deleted"
                     [class.initial]="message.initial"
                     [class.last]="last">
                   <div class="timeline-rail" aria-hidden="true">
@@ -451,11 +453,66 @@ type TicketDetailMode = 'customer' | 'admin';
                         @if (message.mine) {
                           <span class="you-tag">{{ 'tickets.detail.you' | translate }}</span>
                         }
+                        @if (message.edited && !message.deleted) {
+                          <span class="edited-tag">{{ 'tickets.detail.edited' | translate }}</span>
+                        }
+                        @if (message.deleted) {
+                          <span class="deleted-tag">{{ 'tickets.detail.deletedBadge' | translate }}</span>
+                        }
                       </div>
-                      <time dir="ltr">{{ message.createdAt | localeDate:dateTimeFormat }}</time>
+                      <div class="message-meta-actions">
+                        @if (isAdmin && message.hasRevisions && (message.id || message.initial)) {
+                          <button mat-icon-button type="button"
+                                  (click)="viewMessageRevisions(message)"
+                                  [matTooltip]="'tickets.detail.viewHistory' | translate">
+                            <mat-icon>history</mat-icon>
+                          </button>
+                        }
+                        @if (message.canEdit && (message.id || message.initial) && !(editingMessageId === message.id) && !(editingInitial && message.initial)) {
+                          <button mat-icon-button type="button"
+                                  (click)="startEditMessage(message)"
+                                  [disabled]="messageActionBusy === message.id"
+                                  [matTooltip]="'tickets.detail.editMessage' | translate">
+                            <mat-icon>edit</mat-icon>
+                          </button>
+                        }
+                        @if (message.canDelete && message.id && editingMessageId !== message.id && !editingInitial) {
+                          <button mat-icon-button type="button"
+                                  (click)="confirmDeleteMessage(message)"
+                                  [disabled]="messageActionBusy === message.id"
+                                  [matTooltip]="'tickets.detail.deleteMessage' | translate">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        }
+                        <time dir="ltr">{{ message.createdAt | localeDate:dateTimeFormat }}</time>
+                      </div>
                     </header>
-                    <div class="message-body markdown-body" [innerHTML]="message.body | markdown"></div>
-                    @if (message.attachments?.length) {
+                    @if ((editingMessageId != null && editingMessageId === message.id) || (editingInitial && message.initial)) {
+                      <form class="edit-form" [formGroup]="editMessageForm" (ngSubmit)="saveEditedMessage(message)">
+                        <app-markdown-editor
+                          formControlName="body"
+                          [rows]="5"
+                          [maxLength]="10000"
+                          labelKey="tickets.detail.editMessageBody"
+                          placeholderKey="tickets.markdown.replyPlaceholder"
+                          [invalid]="editMessageForm.controls.body.touched && editMessageForm.controls.body.invalid">
+                        </app-markdown-editor>
+                        <div class="edit-actions">
+                          <button mat-button type="button" (click)="cancelEditMessage()" [disabled]="messageActionBusy !== null">
+                            {{ 'common.cancel' | translate }}
+                          </button>
+                          <button mat-flat-button color="primary" type="submit"
+                                  [disabled]="editMessageForm.invalid || messageActionBusy !== null">
+                            {{ 'tickets.detail.saveEdit' | translate }}
+                          </button>
+                        </div>
+                      </form>
+                    } @else if (message.deleted) {
+                      <p class="deleted-message">{{ 'tickets.detail.messageDeleted' | translate }}</p>
+                    } @else {
+                      <div class="message-body markdown-body" [innerHTML]="message.body | markdown"></div>
+                    }
+                    @if (!message.deleted && message.attachments?.length) {
                       <ul class="attachment-list">
                         @for (file of message.attachments; track file.id) {
                           <li class="attachment-row">
@@ -846,6 +903,29 @@ type TicketDetailMode = 'customer' | 'admin';
     .role-tag.staff { color: #0f766e; border-color: color-mix(in srgb, #0f766e 35%, var(--border-color)); }
     .role-tag.customer { color: #2563eb; border-color: color-mix(in srgb, #2563eb 35%, var(--border-color)); }
     .you-tag { color: var(--primary); border-color: color-mix(in srgb, var(--primary) 35%, var(--border-color)); }
+    .edited-tag, .deleted-tag {
+      font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+      border: 1px solid var(--border-color); background: var(--bg-primary, #fff);
+    }
+    .edited-tag { color: #7c3aed; border-color: color-mix(in srgb, #7c3aed 35%, var(--border-color)); }
+    .deleted-tag { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 35%, var(--border-color)); }
+    .message-meta-actions {
+      display: flex; align-items: center; gap: 2px; flex-shrink: 0;
+    }
+    .message-meta-actions time { color: var(--text-muted); white-space: nowrap; margin-inline-start: 4px; }
+    .timeline-item.deleted .message {
+      opacity: 0.85;
+      border-style: dashed;
+    }
+    .deleted-message {
+      margin: 0;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    .edit-form { margin-top: 4px; }
+    .edit-actions {
+      display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;
+    }
     .message-body { word-break: break-word; line-height: 1.5; }
     .reply-label {
       display: block; margin: 12px 0 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
@@ -955,10 +1035,17 @@ export class TicketDetailComponent implements OnInit {
   catalogTags: TicketTag[] = [];
   selectedTags: TicketTag[] = [];
   freeformTag = '';
+  editingMessageId: number | null = null;
+  editingInitial = false;
+  messageActionBusy: number | null = null;
 
   readonly replyForm = this.fb.nonNullable.group({
     body: ['', [Validators.required, Validators.maxLength(10000)]],
     internalNote: [false]
+  });
+
+  readonly editMessageForm = this.fb.nonNullable.group({
+    body: ['', [Validators.required, Validators.maxLength(10000)]]
   });
 
   get isAdmin(): boolean {
@@ -1538,6 +1625,143 @@ export class TicketDetailComponent implements OnInit {
         this.submitting = false;
         this.showError(this.apiError.resolve(error));
       }
+    });
+  }
+
+  startEditMessage(message: TicketMessage): void {
+    if (!message.canEdit) {
+      return;
+    }
+    if (message.initial) {
+      this.editingInitial = true;
+      this.editingMessageId = null;
+      this.editMessageForm.reset({ body: message.body || '' });
+      return;
+    }
+    if (!message.id) {
+      return;
+    }
+    this.editingInitial = false;
+    this.editingMessageId = message.id;
+    this.editMessageForm.reset({ body: message.body || '' });
+  }
+
+  cancelEditMessage(): void {
+    this.editingMessageId = null;
+    this.editingInitial = false;
+    this.editMessageForm.reset({ body: '' });
+  }
+
+  saveEditedMessage(message: TicketMessage): void {
+    if (!this.ticketId || this.editMessageForm.invalid || this.messageActionBusy) {
+      this.editMessageForm.markAllAsTouched();
+      return;
+    }
+    const body = this.editMessageForm.controls.body.value.trim();
+
+    if (message.initial) {
+      this.messageActionBusy = -1;
+      const request$ = this.isAdmin
+        ? this.ticketService.editDescriptionAsAdmin(this.ticketId, body)
+        : this.ticketService.editDescription(this.ticketId, body);
+      request$.subscribe({
+        next: (detail) => {
+          this.applyDetail(detail);
+          this.cancelEditMessage();
+          this.messageActionBusy = null;
+          this.snackBar.open(this.translate.instant('tickets.detail.editSaved'), undefined, { duration: 3000 });
+        },
+        error: (error) => {
+          this.messageActionBusy = null;
+          this.showError(this.apiError.resolve(error));
+        }
+      });
+      return;
+    }
+
+    if (!message.id) {
+      return;
+    }
+    this.messageActionBusy = message.id;
+    const request$ = this.isAdmin
+      ? this.ticketService.editMessageAsAdmin(this.ticketId, message.id, body)
+      : this.ticketService.editMessage(this.ticketId, message.id, body);
+
+    request$.subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.cancelEditMessage();
+        this.messageActionBusy = null;
+        this.snackBar.open(this.translate.instant('tickets.detail.editSaved'), undefined, { duration: 3000 });
+      },
+      error: (error) => {
+        this.messageActionBusy = null;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  confirmDeleteMessage(message: TicketMessage): void {
+    if (!this.ticketId || !message.id || !message.canDelete || this.messageActionBusy) {
+      return;
+    }
+    this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        titleKey: 'tickets.detail.deleteMessageTitle',
+        messageKey: 'tickets.detail.deleteMessageConfirm',
+        confirmKey: 'tickets.detail.deleteMessage',
+        confirmColor: 'warn'
+      }
+    }).afterClosed().subscribe((confirmed) => {
+      if (!confirmed || !this.ticketId || !message.id) {
+        return;
+      }
+      this.messageActionBusy = message.id;
+      const request$ = this.isAdmin
+        ? this.ticketService.deleteMessageAsAdmin(this.ticketId, message.id)
+        : this.ticketService.deleteMessage(this.ticketId, message.id);
+
+      request$.subscribe({
+        next: (detail) => {
+          this.applyDetail(detail);
+          if (this.editingMessageId === message.id) {
+            this.cancelEditMessage();
+          }
+          this.messageActionBusy = null;
+          this.snackBar.open(this.translate.instant('tickets.detail.deleteSaved'), undefined, { duration: 3000 });
+        },
+        error: (error) => {
+          this.messageActionBusy = null;
+          this.showError(this.apiError.resolve(error));
+        }
+      });
+    });
+  }
+
+  viewMessageRevisions(message: TicketMessage): void {
+    if (!this.isAdmin || !this.ticketId || !message.hasRevisions) {
+      return;
+    }
+    const request$ = message.initial
+      ? this.ticketService.listDescriptionRevisions(this.ticketId)
+      : message.id
+        ? this.ticketService.listMessageRevisions(this.ticketId, message.id)
+        : null;
+    if (!request$) {
+      return;
+    }
+    request$.subscribe({
+      next: (revisions) => {
+        this.dialog.open(TicketMessageRevisionsDialogComponent, {
+          width: '720px',
+          maxWidth: '95vw',
+          data: {
+            authorName: message.authorName || message.authorEmail,
+            revisions
+          }
+        });
+      },
+      error: (error) => this.showError(this.apiError.resolve(error))
     });
   }
 

@@ -18,6 +18,7 @@ import { AuthService, User } from '../../services/auth.service';
 import { ApiErrorService } from '../../services/api-error.service';
 import { PasswordPolicyService, PasswordPolicy } from '../../services/password-policy.service';
 import { SmsConfigService, SmsCreditResult, SmsLinesResult, SmsProviderResult } from '../../services/sms-config.service';
+import { EmailConfigService } from '../../services/email-config.service';
 import {
   buildPasswordValidators,
   buildPasswordPolicyChecks,
@@ -461,6 +462,115 @@ interface SettingsNavItem {
             }
           </section>
 
+          <section class="settings-group settings-anchor" id="email-config">
+            <h2 class="settings-group-title">{{ 'settings.emailConfig.title' | translate }}</h2>
+            <p class="settings-group-desc">{{ 'settings.emailConfig.subtitle' | translate }}</p>
+
+            @if (emailConfigLoading) {
+              <p class="settings-group-desc">{{ 'settings.emailConfig.loading' | translate }}</p>
+            } @else {
+              <form [formGroup]="emailConfigForm" class="policy-form" (ngSubmit)="saveEmailConfig()">
+                <div class="email-config-toggles">
+                  <mat-slide-toggle formControlName="enabled" color="primary">
+                    {{ 'settings.emailConfig.enabled' | translate }}
+                  </mat-slide-toggle>
+                  <mat-slide-toggle formControlName="useTls" color="primary">
+                    {{ 'settings.emailConfig.useTls' | translate }}
+                  </mat-slide-toggle>
+                </div>
+
+                <div class="sms-config-fields">
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-icon matPrefix>dns</mat-icon>
+                    <mat-label>{{ 'settings.emailConfig.host' | translate }}</mat-label>
+                    <input matInput formControlName="host" type="text" dir="ltr" autocomplete="off">
+                    @if (emailConfigForm.controls.host.hasError('required') && emailConfigForm.controls.host.touched) {
+                      <mat-error>{{ 'auth.validation.required' | translate }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-icon matPrefix>settings_ethernet</mat-icon>
+                    <mat-label>{{ 'settings.emailConfig.port' | translate }}</mat-label>
+                    <input matInput formControlName="port" type="number" min="1" max="65535" dir="ltr">
+                    @if (emailConfigForm.controls.port.hasError('required') && emailConfigForm.controls.port.touched) {
+                      <mat-error>{{ 'auth.validation.required' | translate }}</mat-error>
+                    } @else if (emailConfigForm.controls.port.hasError('min') || emailConfigForm.controls.port.hasError('max')) {
+                      <mat-error>{{ 'settings.emailConfig.portInvalid' | translate }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-icon matPrefix>person</mat-icon>
+                    <mat-label>{{ 'settings.emailConfig.username' | translate }}</mat-label>
+                    <input matInput formControlName="username" type="text" dir="ltr" autocomplete="off">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-icon matPrefix>vpn_key</mat-icon>
+                    <mat-label>{{ 'settings.emailConfig.password' | translate }}</mat-label>
+                    <input matInput formControlName="password" type="password" dir="ltr" autocomplete="new-password">
+                    @if (emailPasswordConfigured) {
+                      <mat-hint>{{ 'settings.emailConfig.passwordHint' | translate }}</mat-hint>
+                    }
+                    @if (emailConfigForm.controls.password.hasError('required') && emailConfigForm.controls.password.touched) {
+                      <mat-error>{{ 'auth.validation.required' | translate }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-icon matPrefix>alternate_email</mat-icon>
+                    <mat-label>{{ 'settings.emailConfig.fromEmail' | translate }}</mat-label>
+                    <input matInput formControlName="fromEmail" type="email" dir="ltr" autocomplete="off">
+                    @if (emailConfigForm.controls.fromEmail.hasError('required') && emailConfigForm.controls.fromEmail.touched) {
+                      <mat-error>{{ 'auth.validation.required' | translate }}</mat-error>
+                    } @else if (emailConfigForm.controls.fromEmail.hasError('email') && emailConfigForm.controls.fromEmail.touched) {
+                      <mat-error>{{ 'settings.emailConfig.fromEmailInvalid' | translate }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-icon matPrefix>badge</mat-icon>
+                    <mat-label>{{ 'settings.emailConfig.fromName' | translate }}</mat-label>
+                    <input matInput formControlName="fromName" type="text" autocomplete="off">
+                  </mat-form-field>
+                </div>
+
+                <div class="form-actions">
+                  <button mat-flat-button color="primary" type="submit"
+                          [disabled]="emailConfigForm.invalid || emailConfigSaving">
+                    {{ 'settings.emailConfig.save' | translate }}
+                  </button>
+                </div>
+              </form>
+
+              @if (emailConfigForm.controls.enabled.value) {
+                <div class="email-test-card">
+                  <h3>{{ 'settings.emailConfig.testTitle' | translate }}</h3>
+                  <p class="settings-group-desc">{{ 'settings.emailConfig.testHint' | translate }}</p>
+                  <div class="email-test-row">
+                    <mat-form-field appearance="outline" class="full-width sms-control-field">
+                      <mat-icon matPrefix>mail</mat-icon>
+                      <mat-label>{{ 'settings.emailConfig.testTo' | translate }}</mat-label>
+                      <input matInput [value]="emailTestTo"
+                             (input)="emailTestTo = $any($event.target).value"
+                             type="email" dir="ltr" autocomplete="off">
+                    </mat-form-field>
+                    <button mat-stroked-button type="button"
+                            [disabled]="emailTestSending || !emailTestTo"
+                            (click)="sendTestEmail()">
+                      <mat-icon>send</mat-icon>
+                      {{ (emailTestSending ? 'settings.emailConfig.testSending' : 'settings.emailConfig.testSend') | translate }}
+                    </button>
+                  </div>
+                  @if (emailTestError) {
+                    <p class="sms-credit-error">{{ emailTestError }}</p>
+                  }
+                </div>
+              }
+            }
+          </section>
+
           <section class="settings-group settings-anchor" id="sms-config">
             <h2 class="settings-group-title">{{ 'settings.smsConfig.title' | translate }}</h2>
             <p class="settings-group-desc">{{ 'settings.smsConfig.subtitle' | translate }}</p>
@@ -874,6 +984,38 @@ interface SettingsNavItem {
       flex-wrap: wrap;
     }
 
+    .email-config-toggles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 24px;
+      margin-bottom: 16px;
+    }
+
+    .email-test-card {
+      margin-top: 20px;
+      padding: 14px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+    }
+
+    .email-test-card h3 {
+      margin: 0 0 4px;
+      font-size: 0.95rem;
+    }
+
+    .email-test-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .email-test-row button {
+      margin-top: 4px;
+      white-space: nowrap;
+    }
+
     .policy-form .full-width {
       width: 100%;
     }
@@ -895,6 +1037,7 @@ export class SettingsComponent implements OnInit {
   private readonly usersService = inject(UsersService);
   private readonly passwordPolicyService = inject(PasswordPolicyService);
   private readonly smsConfigService = inject(SmsConfigService);
+  private readonly emailConfigService = inject(EmailConfigService);
   private readonly apiError = inject(ApiErrorService);
   private readonly translate = inject(TranslateService);
   private readonly snackBar = inject(MatSnackBar);
@@ -914,6 +1057,7 @@ export class SettingsComponent implements OnInit {
     { id: 'notifications', titleKey: 'settings.notifications', icon: 'notifications' },
     { id: 'security', titleKey: 'settings.security', icon: 'shield' },
     { id: 'password-policy', titleKey: 'settings.passwordPolicy.title', icon: 'policy', adminOnly: true },
+    { id: 'email-config', titleKey: 'settings.emailConfig.title', icon: 'email', adminOnly: true },
     { id: 'sms-config', titleKey: 'settings.smsConfig.title', icon: 'sms', adminOnly: true }
   ];
 
@@ -930,6 +1074,12 @@ export class SettingsComponent implements OnInit {
   smsConfigLoading = false;
   smsConfigSaving = false;
   smsApiKeyConfigured = false;
+  emailConfigLoading = false;
+  emailConfigSaving = false;
+  emailPasswordConfigured = false;
+  emailTestTo = '';
+  emailTestSending = false;
+  emailTestError = '';
   smsCreditLoading = false;
   smsCreditResult: SmsCreditResult | null = null;
   smsCreditErrorMessage = '';
@@ -989,6 +1139,17 @@ export class SettingsComponent implements OnInit {
     apiKey: ['']
   });
 
+  emailConfigForm = this.fb.nonNullable.group({
+    enabled: [false],
+    host: [''],
+    port: [587, [Validators.required, Validators.min(1), Validators.max(65535)]],
+    username: [''],
+    password: [''],
+    fromEmail: ['', [Validators.email]],
+    fromName: [''],
+    useTls: [true]
+  });
+
   ngOnInit(): void {
     this.usersService.getMe().subscribe({
       next: (user) => this.applyUser(user),
@@ -997,6 +1158,7 @@ export class SettingsComponent implements OnInit {
     this.loadPasswordPolicyForForms();
     if (this.authService.isAdmin()) {
       this.loadAdminPasswordPolicy();
+      this.loadAdminEmailConfig();
       this.loadAdminSmsConfig();
     }
     this.passwordForm.controls.newPassword.valueChanges.subscribe((value) => {
@@ -1108,6 +1270,134 @@ export class SettingsComponent implements OnInit {
       error: (error) => {
         this.policySaving = false;
         this.showError(error);
+      }
+    });
+  }
+
+  private loadAdminEmailConfig(): void {
+    this.emailConfigLoading = true;
+    this.emailConfigService.getConfig().subscribe({
+      next: (config) => {
+        this.emailConfigLoading = false;
+        this.emailPasswordConfigured = config.passwordConfigured;
+        this.emailConfigForm.patchValue({
+          enabled: config.enabled,
+          host: config.host || '',
+          port: config.port || 587,
+          username: config.username || '',
+          password: '',
+          fromEmail: config.fromEmail || '',
+          fromName: config.fromName || '',
+          useTls: config.useTls
+        });
+        this.applyEmailValidators();
+        if (!this.emailTestTo && this.profileForm.controls.email.value) {
+          this.emailTestTo = this.profileForm.controls.email.value;
+        }
+      },
+      error: (error) => {
+        this.emailConfigLoading = false;
+        this.showError(error);
+      }
+    });
+
+    this.emailConfigForm.controls.enabled.valueChanges.subscribe(() => this.applyEmailValidators());
+    this.emailConfigForm.controls.username.valueChanges.subscribe(() => this.applyEmailPasswordValidators());
+  }
+
+  private applyEmailValidators(): void {
+    const enabled = this.emailConfigForm.controls.enabled.value;
+    const hostCtrl = this.emailConfigForm.controls.host;
+    const fromEmailCtrl = this.emailConfigForm.controls.fromEmail;
+
+    if (enabled) {
+      hostCtrl.setValidators([Validators.required]);
+      fromEmailCtrl.setValidators([Validators.required, Validators.email]);
+    } else {
+      hostCtrl.setValidators([]);
+      fromEmailCtrl.setValidators([Validators.email]);
+    }
+    hostCtrl.updateValueAndValidity({ emitEvent: false });
+    fromEmailCtrl.updateValueAndValidity({ emitEvent: false });
+    this.applyEmailPasswordValidators();
+  }
+
+  private applyEmailPasswordValidators(): void {
+    const enabled = this.emailConfigForm.controls.enabled.value;
+    const username = this.emailConfigForm.controls.username.value.trim();
+    const passwordCtrl = this.emailConfigForm.controls.password;
+
+    if (enabled && username && !this.emailPasswordConfigured) {
+      passwordCtrl.setValidators([Validators.required]);
+    } else {
+      passwordCtrl.setValidators([]);
+    }
+    passwordCtrl.updateValueAndValidity({ emitEvent: false });
+  }
+
+  saveEmailConfig(): void {
+    if (this.emailConfigForm.invalid || !this.authService.isAdmin()) {
+      this.emailConfigForm.markAllAsTouched();
+      return;
+    }
+
+    const raw = this.emailConfigForm.getRawValue();
+    const username = raw.username.trim();
+    const password = raw.password.trim();
+
+    if (raw.enabled && username && !this.emailPasswordConfigured && !password) {
+      this.emailConfigForm.controls.password.setErrors({ required: true });
+      this.emailConfigForm.controls.password.markAsTouched();
+      return;
+    }
+
+    this.emailConfigSaving = true;
+    const payload = {
+      enabled: raw.enabled,
+      host: raw.host.trim(),
+      port: Number(raw.port),
+      username,
+      fromEmail: raw.fromEmail.trim(),
+      fromName: raw.fromName.trim(),
+      useTls: raw.useTls,
+      ...(password ? { password } : {})
+    };
+
+    this.emailConfigService.updateConfig(payload).subscribe({
+      next: (config) => {
+        this.emailConfigSaving = false;
+        this.emailPasswordConfigured = config.passwordConfigured;
+        this.emailConfigForm.patchValue({ password: '' });
+        this.applyEmailPasswordValidators();
+        this.emailTestError = '';
+        this.snack(this.translate.instant('settings.emailConfig.saved'));
+      },
+      error: (error) => {
+        this.emailConfigSaving = false;
+        this.showError(error);
+      }
+    });
+  }
+
+  sendTestEmail(): void {
+    const to = this.emailTestTo.trim();
+    if (!to || !this.authService.isAdmin() || this.emailTestSending) {
+      return;
+    }
+    this.emailTestSending = true;
+    this.emailTestError = '';
+    this.emailConfigService.sendTestEmail(to).subscribe({
+      next: (result) => {
+        this.emailTestSending = false;
+        if (result.success) {
+          this.snack(this.translate.instant('settings.emailConfig.testSuccess'));
+        } else {
+          this.emailTestError = result.errorMessage || this.translate.instant('settings.emailConfig.testFailed');
+        }
+      },
+      error: (error) => {
+        this.emailTestSending = false;
+        this.emailTestError = this.apiError.resolve(error);
       }
     });
   }
@@ -1482,6 +1772,9 @@ export class SettingsComponent implements OnInit {
     const first = user.firstName?.charAt(0) ?? '';
     const last = user.lastName?.charAt(0) ?? '';
     this.profileInitials = `${first}${last}`.toUpperCase() || user.email?.charAt(0).toUpperCase() || '?';
+    if (!this.emailTestTo && user.email) {
+      this.emailTestTo = user.email;
+    }
   }
 
   saveProfile(): void {
