@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, inject, computed } from '@angular/core';
+import { Component, EventEmitter, Output, inject, computed, OnInit, OnDestroy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
@@ -8,11 +8,13 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslateModule } from '@ngx-translate/core';
 import { ThemeService } from '../../services/theme.service';
 import { TranslationService } from '../../services/translation.service';
 import { AuthService } from '../../services/auth.service';
 import { UsersService } from '../../services/users.service';
+import { AppNotification, NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-toolbar',
@@ -26,6 +28,7 @@ import { UsersService } from '../../services/users.service';
     MatBadgeModule,
     MatDividerModule,
     MatTooltipModule,
+    MatProgressSpinnerModule,
     TranslateModule
   ],
   template: `
@@ -72,29 +75,53 @@ import { UsersService } from '../../services/users.service';
 
         <button mat-icon-button
                 type="button"
-                class="control-btn"
+                class="control-btn notif-btn"
                 [matMenuTriggerFor]="notifMenu"
+                (menuOpened)="onNotificationsOpened()"
                 [attr.aria-label]="'a11y.notifications' | translate"
-                matBadge="3"
+                [matBadge]="unreadCount() > 0 ? unreadBadge() : null"
                 matBadgeColor="warn"
                 matBadgeSize="small"
                 [matTooltip]="'a11y.notifications' | translate">
-          <mat-icon>notifications_none</mat-icon>
+          <mat-icon>{{ unreadCount() > 0 ? 'notifications_active' : 'notifications_none' }}</mat-icon>
         </button>
         <mat-menu #notifMenu="matMenu" class="notif-menu">
           <div class="menu-cap">
-            <span>{{ 'toolbar.notifications' | translate }}</span>
+            <span>{{ 'notifications.title' | translate }}</span>
+            @if (unreadCount() > 0) {
+              <button mat-button type="button" class="mark-all-btn" (click)="markAllRead($event)">
+                {{ 'notifications.markAllRead' | translate }}
+              </button>
+            }
           </div>
           <mat-divider></mat-divider>
-          @for (notif of notifications; track notif.id) {
-            <button mat-menu-item type="button" class="notif-item">
-              <mat-icon [style.color]="notif.color">{{ notif.icon }}</mat-icon>
-              <div class="notif-content">
-                <span class="notif-text">{{ notif.textKey | translate }}</span>
-                <span class="notif-time">{{ notif.timeKey | translate }}</span>
-              </div>
-            </button>
+
+          @if (loadingNotifications()) {
+            <div class="notif-loading">
+              <mat-progress-spinner diameter="24" strokeWidth="3" mode="indeterminate"></mat-progress-spinner>
+            </div>
+          } @else if (notifications().length === 0) {
+            <div class="notif-empty">{{ 'notifications.empty' | translate }}</div>
+          } @else {
+            @for (notif of notifications(); track notif.id) {
+              <button mat-menu-item type="button"
+                      class="notif-item"
+                      [class.unread]="!notif.read"
+                      (click)="openNotification(notif)">
+                <mat-icon [style.color]="notificationService.iconColor(notif.type)">{{ notificationService.iconName(notif.type) }}</mat-icon>
+                <div class="notif-content">
+                  <span class="notif-text">{{ notificationService.messageText(notif) }}</span>
+                  <span class="notif-time">{{ notificationService.relativeTime(notif.createdAt) }}</span>
+                </div>
+              </button>
+            }
           }
+
+          <mat-divider></mat-divider>
+          <button mat-menu-item type="button" routerLink="/notifications" class="view-all-btn">
+            <mat-icon>list_alt</mat-icon>
+            <span>{{ 'notifications.viewAll' | translate }}</span>
+          </button>
         </mat-menu>
 
         @if (currentUser(); as user) {
@@ -187,6 +214,10 @@ import { UsersService } from '../../services/users.service';
       color: var(--accent) !important;
       background: var(--accent-light) !important;
       border-color: var(--border-color);
+    }
+
+    .notif-btn {
+      overflow: visible;
     }
 
     .lang-code {
@@ -345,31 +376,67 @@ import { UsersService } from '../../services/users.service';
     }
 
     .menu-cap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       padding: 12px 16px;
       font-weight: 700;
       font-size: 0.85rem;
       color: var(--text-primary);
     }
 
+    .mark-all-btn {
+      min-width: 0 !important;
+      padding: 0 8px !important;
+      font-size: 0.72rem !important;
+      font-weight: 600 !important;
+      line-height: 1.2 !important;
+      color: var(--accent) !important;
+    }
+
+    .notif-loading,
+    .notif-empty {
+      padding: 20px 16px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
     .notif-item {
       height: auto !important;
       padding: 12px 16px !important;
+      align-items: flex-start !important;
+      white-space: normal !important;
+    }
+
+    .notif-item.unread {
+      background: color-mix(in srgb, var(--accent) 8%, transparent);
     }
 
     .notif-content {
       display: flex;
       flex-direction: column;
+      gap: 4px;
       margin-inline-start: 10px;
+      min-width: 0;
     }
 
     .notif-text {
       font-size: 0.82rem;
       color: var(--text-primary);
+      line-height: 1.4;
+      white-space: normal;
     }
 
     .notif-time {
       font-size: 0.7rem;
       color: var(--text-muted);
+    }
+
+    .view-all-btn {
+      font-weight: 600 !important;
+      color: var(--accent) !important;
     }
 
     .logout-btn {
@@ -398,16 +465,25 @@ import { UsersService } from '../../services/users.service';
     }
   `]
 })
-export class ToolbarComponent {
+export class ToolbarComponent implements OnInit, OnDestroy {
   @Output() onToggleSidebar = new EventEmitter<void>();
 
   themeService = inject(ThemeService);
   translationService = inject(TranslationService);
+  notificationService = inject(NotificationService);
   private authService = inject(AuthService);
   private usersService = inject(UsersService);
   private router = inject(Router);
 
   currentUser = toSignal(this.authService.currentUser$, { initialValue: null });
+  notifications = toSignal(this.notificationService.notifications$, { initialValue: [] as AppNotification[] });
+  unreadCount = toSignal(this.notificationService.unreadCount$, { initialValue: 0 });
+  loadingNotifications = computed(() => false);
+
+  unreadBadge = computed(() => {
+    const count = this.unreadCount();
+    return count > 99 ? '99+' : String(count);
+  });
 
   displayName = computed(() => {
     const user = this.currentUser();
@@ -430,13 +506,45 @@ export class ToolbarComponent {
 
   avatarSrc = computed(() => this.usersService.resolveAvatarUrl(this.currentUser()?.avatarUrl));
 
-  notifications = [
-    { id: 1, textKey: 'toolbar.notifSold', timeKey: 'toolbar.time5m', icon: 'info', color: 'var(--info)' },
-    { id: 2, textKey: 'toolbar.notifOffer', timeKey: 'toolbar.time1h', icon: 'payments', color: 'var(--success)' },
-    { id: 3, textKey: 'toolbar.notifExpired', timeKey: 'toolbar.time3h', icon: 'warning', color: 'var(--warning)' }
-  ];
+  ngOnInit(): void {
+    if (this.authService.isLoggedIn()) {
+      this.notificationService.startPolling();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.notificationService.reset();
+  }
+
+  onNotificationsOpened(): void {
+    this.notificationService.refresh().subscribe();
+  }
+
+  markAllRead(event: Event): void {
+    event.stopPropagation();
+    this.notificationService.markAllRead().subscribe();
+  }
+
+  openNotification(notif: AppNotification): void {
+    const navigate = () => {
+      const route = this.notificationService.ticketRoute(notif);
+      if (route) {
+        this.router.navigate(route);
+      }
+    };
+
+    if (!notif.read) {
+      this.notificationService.markRead(notif.id).subscribe({
+        next: () => navigate(),
+        error: () => navigate()
+      });
+      return;
+    }
+    navigate();
+  }
 
   logout(): void {
+    this.notificationService.reset();
     this.authService.logout();
     this.router.navigate(['/login']);
   }

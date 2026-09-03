@@ -8,6 +8,8 @@ export interface ConfirmDialogData {
   titleKey: string;
   messageKey: string;
   messageParams?: Record<string, unknown>;
+  hintKey?: string;
+  hintParams?: Record<string, unknown>;
   confirmKey?: string;
   cancelKey?: string;
   confirmColor?: 'primary' | 'warn' | 'accent';
@@ -21,6 +23,9 @@ export interface ConfirmDialogData {
     <h2 mat-dialog-title>{{ data.titleKey | translate }}</h2>
     <mat-dialog-content>
       <p class="confirm-message">{{ data.messageKey | translate: data.messageParams }}</p>
+      @if (data.hintKey) {
+        <p class="confirm-hint">{{ data.hintKey | translate: data.hintParams }}</p>
+      }
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button type="button" mat-dialog-close>
@@ -47,6 +52,17 @@ export interface ConfirmDialogData {
       color: var(--text-secondary);
       line-height: 1.5;
       font-size: 0.92rem;
+    }
+
+    .confirm-hint {
+      margin: 12px 0 0;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      background: color-mix(in srgb, var(--warning) 10%, var(--bg-secondary));
+      border: 1px solid color-mix(in srgb, var(--warning) 28%, var(--border-color));
+      color: var(--text-secondary);
+      font-size: 0.84rem;
+      line-height: 1.45;
     }
   `]
 })

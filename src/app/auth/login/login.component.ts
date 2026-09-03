@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router, RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { TranslationService } from '../../services/translation.service';
 import { ApiErrorService } from '../../services/api-error.service';
@@ -77,6 +78,24 @@ import { AuthShellComponent } from '../auth-shell/auth-shell.component';
               {{ 'auth.login.forgotPassword' | translate }}
             </a>
           </div>
+
+          @if (showEmailVerificationHint) {
+            <div class="verify-banner">
+              <mat-icon aria-hidden="true">mark_email_unread</mat-icon>
+              <div class="verify-banner-copy">
+                <p>{{ 'auth.login.emailNotVerified' | translate }}</p>
+                <button mat-stroked-button type="button"
+                        (click)="resendVerification()"
+                        [disabled]="resendSending">
+                  @if (resendSending) {
+                    <mat-progress-spinner diameter="18" strokeWidth="3" mode="indeterminate"></mat-progress-spinner>
+                  } @else {
+                    {{ 'auth.register.resendVerification' | translate }}
+                  }
+                </button>
+              </div>
+            </div>
+          }
 
           <button mat-flat-button
                   color="primary"
@@ -185,6 +204,30 @@ import { AuthShellComponent } from '../auth-shell/auth-shell.component';
       line-height: 1.5;
     }
 
+    .verify-banner {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin: 0 0 16px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: color-mix(in srgb, var(--warning) 10%, var(--bg-secondary));
+      border: 1px solid color-mix(in srgb, var(--warning) 28%, var(--border-color));
+    }
+
+    .verify-banner mat-icon {
+      color: var(--warning);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .verify-banner-copy p {
+      margin: 0 0 10px;
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
     .form-footer {
       margin-top: 28px;
       text-align: center;
@@ -202,6 +245,8 @@ export class LoginComponent implements OnInit {
   totpForm!: FormGroup;
   isLoading = false;
   hidePassword = true;
+  showEmailVerificationHint = false;
+  resendSending = false;
   step: 'credentials' | 'totp' = 'credentials';
   private preAuthToken = '';
 
@@ -232,6 +277,7 @@ export class LoginComponent implements OnInit {
     }
 
     this.isLoading = true;
+    this.showEmailVerificationHint = false;
 
     this.authService.login(this.loginForm.value).subscribe({
       next: (response) => {
@@ -246,6 +292,31 @@ export class LoginComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading = false;
+        if (error instanceof HttpErrorResponse && error.error?.code === 'EMAIL_NOT_VERIFIED') {
+          this.showEmailVerificationHint = true;
+        }
+        this.showError(error, 'auth.messages.loginFailed');
+      }
+    });
+  }
+
+  resendVerification(): void {
+    const email = String(this.loginForm.get('email')?.value ?? '').trim();
+    if (!email || this.resendSending) {
+      return;
+    }
+    this.resendSending = true;
+    this.authService.resendVerificationEmail(email).subscribe({
+      next: () => {
+        this.resendSending = false;
+        this.snackBar.open(
+          this.translateService.instant('auth.register.resendSent'),
+          this.translateService.instant('common.close'),
+          { duration: 3000 }
+        );
+      },
+      error: (error) => {
+        this.resendSending = false;
         this.showError(error, 'auth.messages.loginFailed');
       }
     });

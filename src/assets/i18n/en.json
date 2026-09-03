@@ -28,7 +28,8 @@
       "totpHint": "You can also use a one-time backup code if you saved one when enabling 2FA.",
       "totpCode": "Authentication code",
       "verify": "Verify",
-      "backToLogin": "Back to sign in"
+      "backToLogin": "Back to sign in",
+      "emailNotVerified": "Your email address is not verified yet. Check your inbox or resend the verification email."
     },
     "register": {
       "title": "Create your account",
@@ -50,7 +51,16 @@
       "passwordStrong": "Strong",
       "feature1": "List domains for sale",
       "feature2": "Analyze domain value",
-      "feature3": "Track your revenue"
+      "feature3": "Track your revenue",
+      "emailVerificationHint": "We'll email you a verification link after sign-up to secure your account.",
+      "policyLoading": "Loading password rules…",
+      "successTitle": "Check your inbox",
+      "successSubtitle": "Verify your email before you can sign in.",
+      "verificationSentTo": "We sent a verification link to {{email}}.",
+      "verificationNote": "Didn't receive it? Check spam or resend the email below.",
+      "resendVerification": "Resend verification email",
+      "resendSent": "Verification email sent",
+      "backToSignIn": "Back to sign in"
     },
     "forgotPassword": {
       "title": "Reset your password",
@@ -62,10 +72,23 @@
       "back": "Back to sign in",
       "loading": "Sending..."
     },
+    "verifyEmail": {
+      "title": "Verify your email",
+      "subtitlePending": "Confirming your email address…",
+      "subtitleSuccess": "Your email is verified",
+      "subtitleFailed": "Verification could not be completed",
+      "heroTitle": "One more step",
+      "heroSupport": "Email verification helps secure your account and recover access if needed.",
+      "success": "Your email address has been verified.",
+      "missingToken": "Verification link is missing or invalid.",
+      "goProfile": "Go to profile",
+      "backLogin": "Back to sign in"
+    },
     "validation": {
       "required": "This field is required",
       "email": "Please enter a valid email",
       "minLength": "Minimum 8 characters",
+      "minNameLength": "At least 2 characters",
       "passwordMismatch": "Passwords do not match",
       "termsRequired": "You must accept the terms"
     },
@@ -73,6 +96,7 @@
       "loginSuccess": "Welcome back!",
       "loginFailed": "Invalid email or password",
       "registerSuccess": "Account created successfully",
+      "registerSuccessVerify": "Account created! Verify your email to secure your account.",
       "registerFailed": "Registration failed. Please try again.",
       "resetEmailSent": "Reset link sent to your email",
       "sessionExpired": "Session expired. Please login again",
@@ -82,6 +106,7 @@
   },
   "menu": {
     "dashboard": "Dashboard",
+    "notifications": "Notifications",
     "domains": "My Domains",
     "analyzer": "Domain Analyzer",
     "marketplace": "Marketplace",
@@ -956,6 +981,7 @@
     "portfolio": "Portfolio",
     "addNew": "Add New Domain",
     "search": "Search domains...",
+    "deleteTitle": "Delete domain",
     "deleteConfirm": "Are you sure you want to delete {{domain}}?",
     "filters": {
       "all": "All",
@@ -1121,7 +1147,24 @@
       "phoneIncomplete": "Select a country and enter your mobile number",
       "phoneInvalid": "Enter a valid mobile number for the selected country",
       "save": "Save Profile",
-      "saved": "Profile updated successfully"
+      "saved": "Profile updated successfully",
+      "emailVerified": "Email verified",
+      "emailUnverified": "Email not verified",
+      "sendVerification": "Send verification email",
+      "sendingVerification": "Sending…",
+      "verificationSent": "Verification email sent",
+      "verificationSentHint": "Check your inbox to verify your new email address",
+      "phoneVerified": "Mobile verified",
+      "phoneUnverified": "Mobile not verified",
+      "sendPhoneVerification": "Send verification code",
+      "sendingPhoneVerification": "Sending…",
+      "phoneVerificationSent": "Verification code sent",
+      "phoneVerificationSentHint": "Enter the SMS code to verify your new mobile number",
+      "phoneOtpLabel": "Verification code",
+      "phoneOtpPlaceholder": "6-digit code",
+      "verifyPhone": "Verify mobile",
+      "verifyingPhone": "Verifying…",
+      "phoneVerifiedSuccess": "Mobile number verified"
     },
     "password": {
       "title": "Change Password",
@@ -1157,6 +1200,7 @@
       "minLengthRange": "Enter a value between 4 and 128",
       "maxLengthRange": "Enter a value between 4 and 256",
       "reqMinLength": "At least {{n}} characters",
+      "reqMaxLength": "No more than {{n}} characters",
       "reqUppercase": "Include an uppercase letter",
       "reqLowercase": "Include a lowercase letter",
       "reqDigit": "Include a digit",
@@ -1452,9 +1496,14 @@
       "changeRole": "Change Role"
     },
     "confirm": {
-      "delete": "Delete {{name}}?",
-      "enable": "Enable {{name}}?",
-      "disable": "Disable {{name}}?"
+      "deleteTitle": "Delete user account?",
+      "delete": "You are about to permanently delete {{name}} ({{email}}). This action cannot be undone.",
+      "deleteHint": "Users linked to tickets or other records cannot be deleted.",
+      "deleteConfirm": "Delete user",
+      "enableTitle": "Enable user account",
+      "enable": "Enable {{name}} ({{email}})? They will be able to sign in again.",
+      "disableTitle": "Disable user account",
+      "disable": "Disable {{name}} ({{email}})? They will no longer be able to sign in."
     },
     "messages": {
       "created": "User created",
@@ -1529,6 +1578,7 @@
     "UNEXPECTED_ERROR": "Something went wrong. Please try again.",
     "USER_NOT_FOUND": "User not found",
     "CANNOT_DELETE_SELF": "You cannot delete your own account",
+    "USER_IN_USE": "User cannot be deleted because they are referenced by tickets or other records",
     "CANNOT_DISABLE_SELF": "You cannot disable your own account",
     "INVALID_CURRENT_PASSWORD": "Current password is incorrect",
     "INVALID_AVATAR": "Invalid avatar image. Use JPEG, PNG, or WebP under 5MB",
@@ -1547,6 +1597,18 @@
     "SMS_PACK_ID_REQUIRED": "SMS pack ID is required",
     "EMAIL_CONFIG_INVALID": "Invalid email server configuration",
     "EMAIL_CONFIG_DISABLED": "Email server is not enabled",
+    "EMAIL_ALREADY_VERIFIED": "Your email is already verified",
+    "EMAIL_NOT_VERIFIED": "Verify your email before signing in",
+    "EMAIL_VERIFICATION_DISABLED": "Email server is not configured. Ask an admin to enable SMTP in Settings.",
+    "EMAIL_VERIFICATION_INVALID": "Verification link is invalid or has expired",
+    "PHONE_NOT_SET": "Add a mobile number to your profile first",
+    "PHONE_INVALID": "Mobile number is not valid for SMS verification",
+    "PHONE_ALREADY_VERIFIED": "Your mobile number is already verified",
+    "PHONE_VERIFICATION_DISABLED": "SMS is not configured. Ask an admin to set up SMS in Settings.",
+    "PHONE_VERIFICATION_INVALID": "Verification code is invalid or has expired",
+    "PHONE_VERIFICATION_SEND_FAILED": "Failed to send verification SMS",
+    "PHONE_VERIFICATION_COOLDOWN": "Please wait before requesting another code",
+    "PHONE_VERIFICATION_TOO_MANY_ATTEMPTS": "Too many failed attempts. Request a new code.",
     "EMAIL_HOST_REQUIRED": "SMTP host is required when email is enabled",
     "EMAIL_FROM_REQUIRED": "From email address is required when email is enabled",
     "EMAIL_PASSWORD_REQUIRED": "SMTP password is required when a username is set",
@@ -1630,6 +1692,40 @@
     "minutesAgo": "{{count}} minutes ago",
     "hoursAgo": "{{count}} hours ago",
     "daysAgo": "{{count}} days ago"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "markAllRead": "Mark all read",
+    "viewAll": "View all notifications",
+    "someone": "Someone",
+    "page": {
+      "eyebrow": "Activity",
+      "title": "Notifications",
+      "subtitle": "Ticket updates, mentions, and assignment alerts in one place.",
+      "refresh": "Refresh",
+      "filterLabel": "Notification filter",
+      "filterAll": "All",
+      "filterUnread": "Unread",
+      "emptyUnread": "You're all caught up — no unread notifications.",
+      "allMarkedRead": "All notifications marked as read"
+    },
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{{count}} min ago",
+      "hoursAgo": "{{count}} h ago",
+      "daysAgo": "{{count}} d ago"
+    },
+    "types": {
+      "TICKET_CREATED": "{{actor}} created {{ticketNumber}}",
+      "TICKET_CUSTOMER_REPLY": "{{actor}} replied on {{ticketNumber}}",
+      "TICKET_STAFF_REPLY": "Support replied on {{ticketNumber}}",
+      "TICKET_MENTION": "{{actor}} mentioned you on {{ticketNumber}}",
+      "TICKET_STATUS_CHANGED": "{{ticketNumber}} status: {{statusFrom}} → {{statusTo}}",
+      "TICKET_ASSIGNED": "{{ticketNumber}} assigned to you",
+      "TICKET_CLOSED": "{{ticketNumber}} was closed",
+      "TICKET_REOPENED": "{{ticketNumber}} was reopened"
+    }
   },
   "toolbar": {
     "profile": "Profile",

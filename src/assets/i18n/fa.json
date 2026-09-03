@@ -28,7 +28,8 @@
       "totpHint": "در صورت نیاز می‌توانید از یکی از کدهای پشتیبان یک‌بارمصرف استفاده کنید.",
       "totpCode": "کد احراز هویت",
       "verify": "تأیید",
-      "backToLogin": "بازگشت به ورود"
+      "backToLogin": "بازگشت به ورود",
+      "emailNotVerified": "ایمیل شما هنوز تأیید نشده است. صندوق ورودی را بررسی کنید یا ایمیل تأیید را دوباره ارسال کنید."
     },
     "register": {
       "title": "ایجاد حساب",
@@ -50,7 +51,16 @@
       "passwordStrong": "قوی",
       "feature1": "دامنه‌ها را برای فروش لیست کنید",
       "feature2": "ارزش دامنه را تحلیل کنید",
-      "feature3": "درآمد خود را پیگیری کنید"
+      "feature3": "درآمد خود را پیگیری کنید",
+      "emailVerificationHint": "پس از ثبت‌نام، لینک تأیید به این ایمیل ارسال می‌شود.",
+      "policyLoading": "در حال بارگذاری قوانین رمز عبور…",
+      "successTitle": "صندوق ورودی را بررسی کنید",
+      "successSubtitle": "قبل از ورود باید ایمیل خود را تأیید کنید.",
+      "verificationSentTo": "لینک تأیید به {{email}} ارسال شد.",
+      "verificationNote": "ایمیل را دریافت نکردید؟ پوشه هرزنامه را بررسی کنید یا دوباره ارسال کنید.",
+      "resendVerification": "ارسال مجدد ایمیل تأیید",
+      "resendSent": "ایمیل تأیید ارسال شد",
+      "backToSignIn": "بازگشت به ورود"
     },
     "forgotPassword": {
       "title": "بازنشانی رمز عبور",
@@ -62,10 +72,23 @@
       "back": "بازگشت به ورود",
       "loading": "در حال ارسال..."
     },
+    "verifyEmail": {
+      "title": "تأیید ایمیل",
+      "subtitlePending": "در حال تأیید آدرس ایمیل…",
+      "subtitleSuccess": "ایمیل شما تأیید شد",
+      "subtitleFailed": "تأیید ایمیل انجام نشد",
+      "heroTitle": "یک قدم دیگر",
+      "heroSupport": "تأیید ایمیل به امنیت حساب و بازیابی دسترسی کمک می‌کند.",
+      "success": "آدرس ایمیل شما تأیید شد.",
+      "missingToken": "لینک تأیید نامعتبر یا ناقص است.",
+      "goProfile": "رفتن به پروفایل",
+      "backLogin": "بازگشت به ورود"
+    },
     "validation": {
       "required": "این فیلد الزامی است",
       "email": "لطفاً ایمیل معتبر وارد کنید",
       "minLength": "حداقل ۸ کاراکتر",
+      "minNameLength": "حداقل ۲ کاراکتر",
       "passwordMismatch": "رمزهای عبور مطابقت ندارند",
       "termsRequired": "باید قوانین را بپذیرید"
     },
@@ -82,6 +105,7 @@
   },
   "menu": {
     "dashboard": "داشبورد",
+    "notifications": "اعلان‌ها",
     "domains": "دامنه‌های من",
     "analyzer": "تحلیلگر دامنه",
     "marketplace": "بازار",
@@ -951,6 +975,7 @@
     "portfolio": "پرتفولیو",
     "addNew": "افزودن دامنه جدید",
     "search": "جستجوی دامنه‌ها...",
+    "deleteTitle": "حذف دامنه",
     "deleteConfirm": "آیا از حذف {{domain}} مطمئن هستید؟",
     "filters": {
       "all": "همه",
@@ -1099,7 +1124,24 @@
       "phoneIncomplete": "کشور را انتخاب کنید و شماره موبایل را وارد کنید",
       "phoneInvalid": "شماره موبایل مطابق با فرمت کشور انتخاب‌شده نیست",
       "save": "ذخیره پروفایل",
-      "saved": "پروفایل با موفقیت به‌روز شد"
+      "saved": "پروفایل با موفقیت به‌روز شد",
+      "emailVerified": "ایمیل تأیید شده",
+      "emailUnverified": "ایمیل تأیید نشده",
+      "sendVerification": "ارسال ایمیل تأیید",
+      "sendingVerification": "در حال ارسال…",
+      "verificationSent": "ایمیل تأیید ارسال شد",
+      "verificationSentHint": "برای تأیید ایمیل جدید، صندوق ورودی خود را بررسی کنید",
+      "phoneVerified": "موبایل تأیید شده",
+      "phoneUnverified": "موبایل تأیید نشده",
+      "sendPhoneVerification": "ارسال کد تأیید",
+      "sendingPhoneVerification": "در حال ارسال…",
+      "phoneVerificationSent": "کد تأیید ارسال شد",
+      "phoneVerificationSentHint": "کد پیامک را برای تأیید شماره موبایل جدید وارد کنید",
+      "phoneOtpLabel": "کد تأیید",
+      "phoneOtpPlaceholder": "کد ۶ رقمی",
+      "verifyPhone": "تأیید موبایل",
+      "verifyingPhone": "در حال تأیید…",
+      "phoneVerifiedSuccess": "شماره موبایل تأیید شد"
     },
     "password": {
       "title": "تغییر رمز عبور",
@@ -1135,6 +1177,7 @@
       "minLengthRange": "عددی بین ۴ تا ۱۲۸ وارد کنید",
       "maxLengthRange": "عددی بین ۴ تا ۲۵۶ وارد کنید",
       "reqMinLength": "حداقل {{n}} کاراکتر",
+      "reqMaxLength": "حداکثر {{n}} کاراکتر",
       "reqUppercase": "شامل حرف بزرگ",
       "reqLowercase": "شامل حرف کوچک",
       "reqDigit": "شامل عدد",
@@ -1430,9 +1473,14 @@
       "changeRole": "تغییر نقش"
     },
     "confirm": {
-      "delete": "حذف {{name}}؟",
-      "enable": "فعال کردن {{name}}؟",
-      "disable": "غیرفعال کردن {{name}}؟"
+      "deleteTitle": "حذف حساب کاربری؟",
+      "delete": "در حال حذف دائمی {{name}} ({{email}}) هستید. این عمل قابل بازگشت نیست.",
+      "deleteHint": "کاربرانی که در تیکت‌ها یا رکوردهای دیگر استفاده شده‌اند قابل حذف نیستند.",
+      "deleteConfirm": "حذف کاربر",
+      "enableTitle": "فعال‌سازی حساب کاربری",
+      "enable": "{{name}} ({{email}}) فعال شود؟ کاربر می‌تواند دوباره وارد شود.",
+      "disableTitle": "غیرفعال‌سازی حساب کاربری",
+      "disable": "{{name}} ({{email}}) غیرفعال شود؟ کاربر دیگر نمی‌تواند وارد شود."
     },
     "messages": {
       "created": "کاربر ایجاد شد",
@@ -1507,6 +1555,7 @@
     "UNEXPECTED_ERROR": "خطایی رخ داد. لطفاً دوباره تلاش کنید.",
     "USER_NOT_FOUND": "کاربر یافت نشد",
     "CANNOT_DELETE_SELF": "نمی‌توانید حساب خود را حذف کنید",
+    "USER_IN_USE": "کاربر به دلیل ارجاع در تیکت‌ها یا سایر رکوردها قابل حذف نیست",
     "CANNOT_DISABLE_SELF": "نمی‌توانید حساب خود را غیرفعال کنید",
     "INVALID_CURRENT_PASSWORD": "رمز عبور فعلی نادرست است",
     "INVALID_AVATAR": "تصویر آواتار نامعتبر است. JPEG، PNG یا WebP تا ۵ مگابایت",
@@ -1525,6 +1574,18 @@
     "SMS_PACK_ID_REQUIRED": "شناسه مجموعه پیامک الزامی است",
     "EMAIL_CONFIG_INVALID": "تنظیمات سرور ایمیل نامعتبر است",
     "EMAIL_CONFIG_DISABLED": "سرور ایمیل فعال نیست",
+    "EMAIL_ALREADY_VERIFIED": "ایمیل شما قبلاً تأیید شده است",
+    "EMAIL_NOT_VERIFIED": "قبل از ورود ایمیل خود را تأیید کنید",
+    "EMAIL_VERIFICATION_DISABLED": "سرور ایمیل پیکربندی نشده است. از مدیر بخواهید SMTP را در تنظیمات فعال کند.",
+    "EMAIL_VERIFICATION_INVALID": "لینک تأیید نامعتبر است یا منقضی شده",
+    "PHONE_NOT_SET": "ابتدا شماره موبایل را در پروفایل وارد کنید",
+    "PHONE_INVALID": "شماره موبایل برای تأیید پیامکی معتبر نیست",
+    "PHONE_ALREADY_VERIFIED": "شماره موبایل شما قبلاً تأیید شده است",
+    "PHONE_VERIFICATION_DISABLED": "پیامک پیکربندی نشده است. از مدیر بخواهید SMS را در تنظیمات فعال کند.",
+    "PHONE_VERIFICATION_INVALID": "کد تأیید نامعتبر است یا منقضی شده",
+    "PHONE_VERIFICATION_SEND_FAILED": "ارسال پیامک تأیید ناموفق بود",
+    "PHONE_VERIFICATION_COOLDOWN": "لطفاً قبل از درخواست کد جدید کمی صبر کنید",
+    "PHONE_VERIFICATION_TOO_MANY_ATTEMPTS": "تلاش‌های ناموفق زیاد بود. کد جدید درخواست کنید.",
     "EMAIL_HOST_REQUIRED": "هنگام فعال بودن ایمیل، میزبان SMTP الزامی است",
     "EMAIL_FROM_REQUIRED": "هنگام فعال بودن ایمیل، آدرس فرستنده الزامی است",
     "EMAIL_PASSWORD_REQUIRED": "هنگام تنظیم نام کاربری، رمز عبور SMTP الزامی است",
@@ -1608,6 +1669,40 @@
     "minutesAgo": "{{count}} دقیقه پیش",
     "hoursAgo": "{{count}} ساعت پیش",
     "daysAgo": "{{count}} روز پیش"
+  },
+  "notifications": {
+    "title": "اعلان‌ها",
+    "empty": "هنوز اعلانی ندارید",
+    "markAllRead": "علامت‌گذاری همه به‌عنوان خوانده‌شده",
+    "viewAll": "مشاهده همه اعلان‌ها",
+    "someone": "کاربری",
+    "page": {
+      "eyebrow": "فعالیت",
+      "title": "اعلان‌ها",
+      "subtitle": "به‌روزرسانی تیکت‌ها، منشن‌ها و هشدارهای اختصاص در یکجا.",
+      "refresh": "بروزرسانی",
+      "filterLabel": "فیلتر اعلان‌ها",
+      "filterAll": "همه",
+      "filterUnread": "خوانده‌نشده",
+      "emptyUnread": "همه اعلان‌ها خوانده شده‌اند.",
+      "allMarkedRead": "همه اعلان‌ها خوانده شدند"
+    },
+    "time": {
+      "justNow": "همین الان",
+      "minutesAgo": "{{count}} دقیقه پیش",
+      "hoursAgo": "{{count}} ساعت پیش",
+      "daysAgo": "{{count}} روز پیش"
+    },
+    "types": {
+      "TICKET_CREATED": "{{actor}} تیکت {{ticketNumber}} را ایجاد کرد",
+      "TICKET_CUSTOMER_REPLY": "{{actor}} به {{ticketNumber}} پاسخ داد",
+      "TICKET_STAFF_REPLY": "پشتیبانی به {{ticketNumber}} پاسخ داد",
+      "TICKET_MENTION": "{{actor}} شما را در {{ticketNumber}} منشن کرد",
+      "TICKET_STATUS_CHANGED": "وضعیت {{ticketNumber}}: {{statusFrom}} ← {{statusTo}}",
+      "TICKET_ASSIGNED": "{{ticketNumber}} به شما اختصاص یافت",
+      "TICKET_CLOSED": "{{ticketNumber}} بسته شد",
+      "TICKET_REOPENED": "{{ticketNumber}} دوباره باز شد"
+    }
   },
   "toolbar": {
     "profile": "پروفایل",

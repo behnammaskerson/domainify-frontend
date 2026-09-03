@@ -3,6 +3,7 @@ import { AdminLayoutComponent } from './components/admin-layout/admin-layout.com
 import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
+import { VerifyEmailComponent } from './auth/verify-email/verify-email.component';
 import { AuthGuard } from './auth/auth.guard';
 import { AdminGuard } from './auth/admin.guard';
 
@@ -18,6 +19,10 @@ export const routes: Routes = [
   {
     path: 'forgot-password',
     component: ForgotPasswordComponent
+  },
+  {
+    path: 'verify-email',
+    component: VerifyEmailComponent
   },
   {
     path: '',
@@ -48,6 +53,10 @@ export const routes: Routes = [
       {
         path: 'settings',
         loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent)
+      },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./pages/notifications/notifications-page.component').then(m => m.NotificationsPageComponent)
       },
       {
         path: 'admin/tickets/inbox',

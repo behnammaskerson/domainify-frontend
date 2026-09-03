@@ -28,7 +28,8 @@
       "totpHint": "2FA'yı etkinleştirirken kaydettiyseniz tek kullanımlık yedek kod da kullanabilirsiniz.",
       "totpCode": "Kimlik doğrulama kodu",
       "verify": "Doğrula",
-      "backToLogin": "Girişe dön"
+      "backToLogin": "Girişe dön",
+      "emailNotVerified": "E-posta adresiniz henüz doğrulanmadı. Gelen kutunuzu kontrol edin veya doğrulama e-postasını yeniden gönderin."
     },
     "register": {
       "title": "Hesabınızı oluşturun",
@@ -50,7 +51,16 @@
       "passwordStrong": "Güçlü",
       "feature1": "Satış için alan adı listeleyin",
       "feature2": "Alan adı değerini analiz edin",
-      "feature3": "Gelirinizi takip edin"
+      "feature3": "Gelirinizi takip edin",
+      "emailVerificationHint": "Kayıttan sonra hesabınızı güvence altına almak için doğrulama bağlantısı göndereceğiz.",
+      "policyLoading": "Şifre kuralları yükleniyor…",
+      "successTitle": "Gelen kutunuzu kontrol edin",
+      "successSubtitle": "Giriş yapmadan önce e-postanızı doğrulayın.",
+      "verificationSentTo": "{{email}} adresine doğrulama bağlantısı gönderdik.",
+      "verificationNote": "Almadınız mı? Spam klasörünü kontrol edin veya yeniden gönderin.",
+      "resendVerification": "Doğrulama e-postasını yeniden gönder",
+      "resendSent": "Doğrulama e-postası gönderildi",
+      "backToSignIn": "Girişe dön"
     },
     "forgotPassword": {
       "title": "Şifrenizi sıfırlayın",
@@ -62,10 +72,23 @@
       "back": "Girişe dön",
       "loading": "Gönderiliyor..."
     },
+    "verifyEmail": {
+      "title": "E-postanızı doğrulayın",
+      "subtitlePending": "E-posta adresi doğrulanıyor…",
+      "subtitleSuccess": "E-postanız doğrulandı",
+      "subtitleFailed": "Doğrulama tamamlanamadı",
+      "heroTitle": "Son bir adım",
+      "heroSupport": "E-posta doğrulama hesabınızı güvence altına alır ve erişimi kurtarmanıza yardımcı olur.",
+      "success": "E-posta adresiniz doğrulandı.",
+      "missingToken": "Doğrulama bağlantısı eksik veya geçersiz.",
+      "goProfile": "Profile git",
+      "backLogin": "Girişe dön"
+    },
     "validation": {
       "required": "Bu alan zorunludur",
       "email": "Geçerli bir e-posta girin",
       "minLength": "En az 8 karakter",
+      "minNameLength": "En az 2 karakter",
       "passwordMismatch": "Şifreler eşleşmiyor",
       "termsRequired": "Şartları kabul etmelisiniz"
     },
@@ -82,6 +105,7 @@
   },
   "menu": {
     "dashboard": "Kontrol Paneli",
+    "notifications": "Bildirimler",
     "domains": "Alan Adlarım",
     "analyzer": "Alan Adı Analizörü",
     "marketplace": "Pazar Yeri",
@@ -878,6 +902,7 @@
     "portfolio": "Portföy",
     "addNew": "Yeni Alan Adı Ekle",
     "search": "Alan adı ara...",
+    "deleteTitle": "Alan adını sil",
     "deleteConfirm": "{{domain}} alan adını silmek istediğinize emin misiniz?",
     "filters": {
       "all": "Tümü",
@@ -1043,7 +1068,24 @@
       "phoneIncomplete": "Ülke seçin ve cep telefonunuzu girin",
       "phoneInvalid": "Seçilen ülke için geçerli bir cep telefonu girin",
       "save": "Profili Kaydet",
-      "saved": "Profil başarıyla güncellendi"
+      "saved": "Profil başarıyla güncellendi",
+      "emailVerified": "E-posta doğrulandı",
+      "emailUnverified": "E-posta doğrulanmadı",
+      "sendVerification": "Doğrulama e-postası gönder",
+      "sendingVerification": "Gönderiliyor…",
+      "verificationSent": "Doğrulama e-postası gönderildi",
+      "verificationSentHint": "Yeni e-postanızı doğrulamak için gelen kutunuzu kontrol edin",
+      "phoneVerified": "Mobil doğrulandı",
+      "phoneUnverified": "Mobil doğrulanmadı",
+      "sendPhoneVerification": "Doğrulama kodu gönder",
+      "sendingPhoneVerification": "Gönderiliyor…",
+      "phoneVerificationSent": "Doğrulama kodu gönderildi",
+      "phoneVerificationSentHint": "Yeni mobil numaranızı doğrulamak için SMS kodunu girin",
+      "phoneOtpLabel": "Doğrulama kodu",
+      "phoneOtpPlaceholder": "6 haneli kod",
+      "verifyPhone": "Mobili doğrula",
+      "verifyingPhone": "Doğrulanıyor…",
+      "phoneVerifiedSuccess": "Mobil numara doğrulandı"
     },
     "password": {
       "title": "Şifre Değiştir",
@@ -1079,6 +1121,7 @@
       "minLengthRange": "4 ile 128 arasında bir değer girin",
       "maxLengthRange": "4 ile 256 arasında bir değer girin",
       "reqMinLength": "En az {{n}} karakter",
+      "reqMaxLength": "En fazla {{n}} karakter",
       "reqUppercase": "Büyük harf ekleyin",
       "reqLowercase": "Küçük harf ekleyin",
       "reqDigit": "Rakam ekleyin",
@@ -1374,9 +1417,14 @@
       "changeRole": "Rolü Değiştir"
     },
     "confirm": {
-      "delete": "{{name}} silinsin mi?",
-      "enable": "{{name}} etkinleştirilsin mi?",
-      "disable": "{{name}} devre dışı bırakılsın mı?"
+      "deleteTitle": "Kullanıcı hesabı silinsin mi?",
+      "delete": "{{name}} ({{email}}) kalıcı olarak silinecek. Bu işlem geri alınamaz.",
+      "deleteHint": "Biletler veya diğer kayıtlarla bağlantılı kullanıcılar silinemez.",
+      "deleteConfirm": "Kullanıcıyı sil",
+      "enableTitle": "Kullanıcı hesabını etkinleştir",
+      "enable": "{{name}} ({{email}}) etkinleştirilsin mi? Tekrar giriş yapabilecek.",
+      "disableTitle": "Kullanıcı hesabını devre dışı bırak",
+      "disable": "{{name}} ({{email}}) devre dışı bırakılsın mı? Artık giriş yapamayacak."
     },
     "messages": {
       "created": "Kullanıcı oluşturuldu",
@@ -1451,6 +1499,7 @@
     "UNEXPECTED_ERROR": "Bir hata oluştu. Lütfen tekrar deneyin.",
     "USER_NOT_FOUND": "Kullanıcı bulunamadı",
     "CANNOT_DELETE_SELF": "Kendi hesabınızı silemezsiniz",
+    "USER_IN_USE": "Kullanıcı biletler veya diğer kayıtlarla ilişkili olduğu için silinemez",
     "CANNOT_DISABLE_SELF": "Kendi hesabınızı devre dışı bırakamazsınız",
     "INVALID_CURRENT_PASSWORD": "Mevcut şifre yanlış",
     "INVALID_AVATAR": "Geçersiz avatar. 5MB altında JPEG, PNG veya WebP kullanın",
@@ -1469,6 +1518,18 @@
     "SMS_PACK_ID_REQUIRED": "SMS paket kimliği gerekli",
     "EMAIL_CONFIG_INVALID": "Geçersiz e-posta sunucusu yapılandırması",
     "EMAIL_CONFIG_DISABLED": "E-posta sunucusu etkin değil",
+    "EMAIL_ALREADY_VERIFIED": "E-postanız zaten doğrulandı",
+    "EMAIL_NOT_VERIFIED": "Giriş yapmadan önce e-postanızı doğrulayın",
+    "EMAIL_VERIFICATION_DISABLED": "E-posta sunucusu yapılandırılmamış. Yöneticiden Ayarlar'da SMTP'yi etkinleştirmesini isteyin.",
+    "EMAIL_VERIFICATION_INVALID": "Doğrulama bağlantısı geçersiz veya süresi dolmuş",
+    "PHONE_NOT_SET": "Önce profilinize bir mobil numara ekleyin",
+    "PHONE_INVALID": "Mobil numara SMS doğrulaması için geçerli değil",
+    "PHONE_ALREADY_VERIFIED": "Mobil numaranız zaten doğrulandı",
+    "PHONE_VERIFICATION_DISABLED": "SMS yapılandırılmamış. Yöneticiden Ayarlar'da SMS kurmasını isteyin.",
+    "PHONE_VERIFICATION_INVALID": "Doğrulama kodu geçersiz veya süresi dolmuş",
+    "PHONE_VERIFICATION_SEND_FAILED": "Doğrulama SMS'i gönderilemedi",
+    "PHONE_VERIFICATION_COOLDOWN": "Yeni kod istemeden önce lütfen bekleyin",
+    "PHONE_VERIFICATION_TOO_MANY_ATTEMPTS": "Çok fazla başarısız deneme. Yeni kod isteyin.",
     "EMAIL_HOST_REQUIRED": "E-posta etkinken SMTP ana bilgisayarı gerekli",
     "EMAIL_FROM_REQUIRED": "E-posta etkinken gönderen adresi gerekli",
     "EMAIL_PASSWORD_REQUIRED": "Kullanıcı adı ayarlandığında SMTP parolası gerekli",
@@ -1552,6 +1613,40 @@
     "minutesAgo": "{{count}} dakika önce",
     "hoursAgo": "{{count}} saat önce",
     "daysAgo": "{{count}} gün önce"
+  },
+  "notifications": {
+    "title": "Bildirimler",
+    "empty": "Henüz bildirim yok",
+    "markAllRead": "Tümünü okundu işaretle",
+    "viewAll": "Tüm bildirimleri gör",
+    "someone": "Bir kullanıcı",
+    "page": {
+      "eyebrow": "Etkinlik",
+      "title": "Bildirimler",
+      "subtitle": "Bilet güncellemeleri, bahsetmeler ve atama uyarıları tek yerde.",
+      "refresh": "Yenile",
+      "filterLabel": "Bildirim filtresi",
+      "filterAll": "Tümü",
+      "filterUnread": "Okunmamış",
+      "emptyUnread": "Okunmamış bildiriminiz yok.",
+      "allMarkedRead": "Tüm bildirimler okundu olarak işaretlendi"
+    },
+    "time": {
+      "justNow": "Az önce",
+      "minutesAgo": "{{count}} dk önce",
+      "hoursAgo": "{{count}} sa önce",
+      "daysAgo": "{{count}} g önce"
+    },
+    "types": {
+      "TICKET_CREATED": "{{actor}} {{ticketNumber}} oluşturdu",
+      "TICKET_CUSTOMER_REPLY": "{{actor}} {{ticketNumber}} yanıtladı",
+      "TICKET_STAFF_REPLY": "Destek {{ticketNumber}} yanıtladı",
+      "TICKET_MENTION": "{{actor}} sizi {{ticketNumber}} içinde etiketledi",
+      "TICKET_STATUS_CHANGED": "{{ticketNumber}} durumu: {{statusFrom}} → {{statusTo}}",
+      "TICKET_ASSIGNED": "{{ticketNumber}} size atandı",
+      "TICKET_CLOSED": "{{ticketNumber}} kapatıldı",
+      "TICKET_REOPENED": "{{ticketNumber}} yeniden açıldı"
+    }
   },
   "toolbar": {
     "profile": "Profil",

@@ -7,8 +7,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
+import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { LocaleCurrencyPipe, LocaleDatePipe, LocaleNumberPipe } from '../../pipes/locale-format.pipe';
 
 @Component({
@@ -23,6 +25,7 @@ import { LocaleCurrencyPipe, LocaleDatePipe, LocaleNumberPipe } from '../../pipe
     MatFormFieldModule,
     MatMenuModule,
     MatTooltipModule,
+    MatDialogModule,
     TranslateModule,
     PageHeroComponent,
     LocaleCurrencyPipe,
@@ -199,6 +202,7 @@ import { LocaleCurrencyPipe, LocaleDatePipe, LocaleNumberPipe } from '../../pipe
 })
 export class DomainsComponent {
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
 
   displayedColumns = ['name', 'status', 'price', 'expires', 'actions'];
   activeFilter = 'all';
@@ -228,12 +232,28 @@ export class DomainsComponent {
   }
 
   onDelete(domain: { name: string }): void {
-    const message = this.translate.instant('domains.deleteConfirm', { domain: domain.name });
-    if (confirm(message)) {
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      maxWidth: '95vw',
+      autoFocus: 'dialog',
+      restoreFocus: true,
+      data: {
+        titleKey: 'domains.deleteTitle',
+        messageKey: 'domains.deleteConfirm',
+        messageParams: { domain: domain.name },
+        confirmKey: 'common.delete',
+        confirmColor: 'warn'
+      }
+    });
+
+    ref.afterClosed().subscribe((confirmed) => {
+      if (!confirmed) {
+        return;
+      }
       const index = this.domains.indexOf(domain as (typeof this.domains)[number]);
       if (index > -1) {
         this.domains.splice(index, 1);
       }
-    }
+    });
   }
 }

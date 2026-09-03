@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, FormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -56,6 +56,7 @@ interface SettingsNavItem {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     MatIconModule,
     MatSlideToggleModule,
     MatFormFieldModule,
@@ -135,6 +136,26 @@ interface SettingsNavItem {
               <mat-label>{{ 'settings.profile.email' | translate }}</mat-label>
               <input matInput type="email" formControlName="email">
             </mat-form-field>
+
+            <div class="email-verification-row">
+              @if (emailVerified) {
+                <span class="email-status verified">
+                  <mat-icon>verified</mat-icon>
+                  {{ 'settings.profile.emailVerified' | translate }}
+                </span>
+              } @else {
+                <span class="email-status unverified">
+                  <mat-icon>mark_email_unread</mat-icon>
+                  {{ 'settings.profile.emailUnverified' | translate }}
+                </span>
+                <button mat-stroked-button type="button"
+                        (click)="sendVerificationEmail()"
+                        [disabled]="verificationSending">
+                  <mat-icon>send</mat-icon>
+                  {{ (verificationSending ? 'settings.profile.sendingVerification' : 'settings.profile.sendVerification') | translate }}
+                </button>
+              }
+            </div>
             <app-ltr-host class="phone-row">
               <div class="phone-field-block country-field">
                 <span class="phone-field-label">{{ 'settings.profile.countryCode' | translate }}</span>
@@ -204,6 +225,47 @@ interface SettingsNavItem {
                 <div class="phone-row-error">{{ 'settings.profile.phoneInvalid' | translate }}</div>
               }
             </app-ltr-host>
+            @if (hasProfilePhone) {
+              <div class="phone-verification-row">
+                @if (phoneVerified) {
+                  <span class="phone-status verified">
+                    <mat-icon>verified</mat-icon>
+                    {{ 'settings.profile.phoneVerified' | translate }}
+                  </span>
+                } @else {
+                  <span class="phone-status unverified">
+                    <mat-icon>phonelink_lock</mat-icon>
+                    {{ 'settings.profile.phoneUnverified' | translate }}
+                  </span>
+                  <button mat-stroked-button type="button"
+                          (click)="sendPhoneVerification()"
+                          [disabled]="phoneVerificationSending || profileForm.dirty">
+                    <mat-icon>sms</mat-icon>
+                    {{ (phoneVerificationSending ? 'settings.profile.sendingPhoneVerification' : 'settings.profile.sendPhoneVerification') | translate }}
+                  </button>
+                  @if (phoneOtpSent) {
+                    <mat-form-field appearance="outline" class="phone-otp-field">
+                      <mat-icon matPrefix>dialpad</mat-icon>
+                      <mat-label>{{ 'settings.profile.phoneOtpLabel' | translate }}</mat-label>
+                      <input matInput
+                             dir="ltr"
+                             inputmode="numeric"
+                             autocomplete="one-time-code"
+                             maxlength="6"
+                             [(ngModel)]="phoneOtpCode"
+                             [ngModelOptions]="{ standalone: true }"
+                             [placeholder]="'settings.profile.phoneOtpPlaceholder' | translate">
+                    </mat-form-field>
+                    <button mat-flat-button color="primary" type="button"
+                            (click)="verifyPhone()"
+                            [disabled]="phoneVerifying || !phoneOtpCode.trim()">
+                      <mat-icon>check_circle</mat-icon>
+                      {{ (phoneVerifying ? 'settings.profile.verifyingPhone' : 'settings.profile.verifyPhone') | translate }}
+                    </button>
+                  }
+                }
+              </div>
+            }
             <div class="form-actions">
               <button mat-flat-button color="primary" type="submit" [disabled]="profileForm.invalid || profileSaving">
                 <mat-icon>save</mat-icon>
@@ -797,6 +859,44 @@ interface SettingsNavItem {
       width: 100%;
     }
 
+    .email-verification-row,
+    .phone-verification-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 8px;
+    }
+
+    .email-status,
+    .phone-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+    }
+
+    .email-status mat-icon,
+    .phone-status mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    .email-status.verified,
+    .phone-status.verified { color: #2e7d32; }
+    .email-status.unverified,
+    .phone-status.unverified { color: var(--text-muted); }
+
+    .phone-otp-field {
+      width: min(180px, 100%);
+      margin: 0;
+    }
+
+    .phone-otp-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
     .form-actions {
       display: flex;
       justify-content: flex-end;
@@ -1065,7 +1165,19 @@ export class SettingsComponent implements OnInit {
     return this.navItems.filter((item) => !item.adminOnly || this.authService.isAdmin());
   }
 
+  get hasProfilePhone(): boolean {
+    const raw = this.profileForm.getRawValue();
+    return !!(raw.phoneCountryCode?.trim() && raw.phoneNumber?.trim());
+  }
+
   profileSaving = false;
+  verificationSending = false;
+  emailVerified = true;
+  phoneVerified = true;
+  phoneVerificationSending = false;
+  phoneVerifying = false;
+  phoneOtpCode = '';
+  phoneOtpSent = false;
   passwordSaving = false;
   avatarSaving = false;
   totpBusy = false;
@@ -1772,6 +1884,10 @@ export class SettingsComponent implements OnInit {
     const first = user.firstName?.charAt(0) ?? '';
     const last = user.lastName?.charAt(0) ?? '';
     this.profileInitials = `${first}${last}`.toUpperCase() || user.email?.charAt(0).toUpperCase() || '?';
+    this.emailVerified = user.emailVerified !== false;
+    this.phoneVerified = user.phoneVerified !== false;
+    this.phoneOtpSent = false;
+    this.phoneOtpCode = '';
     if (!this.emailTestTo && user.email) {
       this.emailTestTo = user.email;
     }
@@ -1797,9 +1913,70 @@ export class SettingsComponent implements OnInit {
         this.applyUser(user);
         this.authService.setCurrentUser(user);
         this.snack(this.translate.instant('settings.profile.saved'));
+        if (!user.emailVerified) {
+          this.snack(this.translate.instant('settings.profile.verificationSentHint'));
+        }
+        if (user.phoneCountryCode && user.phoneNumber && user.phoneVerified === false) {
+          this.snack(this.translate.instant('settings.profile.phoneVerificationSentHint'));
+        }
       },
       error: (error) => {
         this.profileSaving = false;
+        this.showError(error);
+      }
+    });
+  }
+
+  sendVerificationEmail(): void {
+    if (this.verificationSending || this.emailVerified) {
+      return;
+    }
+    this.verificationSending = true;
+    this.usersService.sendVerificationEmail().subscribe({
+      next: () => {
+        this.verificationSending = false;
+        this.snack(this.translate.instant('settings.profile.verificationSent'));
+      },
+      error: (error) => {
+        this.verificationSending = false;
+        this.showError(error);
+      }
+    });
+  }
+
+  sendPhoneVerification(): void {
+    if (this.phoneVerificationSending || this.phoneVerified || !this.hasProfilePhone || this.profileForm.dirty) {
+      return;
+    }
+    this.phoneVerificationSending = true;
+    this.usersService.sendPhoneVerification().subscribe({
+      next: () => {
+        this.phoneVerificationSending = false;
+        this.phoneOtpSent = true;
+        this.snack(this.translate.instant('settings.profile.phoneVerificationSent'));
+      },
+      error: (error) => {
+        this.phoneVerificationSending = false;
+        this.showError(error);
+      }
+    });
+  }
+
+  verifyPhone(): void {
+    const code = this.phoneOtpCode.trim();
+    if (this.phoneVerifying || !code || this.phoneVerified) {
+      return;
+    }
+    this.phoneVerifying = true;
+    this.usersService.verifyPhone(code).subscribe({
+      next: (user) => {
+        this.phoneVerifying = false;
+        this.applyUser(user);
+        this.authService.setCurrentUser(user);
+        this.snack(this.translate.instant('settings.profile.phoneVerifiedSuccess'));
+      },
+      error: (error) => {
+        this.phoneVerifying = false;
         this.showError(error);
       }
     });

@@ -14,6 +14,10 @@ export interface User {
   phoneCountryCode?: string | null;
   phoneNumber?: string | null;
   totpEnabled?: boolean;
+  emailVerified?: boolean;
+  emailVerifiedAt?: string | null;
+  phoneVerified?: boolean;
+  phoneVerifiedAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
   creatorUsername?: string | null;
@@ -28,6 +32,7 @@ export interface AuthResponse {
   requiresTotp?: boolean;
   preAuthToken?: string | null;
   requiresPasswordChange?: boolean;
+  requiresEmailVerification?: boolean;
 }
 
 export interface LoginRequest {
@@ -87,8 +92,16 @@ export class AuthService {
 
   register(request: RegisterRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.API_URL}/auth/register`, request).pipe(
-      tap(response => this.saveToken(response))
+      tap(response => {
+        if (!response.requiresEmailVerification) {
+          this.saveToken(response);
+        }
+      })
     );
+  }
+
+  resendVerificationEmail(email: string): Observable<{ message?: string }> {
+    return this.http.post<{ message?: string }>(`${this.API_URL}/auth/resend-verification-email`, { email });
   }
 
   logout(): void {
@@ -138,6 +151,18 @@ export class AuthService {
   getCurrentUser(): Observable<User> {
     return this.http.get<User>(`${this.API_URL}/users/me`, {
       headers: { Authorization: this.getAuthHeader() }
+    });
+  }
+
+  refreshCurrentUser(): Observable<User> {
+    return this.getCurrentUser().pipe(
+      tap((user) => this.setCurrentUser(user))
+    );
+  }
+
+  verifyEmail(token: string): Observable<{ message: string }> {
+    return this.http.get<{ message: string }>(`${this.API_URL}/auth/verify-email`, {
+      params: { token }
     });
   }
 

@@ -426,6 +426,7 @@ export class SidebarComponent implements OnInit {
 
   navItems: NavItem[] = [
     { icon: 'dashboard', labelKey: 'menu.dashboard', route: '/dashboard' },
+    { icon: 'notifications', labelKey: 'menu.notifications', route: '/notifications' },
     { icon: 'language', labelKey: 'menu.domains', route: '/domains' },
     { icon: 'analytics', labelKey: 'menu.analyzer', route: '/analyzer' },
     { icon: 'storefront', labelKey: 'menu.marketplace', route: '/marketplace' },

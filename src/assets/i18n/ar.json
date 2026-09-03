@@ -28,7 +28,8 @@
       "totpHint": "يمكنك أيضاً استخدام رمز نسخ احتياطي لمرة واحدة إذا حفظته عند تفعيل المصادقة الثنائية.",
       "totpCode": "رمز المصادقة",
       "verify": "تحقق",
-      "backToLogin": "العودة لتسجيل الدخول"
+      "backToLogin": "العودة لتسجيل الدخول",
+      "emailNotVerified": "لم يتم التحقق من بريدك بعد. تحقق من صندوق الوارد أو أعد إرسال رسالة التحقق."
     },
     "register": {
       "title": "إنشاء حسابك",
@@ -50,7 +51,16 @@
       "passwordStrong": "قوي",
       "feature1": "أدرج النطاقات للبيع",
       "feature2": "حلّل قيمة النطاق",
-      "feature3": "تتبّع إيراداتك"
+      "feature3": "تتبّع إيراداتك",
+      "emailVerificationHint": "سنرسل رابط تأكيد إلى هذا البريد بعد التسجيل.",
+      "policyLoading": "جارٍ تحميل قواعد كلمة المرور…",
+      "successTitle": "تحقق من بريدك",
+      "successSubtitle": "تحقق من بريدك قبل أن تتمكن من تسجيل الدخول.",
+      "verificationSentTo": "أرسلنا رابط التحقق إلى {{email}}.",
+      "verificationNote": "لم يصلك البريد؟ تحقق من البريد المزعج أو أعد الإرسال.",
+      "resendVerification": "إعادة إرسال رسالة التحقق",
+      "resendSent": "تم إرسال رسالة التحقق",
+      "backToSignIn": "العودة لتسجيل الدخول"
     },
     "forgotPassword": {
       "title": "إعادة تعيين كلمة المرور",
@@ -62,10 +72,23 @@
       "back": "العودة لتسجيل الدخول",
       "loading": "جارٍ الإرسال..."
     },
+    "verifyEmail": {
+      "title": "تحقق من بريدك",
+      "subtitlePending": "جارٍ تأكيد عنوان البريد…",
+      "subtitleSuccess": "تم التحقق من بريدك",
+      "subtitleFailed": "تعذّر إكمال التحقق",
+      "heroTitle": "خطوة أخيرة",
+      "heroSupport": "يساعد التحقق من البريد في تأمين حسابك واستعادة الوصول عند الحاجة.",
+      "success": "تم التحقق من عنوان بريدك الإلكتروني.",
+      "missingToken": "رابط التحقق مفقود أو غير صالح.",
+      "goProfile": "الذهاب إلى الملف الشخصي",
+      "backLogin": "العودة لتسجيل الدخول"
+    },
     "validation": {
       "required": "هذا الحقل مطلوب",
       "email": "يرجى إدخال بريد إلكتروني صالح",
       "minLength": "الحد الأدنى 8 أحرف",
+      "minNameLength": "حرفان على الأقل",
       "passwordMismatch": "كلمتا المرور غير متطابقتين",
       "termsRequired": "يجب قبول الشروط"
     },
@@ -82,6 +105,7 @@
   },
   "menu": {
     "dashboard": "لوحة التحكم",
+    "notifications": "الإشعارات",
     "domains": "نطاقاتي",
     "analyzer": "محلل النطاقات",
     "marketplace": "السوق",
@@ -873,6 +897,7 @@
     "portfolio": "المحفظة",
     "addNew": "إضافة نطاق جديد",
     "search": "ابحث عن النطاقات...",
+    "deleteTitle": "حذف النطاق",
     "deleteConfirm": "هل أنت متأكد من حذف {{domain}}؟",
     "filters": {
       "all": "الكل",
@@ -1021,7 +1046,24 @@
       "phoneIncomplete": "اختر الدولة وأدخل رقم الجوال",
       "phoneInvalid": "أدخل رقم جوال صالحاً للدولة المختارة",
       "save": "حفظ الملف",
-      "saved": "تم تحديث الملف بنجاح"
+      "saved": "تم تحديث الملف بنجاح",
+      "emailVerified": "البريد مُتحقق منه",
+      "emailUnverified": "البريد غير مُتحقق منه",
+      "sendVerification": "إرسال رسالة التحقق",
+      "sendingVerification": "جارٍ الإرسال…",
+      "verificationSent": "تم إرسال رسالة التحقق",
+      "verificationSentHint": "تحقق من بريدك لتأكيد عنوان البريد الجديد",
+      "phoneVerified": "الجوال مُتحقق منه",
+      "phoneUnverified": "الجوال غير مُتحقق منه",
+      "sendPhoneVerification": "إرسال رمز التحقق",
+      "sendingPhoneVerification": "جارٍ الإرسال…",
+      "phoneVerificationSent": "تم إرسال رمز التحقق",
+      "phoneVerificationSentHint": "أدخل رمز الرسالة النصية لتأكيد رقم الجوال الجديد",
+      "phoneOtpLabel": "رمز التحقق",
+      "phoneOtpPlaceholder": "رمز من 6 أرقام",
+      "verifyPhone": "تأكيد الجوال",
+      "verifyingPhone": "جارٍ التأكيد…",
+      "phoneVerifiedSuccess": "تم تأكيد رقم الجوال"
     },
     "password": {
       "title": "تغيير كلمة المرور",
@@ -1057,6 +1099,7 @@
       "minLengthRange": "أدخل قيمة بين 4 و 128",
       "maxLengthRange": "أدخل قيمة بين 4 و 256",
       "reqMinLength": "على الأقل {{n}} أحرف",
+      "reqMaxLength": "بحد أقصى {{n}} أحرف",
       "reqUppercase": "تضمين حرف كبير",
       "reqLowercase": "تضمين حرف صغير",
       "reqDigit": "تضمين رقم",
@@ -1352,9 +1395,14 @@
       "changeRole": "تغيير الدور"
     },
     "confirm": {
-      "delete": "حذف {{name}}؟",
-      "enable": "تفعيل {{name}}؟",
-      "disable": "تعطيل {{name}}؟"
+      "deleteTitle": "حذف حساب المستخدم؟",
+      "delete": "أنت على وشك حذف {{name}} ({{email}}) نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+      "deleteHint": "لا يمكن حذف المستخدمين المرتبطين بتذاكر أو سجلات أخرى.",
+      "deleteConfirm": "حذف المستخدم",
+      "enableTitle": "تفعيل حساب المستخدم",
+      "enable": "تفعيل {{name}} ({{email}})؟ سيتمكن من تسجيل الدخول مجدداً.",
+      "disableTitle": "تعطيل حساب المستخدم",
+      "disable": "تعطيل {{name}} ({{email}})؟ لن يتمكن من تسجيل الدخول."
     },
     "messages": {
       "created": "تم إنشاء المستخدم",
@@ -1429,6 +1477,7 @@
     "UNEXPECTED_ERROR": "حدث خطأ. يرجى المحاولة مرة أخرى.",
     "USER_NOT_FOUND": "المستخدم غير موجود",
     "CANNOT_DELETE_SELF": "لا يمكنك حذف حسابك",
+    "USER_IN_USE": "لا يمكن حذف المستخدم لأنه مرتبط بتذاكر أو سجلات أخرى",
     "CANNOT_DISABLE_SELF": "لا يمكنك تعطيل حسابك",
     "INVALID_CURRENT_PASSWORD": "كلمة المرور الحالية غير صحيحة",
     "INVALID_AVATAR": "صورة غير صالحة. استخدم JPEG أو PNG أو WebP حتى 5 ميجابايت",
@@ -1447,6 +1496,18 @@
     "SMS_PACK_ID_REQUIRED": "معرّف حزمة الرسائل القصيرة مطلوب",
     "EMAIL_CONFIG_INVALID": "إعدادات خادم البريد غير صالحة",
     "EMAIL_CONFIG_DISABLED": "خادم البريد غير مفعّل",
+    "EMAIL_ALREADY_VERIFIED": "بريدك مُتحقق منه بالفعل",
+    "EMAIL_NOT_VERIFIED": "تحقق من بريدك قبل تسجيل الدخول",
+    "EMAIL_VERIFICATION_DISABLED": "خادم البريد غير مُعد. اطلب من المسؤول تفعيل SMTP في الإعدادات.",
+    "EMAIL_VERIFICATION_INVALID": "رابط التحقق غير صالح أو منتهي الصلاحية",
+    "PHONE_NOT_SET": "أضف رقم الجوال إلى ملفك الشخصي أولاً",
+    "PHONE_INVALID": "رقم الجوال غير صالح للتحقق عبر الرسائل النصية",
+    "PHONE_ALREADY_VERIFIED": "رقم جوالك مُتحقق منه بالفعل",
+    "PHONE_VERIFICATION_DISABLED": "الرسائل النصية غير مُعدّة. اطلب من المسؤول إعدادها في الإعدادات.",
+    "PHONE_VERIFICATION_INVALID": "رمز التحقق غير صالح أو منتهي الصلاحية",
+    "PHONE_VERIFICATION_SEND_FAILED": "فشل إرسال رسالة التحقق",
+    "PHONE_VERIFICATION_COOLDOWN": "يرجى الانتظار قبل طلب رمز جديد",
+    "PHONE_VERIFICATION_TOO_MANY_ATTEMPTS": "محاولات فاشلة كثيرة. اطلب رمزاً جديداً.",
     "EMAIL_HOST_REQUIRED": "مضيف SMTP مطلوب عند تفعيل البريد",
     "EMAIL_FROM_REQUIRED": "عنوان المرسل مطلوب عند تفعيل البريد",
     "EMAIL_PASSWORD_REQUIRED": "كلمة مرور SMTP مطلوبة عند تعيين اسم المستخدم",
@@ -1530,6 +1591,40 @@
     "minutesAgo": "منذ {{count}} دقيقة",
     "hoursAgo": "منذ {{count}} ساعة",
     "daysAgo": "منذ {{count}} يوم"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "empty": "لا توجد إشعارات بعد",
+    "markAllRead": "تعليم الكل كمقروء",
+    "viewAll": "عرض كل الإشعارات",
+    "someone": "مستخدم",
+    "page": {
+      "eyebrow": "النشاط",
+      "title": "الإشعارات",
+      "subtitle": "تحديثات التذاكر والإشارات وتنبيهات التعيين في مكان واحد.",
+      "refresh": "تحديث",
+      "filterLabel": "تصفية الإشعارات",
+      "filterAll": "الكل",
+      "filterUnread": "غير مقروء",
+      "emptyUnread": "لا توجد إشعارات غير مقروءة.",
+      "allMarkedRead": "تم تعليم جميع الإشعارات كمقروءة"
+    },
+    "time": {
+      "justNow": "الآن",
+      "minutesAgo": "منذ {{count}} د",
+      "hoursAgo": "منذ {{count}} س",
+      "daysAgo": "منذ {{count}} ي"
+    },
+    "types": {
+      "TICKET_CREATED": "أنشأ {{actor}} التذكرة {{ticketNumber}}",
+      "TICKET_CUSTOMER_REPLY": "رد {{actor}} على {{ticketNumber}}",
+      "TICKET_STAFF_REPLY": "رد الدعم على {{ticketNumber}}",
+      "TICKET_MENTION": "أشار {{actor}} إليك في {{ticketNumber}}",
+      "TICKET_STATUS_CHANGED": "حالة {{ticketNumber}}: {{statusFrom}} ← {{statusTo}}",
+      "TICKET_ASSIGNED": "تم تعيين {{ticketNumber}} لك",
+      "TICKET_CLOSED": "تم إغلاق {{ticketNumber}}",
+      "TICKET_REOPENED": "تم إعادة فتح {{ticketNumber}}"
+    }
   },
   "toolbar": {
     "profile": "الملف الشخصي",

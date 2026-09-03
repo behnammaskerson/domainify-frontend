@@ -26,6 +26,7 @@ import { TranslationService } from '../../services/translation.service';
 import { PasswordPolicy, PasswordPolicyService } from '../../services/password-policy.service';
 import { buildPasswordValidators } from '../../utils/password-policy.validators';
 import { LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
+import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { findPhoneCountry, formatPhoneDigits } from '../../utils/phone-countries';
 import { Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 
@@ -1509,16 +1510,32 @@ export class UsersComponent implements OnInit {
 
   toggleEnabled(user: ManagedUser): void {
     const next = !user.enabled;
-    const confirmKey = next ? 'users.confirm.enable' : 'users.confirm.disable';
-    if (!confirm(this.translate.instant(confirmKey, { name: `${user.firstName} ${user.lastName}` }))) {
-      return;
-    }
-    this.usersService.setEnabled(user.id, next).subscribe({
-      next: () => {
-        this.snack(this.translate.instant(next ? 'users.messages.enabled' : 'users.messages.disabled'));
-        this.loadUsers();
-      },
-      error: (error) => this.showError(error)
+    const displayName = `${user.firstName} ${user.lastName}`.trim();
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '440px',
+      maxWidth: '95vw',
+      autoFocus: 'dialog',
+      restoreFocus: true,
+      data: {
+        titleKey: next ? 'users.confirm.enableTitle' : 'users.confirm.disableTitle',
+        messageKey: next ? 'users.confirm.enable' : 'users.confirm.disable',
+        messageParams: { name: displayName, email: user.email },
+        confirmKey: next ? 'users.actions.enable' : 'users.actions.disable',
+        confirmColor: next ? 'primary' : 'warn'
+      }
+    });
+
+    ref.afterClosed().subscribe((confirmed) => {
+      if (!confirmed) {
+        return;
+      }
+      this.usersService.setEnabled(user.id, next).subscribe({
+        next: () => {
+          this.snack(this.translate.instant(next ? 'users.messages.enabled' : 'users.messages.disabled'));
+          this.loadUsers();
+        },
+        error: (error) => this.showError(error)
+      });
     });
   }
 
@@ -1533,15 +1550,33 @@ export class UsersComponent implements OnInit {
   }
 
   deleteUser(user: ManagedUser): void {
-    if (!confirm(this.translate.instant('users.confirm.delete', { name: `${user.firstName} ${user.lastName}` }))) {
-      return;
-    }
-    this.usersService.delete(user.id).subscribe({
-      next: () => {
-        this.snack(this.translate.instant('users.messages.deleted'));
-        this.loadUsers();
-      },
-      error: (error) => this.showError(error)
+    const displayName = `${user.firstName} ${user.lastName}`.trim();
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '460px',
+      maxWidth: '95vw',
+      autoFocus: 'dialog',
+      restoreFocus: true,
+      data: {
+        titleKey: 'users.confirm.deleteTitle',
+        messageKey: 'users.confirm.delete',
+        messageParams: { name: displayName, email: user.email },
+        hintKey: 'users.confirm.deleteHint',
+        confirmKey: 'users.confirm.deleteConfirm',
+        confirmColor: 'warn'
+      }
+    });
+
+    ref.afterClosed().subscribe((confirmed) => {
+      if (!confirmed) {
+        return;
+      }
+      this.usersService.delete(user.id).subscribe({
+        next: () => {
+          this.snack(this.translate.instant('users.messages.deleted'));
+          this.loadUsers();
+        },
+        error: (error) => this.showError(error)
+      });
     });
   }
 

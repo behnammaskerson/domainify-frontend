@@ -148,6 +148,18 @@ export class UsersService {
     return this.http.delete<ManagedUser>(`${this.API_URL}/users/me/avatar`);
   }
 
+  sendVerificationEmail(): Observable<{ message?: string }> {
+    return this.http.post<{ message?: string }>(`${this.API_URL}/users/me/send-verification-email`, {});
+  }
+
+  sendPhoneVerification(): Observable<{ message?: string }> {
+    return this.http.post<{ message?: string }>(`${this.API_URL}/users/me/send-phone-verification`, {});
+  }
+
+  verifyPhone(code: string): Observable<User> {
+    return this.http.post<User>(`${this.API_URL}/users/me/verify-phone`, { code });
+  }
+
   resolveAvatarUrl(avatarUrl?: string | null): string | null {
     if (!avatarUrl) {
       return null;
