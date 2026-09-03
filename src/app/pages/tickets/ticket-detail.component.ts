@@ -19,6 +19,7 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-
 import { TicketMergeDialogComponent } from '../../components/ticket-merge-dialog/ticket-merge-dialog.component';
 import { TicketSplitDialogComponent } from '../../components/ticket-split-dialog/ticket-split-dialog.component';
 import { TicketLinkDialogComponent } from '../../components/ticket-link-dialog/ticket-link-dialog.component';
+import { DatetimeFilterFieldComponent } from '../../components/datetime-filter-field/datetime-filter-field.component';
 import { TicketAttachmentViewerDialogComponent } from '../../components/ticket-attachment-viewer-dialog/ticket-attachment-viewer-dialog.component';
 import { LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
 import { MarkdownPipe } from '../../pipes/markdown.pipe';
@@ -57,6 +58,7 @@ type TicketDetailMode = 'customer' | 'admin';
     PageHeroComponent,
     TicketPortalNavComponent,
     MarkdownEditorComponent,
+    DatetimeFilterFieldComponent,
     LocaleDatePipe,
     LocaleDigitsPipe,
     MarkdownPipe
@@ -178,7 +180,54 @@ type TicketDetailMode = 'customer' | 'admin';
               <span class="meta-label">{{ 'tickets.detail.meta.created' | translate }}</span>
               <span class="meta-created-value" dir="ltr">{{ ticket.createdAt | localeDate:dateTimeFormat }}</span>
             </div>
+            <div class="meta-item meta-due" [class.overdue]="ticket.overdue">
+              <span class="meta-label">{{ 'tickets.detail.meta.dueAt' | translate }}</span>
+              @if (ticket.dueAt) {
+                <span class="meta-due-value" dir="ltr">{{ ticket.dueAt | localeDate:dateTimeFormat }}</span>
+                @if (ticket.overdue) {
+                  <span class="overdue-pill">{{ 'tickets.detail.overdue' | translate }}</span>
+                }
+              } @else {
+                <span class="meta-due-value muted-inline">—</span>
+              }
+            </div>
           </div>
+
+          @if (ticket.overdue) {
+            <p class="lifecycle-banner panel-surface overdue-banner">
+              <mat-icon>schedule</mat-icon>
+              <span>{{ 'tickets.detail.overdueNotice' | translate }}</span>
+            </p>
+          }
+
+          @if (isAdmin && canEditDueDate) {
+            <div class="sla-card panel-surface">
+              <div class="tags-header">
+                <div>
+                  <h2>{{ 'tickets.detail.slaTitle' | translate }}</h2>
+                  <p>{{ 'tickets.detail.slaHint' | translate }}</p>
+                </div>
+              </div>
+              <app-datetime-filter-field
+                labelKey="tickets.detail.meta.dueAt"
+                timeLabelKey="tickets.detail.meta.dueTime"
+                [isoValue]="draftDueAt"
+                (isoValueChange)="draftDueAt = $event"
+                [fullWidth]="true"
+                [compact]="true" />
+              <div class="sla-actions">
+                <button mat-stroked-button type="button" [disabled]="dueDateSaving" (click)="applySlaDueDate()">
+                  {{ 'tickets.detail.applySla' | translate }}
+                </button>
+                <button mat-stroked-button type="button" [disabled]="dueDateSaving" (click)="clearDueDate()">
+                  {{ 'tickets.detail.clearDueDate' | translate }}
+                </button>
+                <button mat-flat-button color="primary" type="button" [disabled]="dueDateSaving" (click)="saveDueDate()">
+                  {{ (dueDateSaving ? 'tickets.detail.savingDueDate' : 'tickets.detail.saveDueDate') | translate }}
+                </button>
+              </div>
+            </div>
+          }
 
           @if (ticket.splitFromPublicNumber) {
             <p class="lifecycle-banner panel-surface merge-banner">
@@ -532,7 +581,7 @@ type TicketDetailMode = 'customer' | 'admin';
       padding: 32px 20px; text-align: center; color: var(--text-muted);
     }
     .meta-bar {
-      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 12px; padding: 14px 16px; margin-bottom: 16px;
     }
     .meta-item { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -546,6 +595,40 @@ type TicketDetailMode = 'customer' | 'admin';
       width: 100%;
       text-align: center;
       white-space: nowrap;
+    }
+    .meta-due {
+      align-items: center;
+      text-align: center;
+    }
+    .meta-due-value {
+      display: block;
+      width: 100%;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .meta-due.overdue .meta-due-value { color: var(--danger, #c62828); font-weight: 600; }
+    .overdue-pill {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--danger, #c62828);
+      background: color-mix(in srgb, var(--danger, #c62828) 12%, transparent);
+      border: 1px solid color-mix(in srgb, var(--danger, #c62828) 35%, var(--border-color));
+    }
+    .overdue-banner {
+      color: var(--danger, #c62828);
+      border-color: color-mix(in srgb, var(--danger, #c62828) 35%, var(--border-color));
+    }
+    .sla-card { padding: 16px; margin-bottom: 16px; }
+    .sla-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 12px;
     }
     .meta-label {
       font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;
@@ -809,6 +892,9 @@ export class TicketDetailComponent implements OnInit {
   canMerge = false;
   canSplit = false;
   canLinkRelated = false;
+  canEditDueDate = false;
+  draftDueAt: string | null = null;
+  dueDateSaving = false;
   reopenUntil: string | null = null;
   loading = true;
   submitting = false;
@@ -1109,6 +1195,60 @@ export class TicketDetailComponent implements OnInit {
       },
       error: (error) => {
         this.lifecycleBusy = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  saveDueDate(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canEditDueDate || this.dueDateSaving) {
+      return;
+    }
+    this.dueDateSaving = true;
+    this.ticketService.updateAdminTicketDueDate(this.ticketId, { dueAt: this.draftDueAt }).subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.dueDateSaving = false;
+        this.snackBar.open(this.translate.instant('tickets.detail.dueDateSaved'), undefined, { duration: 3000 });
+      },
+      error: (error) => {
+        this.dueDateSaving = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  applySlaDueDate(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canEditDueDate || this.dueDateSaving) {
+      return;
+    }
+    this.dueDateSaving = true;
+    this.ticketService.updateAdminTicketDueDate(this.ticketId, { recalculateFromPriority: true }).subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.dueDateSaving = false;
+        this.snackBar.open(this.translate.instant('tickets.detail.slaApplied'), undefined, { duration: 3000 });
+      },
+      error: (error) => {
+        this.dueDateSaving = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  clearDueDate(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canEditDueDate || this.dueDateSaving) {
+      return;
+    }
+    this.dueDateSaving = true;
+    this.ticketService.updateAdminTicketDueDate(this.ticketId, { dueAt: null }).subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.dueDateSaving = false;
+        this.snackBar.open(this.translate.instant('tickets.detail.dueDateCleared'), undefined, { duration: 3000 });
+      },
+      error: (error) => {
+        this.dueDateSaving = false;
         this.showError(this.apiError.resolve(error));
       }
     });
@@ -1416,6 +1556,8 @@ export class TicketDetailComponent implements OnInit {
     this.canMerge = !!detail.canMerge;
     this.canSplit = !!detail.canSplit;
     this.canLinkRelated = !!detail.canLinkRelated;
+    this.canEditDueDate = !!detail.canEditDueDate;
+    this.draftDueAt = detail.ticket?.dueAt ?? null;
     this.reopenUntil = detail.reopenUntil ?? null;
     this.statusOptions = (detail.allowedNextStatuses ?? []).filter((status) => status !== detail.ticket?.status);
     this.selectedTags = [...(detail.ticket?.tags ?? [])];

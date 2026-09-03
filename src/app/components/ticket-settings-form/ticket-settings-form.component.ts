@@ -58,6 +58,32 @@ import { TicketAttachmentKind, TicketService } from '../../services/ticket.servi
           </section>
 
           <section class="section">
+            <h3>{{ 'settings.ticketSettings.slaSection' | translate }}</h3>
+            <p class="section-hint">{{ 'settings.ticketSettings.slaIntro' | translate }}</p>
+            <div class="limits-row">
+              <mat-form-field appearance="outline" class="limit-field">
+                <mat-label>{{ 'settings.ticketSettings.slaUrgentHours' | translate }}</mat-label>
+                <input matInput type="number" formControlName="slaUrgentHours" min="1" max="8760">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="limit-field">
+                <mat-label>{{ 'settings.ticketSettings.slaHighHours' | translate }}</mat-label>
+                <input matInput type="number" formControlName="slaHighHours" min="1" max="8760">
+              </mat-form-field>
+            </div>
+            <div class="limits-row">
+              <mat-form-field appearance="outline" class="limit-field">
+                <mat-label>{{ 'settings.ticketSettings.slaMediumHours' | translate }}</mat-label>
+                <input matInput type="number" formControlName="slaMediumHours" min="1" max="8760">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="limit-field">
+                <mat-label>{{ 'settings.ticketSettings.slaLowHours' | translate }}</mat-label>
+                <input matInput type="number" formControlName="slaLowHours" min="1" max="8760">
+              </mat-form-field>
+            </div>
+            <p class="section-hint">{{ 'settings.ticketSettings.slaHint' | translate }}</p>
+          </section>
+
+          <section class="section">
             <h3>{{ 'settings.ticketSettings.attachmentsSection' | translate }}</h3>
             <p class="section-hint">{{ 'settings.ticketSettings.attachmentsIntro' | translate }}</p>
 
@@ -154,6 +180,10 @@ export class TicketSettingsFormComponent implements OnInit {
   readonly form = this.fb.nonNullable.group({
     reopenWindowDays: [14, [Validators.required, Validators.min(1), Validators.max(3650)]],
     autoArchiveClosedAfterDays: [90, [Validators.required, Validators.min(0), Validators.max(3650)]],
+    slaUrgentHours: [4, [Validators.required, Validators.min(1), Validators.max(8760)]],
+    slaHighHours: [24, [Validators.required, Validators.min(1), Validators.max(8760)]],
+    slaMediumHours: [72, [Validators.required, Validators.min(1), Validators.max(8760)]],
+    slaLowHours: [168, [Validators.required, Validators.min(1), Validators.max(8760)]],
     maxAttachments: [5, [Validators.required, Validators.min(1), Validators.max(20)]],
     maxAttachmentSizeMb: [5, [Validators.required, Validators.min(1), Validators.max(50)]],
     allowedAttachmentKinds: this.fb.nonNullable.control<TicketAttachmentKind[]>(
@@ -194,6 +224,10 @@ export class TicketSettingsFormComponent implements OnInit {
     this.ticketService.saveTicketSettings({
       reopenWindowDays: Number(value.reopenWindowDays),
       autoArchiveClosedAfterDays: Number(value.autoArchiveClosedAfterDays),
+      slaUrgentHours: Number(value.slaUrgentHours),
+      slaHighHours: Number(value.slaHighHours),
+      slaMediumHours: Number(value.slaMediumHours),
+      slaLowHours: Number(value.slaLowHours),
       maxAttachments: Number(value.maxAttachments),
       maxAttachmentSizeMb: Number(value.maxAttachmentSizeMb),
       allowedAttachmentKinds: [...value.allowedAttachmentKinds]
@@ -227,6 +261,10 @@ export class TicketSettingsFormComponent implements OnInit {
   private applySettings(settings: {
     reopenWindowDays: number;
     autoArchiveClosedAfterDays?: number;
+    slaUrgentHours?: number;
+    slaHighHours?: number;
+    slaMediumHours?: number;
+    slaLowHours?: number;
     maxAttachments?: number;
     maxAttachmentSizeMb?: number;
     allowedAttachmentKinds?: TicketAttachmentKind[];
@@ -237,6 +275,10 @@ export class TicketSettingsFormComponent implements OnInit {
     this.form.reset({
       reopenWindowDays: settings.reopenWindowDays ?? 14,
       autoArchiveClosedAfterDays: settings.autoArchiveClosedAfterDays ?? 90,
+      slaUrgentHours: settings.slaUrgentHours ?? 4,
+      slaHighHours: settings.slaHighHours ?? 24,
+      slaMediumHours: settings.slaMediumHours ?? 72,
+      slaLowHours: settings.slaLowHours ?? 168,
       maxAttachments: settings.maxAttachments ?? 5,
       maxAttachmentSizeMb: settings.maxAttachmentSizeMb ?? 5,
       allowedAttachmentKinds: [...kinds]

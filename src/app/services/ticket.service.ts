@@ -110,6 +110,7 @@ export interface TicketDetail {
   canMerge?: boolean;
   canSplit?: boolean;
   canLinkRelated?: boolean;
+  canEditDueDate?: boolean;
   reopenUntil?: string;
   reopenWindowDays?: number;
   allowedNextStatuses?: TicketStatus[];
@@ -128,6 +129,10 @@ export interface TicketSettings {
   maxAttachmentSizeMb: number;
   allowedAttachmentKinds: TicketAttachmentKind[];
   autoArchiveClosedAfterDays: number;
+  slaUrgentHours: number;
+  slaHighHours: number;
+  slaMediumHours: number;
+  slaLowHours: number;
 }
 
 export interface TicketAttachmentPolicy {
@@ -368,6 +373,13 @@ export class TicketService {
     return this.http.delete<TicketDetail>(
       `${this.API_URL}/admin/tickets/${ticketId}/related/${relatedTicketId}`
     );
+  }
+
+  updateAdminTicketDueDate(
+    ticketId: number,
+    payload: { dueAt?: string | null; recalculateFromPriority?: boolean }
+  ): Observable<TicketDetail> {
+    return this.http.patch<TicketDetail>(`${this.API_URL}/admin/tickets/${ticketId}/due-date`, payload);
   }
 
   closeMineTicket(id: number): Observable<TicketDetail> {
