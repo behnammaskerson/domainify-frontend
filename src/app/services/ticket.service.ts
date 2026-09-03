@@ -46,13 +46,17 @@ export interface Ticket {
   dueAt?: string;
   overdue?: boolean;
   closedAt?: string;
+  archivedAt?: string;
+  deletedAt?: string;
+  archived?: boolean;
+  deleted?: boolean;
   tags?: TicketTag[];
   createdAt?: string;
   updatedAt?: string;
   attachments?: TicketAttachmentMeta[];
 }
 
-export type TicketInboxView = 'ALL' | 'UNASSIGNED' | 'MINE' | 'MENTIONS' | 'OVERDUE';
+export type TicketInboxView = 'ALL' | 'UNASSIGNED' | 'MINE' | 'MENTIONS' | 'OVERDUE' | 'ARCHIVED' | 'DELETED';
 
 export interface TicketTag {
   id: number;
@@ -84,6 +88,10 @@ export interface TicketDetail {
   canReply: boolean;
   canClose?: boolean;
   canReopen?: boolean;
+  canArchive?: boolean;
+  canUnarchive?: boolean;
+  canSoftDelete?: boolean;
+  canRestore?: boolean;
   reopenUntil?: string;
   reopenWindowDays?: number;
   allowedNextStatuses?: TicketStatus[];
@@ -96,6 +104,7 @@ export interface TicketSettings {
   maxAttachments: number;
   maxAttachmentSizeMb: number;
   allowedAttachmentKinds: TicketAttachmentKind[];
+  autoArchiveClosedAfterDays: number;
 }
 
 export interface TicketAttachmentPolicy {
@@ -295,6 +304,22 @@ export class TicketService {
 
   reopenAdminTicket(id: number): Observable<TicketDetail> {
     return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/reopen`, {});
+  }
+
+  archiveAdminTicket(id: number): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/archive`, {});
+  }
+
+  unarchiveAdminTicket(id: number): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/unarchive`, {});
+  }
+
+  softDeleteAdminTicket(id: number): Observable<TicketDetail> {
+    return this.http.delete<TicketDetail>(`${this.API_URL}/admin/tickets/${id}`);
+  }
+
+  restoreAdminTicket(id: number): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/restore`, {});
   }
 
   closeMineTicket(id: number): Observable<TicketDetail> {

@@ -45,6 +45,19 @@ import { TicketAttachmentKind, TicketService } from '../../services/ticket.servi
           </section>
 
           <section class="section">
+            <h3>{{ 'settings.ticketSettings.archiveSection' | translate }}</h3>
+            <p class="section-hint">{{ 'settings.ticketSettings.archiveIntro' | translate }}</p>
+            <mat-form-field appearance="outline" class="full-field">
+              <mat-label>{{ 'settings.ticketSettings.autoArchiveClosedAfterDays' | translate }}</mat-label>
+              <input matInput type="number" formControlName="autoArchiveClosedAfterDays" min="0" max="3650">
+              <mat-hint>{{ 'settings.ticketSettings.autoArchiveClosedAfterDaysHint' | translate }}</mat-hint>
+              @if (form.controls.autoArchiveClosedAfterDays.touched && form.controls.autoArchiveClosedAfterDays.invalid) {
+                <mat-error>{{ 'settings.ticketSettings.autoArchiveClosedAfterDaysInvalid' | translate }}</mat-error>
+              }
+            </mat-form-field>
+          </section>
+
+          <section class="section">
             <h3>{{ 'settings.ticketSettings.attachmentsSection' | translate }}</h3>
             <p class="section-hint">{{ 'settings.ticketSettings.attachmentsIntro' | translate }}</p>
 
@@ -140,6 +153,7 @@ export class TicketSettingsFormComponent implements OnInit {
 
   readonly form = this.fb.nonNullable.group({
     reopenWindowDays: [14, [Validators.required, Validators.min(1), Validators.max(3650)]],
+    autoArchiveClosedAfterDays: [90, [Validators.required, Validators.min(0), Validators.max(3650)]],
     maxAttachments: [5, [Validators.required, Validators.min(1), Validators.max(20)]],
     maxAttachmentSizeMb: [5, [Validators.required, Validators.min(1), Validators.max(50)]],
     allowedAttachmentKinds: this.fb.nonNullable.control<TicketAttachmentKind[]>(
@@ -179,6 +193,7 @@ export class TicketSettingsFormComponent implements OnInit {
     const value = this.form.getRawValue();
     this.ticketService.saveTicketSettings({
       reopenWindowDays: Number(value.reopenWindowDays),
+      autoArchiveClosedAfterDays: Number(value.autoArchiveClosedAfterDays),
       maxAttachments: Number(value.maxAttachments),
       maxAttachmentSizeMb: Number(value.maxAttachmentSizeMb),
       allowedAttachmentKinds: [...value.allowedAttachmentKinds]
@@ -211,6 +226,7 @@ export class TicketSettingsFormComponent implements OnInit {
 
   private applySettings(settings: {
     reopenWindowDays: number;
+    autoArchiveClosedAfterDays?: number;
     maxAttachments?: number;
     maxAttachmentSizeMb?: number;
     allowedAttachmentKinds?: TicketAttachmentKind[];
@@ -220,6 +236,7 @@ export class TicketSettingsFormComponent implements OnInit {
       : this.attachmentKinds) as TicketAttachmentKind[];
     this.form.reset({
       reopenWindowDays: settings.reopenWindowDays ?? 14,
+      autoArchiveClosedAfterDays: settings.autoArchiveClosedAfterDays ?? 90,
       maxAttachments: settings.maxAttachments ?? 5,
       maxAttachmentSizeMb: settings.maxAttachmentSizeMb ?? 5,
       allowedAttachmentKinds: [...kinds]

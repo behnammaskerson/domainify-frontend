@@ -670,7 +670,9 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
     { id: 'UNASSIGNED', labelKey: 'tickets.adminInbox.views.unassigned' },
     { id: 'MINE', labelKey: 'tickets.adminInbox.views.mine' },
     { id: 'MENTIONS', labelKey: 'tickets.adminInbox.views.mentions' },
-    { id: 'OVERDUE', labelKey: 'tickets.adminInbox.views.overdue' }
+    { id: 'OVERDUE', labelKey: 'tickets.adminInbox.views.overdue' },
+    { id: 'ARCHIVED', labelKey: 'tickets.adminInbox.views.archived' },
+    { id: 'DELETED', labelKey: 'tickets.adminInbox.views.deleted' }
   ];
   readonly displayedColumns = [
     'publicNumber', 'subject', 'requester', 'assignee', 'priority', 'status', 'dueAt', 'updatedAt'

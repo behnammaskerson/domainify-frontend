@@ -14,6 +14,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { TicketPortalNavComponent } from '../../components/ticket-portal-nav/ticket-portal-nav.component';
 import { MarkdownEditorComponent } from '../../components/markdown-editor/markdown-editor.component';
+import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { TicketAttachmentViewerDialogComponent } from '../../components/ticket-attachment-viewer-dialog/ticket-attachment-viewer-dialog.component';
 import { LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
 import { MarkdownPipe } from '../../pipes/markdown.pipe';
@@ -62,6 +63,24 @@ type TicketDetailMode = 'customer' | 'admin';
         [title]="ticket?.subject || ('tickets.detail.title' | translate)"
         [subtitle]="ticket?.publicNumber || ('tickets.detail.subtitle' | translate)">
         <div heroActions>
+          @if (ticket && canRestore) {
+            <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="restoreTicket()">
+              <mat-icon>restore_from_trash</mat-icon>
+              {{ 'tickets.detail.restore' | translate }}
+            </button>
+          }
+          @if (ticket && canUnarchive) {
+            <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="unarchiveTicket()">
+              <mat-icon>unarchive</mat-icon>
+              {{ 'tickets.detail.unarchive' | translate }}
+            </button>
+          }
+          @if (ticket && canArchive) {
+            <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="archiveTicket()">
+              <mat-icon>archive</mat-icon>
+              {{ 'tickets.detail.archive' | translate }}
+            </button>
+          }
           @if (ticket && canReopen) {
             <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="reopenTicket()">
               <mat-icon>lock_open</mat-icon>
@@ -72,6 +91,12 @@ type TicketDetailMode = 'customer' | 'admin';
             <button mat-stroked-button type="button" color="warn" [disabled]="lifecycleBusy" (click)="closeTicket()">
               <mat-icon>lock</mat-icon>
               {{ 'tickets.detail.closeTicket' | translate }}
+            </button>
+          }
+          @if (ticket && canSoftDelete) {
+            <button mat-stroked-button type="button" color="warn" [disabled]="lifecycleBusy" (click)="softDeleteTicket()">
+              <mat-icon>delete</mat-icon>
+              {{ 'tickets.detail.softDelete' | translate }}
             </button>
           }
           <a mat-stroked-button [routerLink]="backLink">
@@ -132,11 +157,20 @@ type TicketDetailMode = 'customer' | 'admin';
               <span class="meta-label">{{ 'tickets.detail.meta.category' | translate }}</span>
               <span>{{ ticket.category?.name || '—' }}</span>
             </div>
-            <div class="meta-item">
+            <div class="meta-item meta-created">
               <span class="meta-label">{{ 'tickets.detail.meta.created' | translate }}</span>
-              <span dir="ltr">{{ ticket.createdAt | localeDate:dateTimeFormat }}</span>
+              <span class="meta-created-value" dir="ltr">{{ ticket.createdAt | localeDate:dateTimeFormat }}</span>
             </div>
           </div>
+
+          @if (ticket.archived || ticket.deleted) {
+            <p class="lifecycle-banner panel-surface" [class.deleted]="ticket.deleted">
+              <mat-icon>{{ ticket.deleted ? 'delete' : 'archive' }}</mat-icon>
+              <span>
+                {{ (ticket.deleted ? 'tickets.detail.deletedNotice' : 'tickets.detail.archivedNotice') | translate }}
+              </span>
+            </p>
+          }
 
           @if (isAdmin) {
             <div class="tags-card panel-surface">
@@ -385,6 +419,16 @@ type TicketDetailMode = 'customer' | 'admin';
     }
     .meta-item { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
     .meta-item span[dir='ltr'] { white-space: nowrap; }
+    .meta-created {
+      align-items: center;
+      text-align: center;
+    }
+    .meta-created-value {
+      display: block;
+      width: 100%;
+      text-align: center;
+      white-space: nowrap;
+    }
     .meta-label {
       font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;
     }
@@ -401,6 +445,15 @@ type TicketDetailMode = 'customer' | 'admin';
       color: var(--text-muted); font-size: 0.85rem;
     }
     .reopen-hint mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    .lifecycle-banner {
+      display: flex; align-items: center; gap: 8px; padding: 10px 14px; margin-bottom: 16px;
+      color: var(--text-muted); font-size: 0.85rem;
+    }
+    .lifecycle-banner.deleted {
+      color: var(--danger, #c62828);
+      border-color: color-mix(in srgb, var(--danger, #c62828) 35%, var(--border-color));
+    }
+    .lifecycle-banner mat-icon { font-size: 18px; width: 18px; height: 18px; }
     .tags-card { padding: 16px; margin-bottom: 16px; }
     .tags-header {
       display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 12px;
@@ -579,6 +632,10 @@ export class TicketDetailComponent implements OnInit {
   canReply = false;
   canClose = false;
   canReopen = false;
+  canArchive = false;
+  canUnarchive = false;
+  canSoftDelete = false;
+  canRestore = false;
   reopenUntil: string | null = null;
   loading = true;
   submitting = false;
@@ -699,6 +756,92 @@ export class TicketDetailComponent implements OnInit {
         this.applyDetail(detail);
         this.lifecycleBusy = false;
         this.snackBar.open(this.translate.instant('tickets.detail.reopenedSuccess'), undefined, { duration: 3000 });
+      },
+      error: (error) => {
+        this.lifecycleBusy = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  archiveTicket(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canArchive || this.lifecycleBusy) {
+      return;
+    }
+    this.lifecycleBusy = true;
+    this.ticketService.archiveAdminTicket(this.ticketId).subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.lifecycleBusy = false;
+        this.snackBar.open(this.translate.instant('tickets.detail.archivedSuccess'), undefined, { duration: 3000 });
+      },
+      error: (error) => {
+        this.lifecycleBusy = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  unarchiveTicket(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canUnarchive || this.lifecycleBusy) {
+      return;
+    }
+    this.lifecycleBusy = true;
+    this.ticketService.unarchiveAdminTicket(this.ticketId).subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.lifecycleBusy = false;
+        this.snackBar.open(this.translate.instant('tickets.detail.unarchivedSuccess'), undefined, { duration: 3000 });
+      },
+      error: (error) => {
+        this.lifecycleBusy = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  softDeleteTicket(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canSoftDelete || this.lifecycleBusy) {
+      return;
+    }
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        titleKey: 'tickets.detail.softDeleteTitle',
+        messageKey: 'tickets.detail.softDeleteMessage',
+        confirmKey: 'tickets.detail.softDelete',
+        confirmColor: 'warn' as const
+      }
+    });
+    ref.afterClosed().subscribe((confirmed) => {
+      if (!confirmed || !this.ticketId) {
+        return;
+      }
+      this.lifecycleBusy = true;
+      this.ticketService.softDeleteAdminTicket(this.ticketId).subscribe({
+        next: (detail) => {
+          this.applyDetail(detail);
+          this.lifecycleBusy = false;
+          this.snackBar.open(this.translate.instant('tickets.detail.softDeletedSuccess'), undefined, { duration: 3000 });
+        },
+        error: (error) => {
+          this.lifecycleBusy = false;
+          this.showError(this.apiError.resolve(error));
+        }
+      });
+    });
+  }
+
+  restoreTicket(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canRestore || this.lifecycleBusy) {
+      return;
+    }
+    this.lifecycleBusy = true;
+    this.ticketService.restoreAdminTicket(this.ticketId).subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.lifecycleBusy = false;
+        this.snackBar.open(this.translate.instant('tickets.detail.restoredSuccess'), undefined, { duration: 3000 });
       },
       error: (error) => {
         this.lifecycleBusy = false;
@@ -952,6 +1095,10 @@ export class TicketDetailComponent implements OnInit {
     this.canReply = !!detail.canReply;
     this.canClose = !!detail.canClose;
     this.canReopen = !!detail.canReopen;
+    this.canArchive = !!detail.canArchive;
+    this.canUnarchive = !!detail.canUnarchive;
+    this.canSoftDelete = !!detail.canSoftDelete;
+    this.canRestore = !!detail.canRestore;
     this.reopenUntil = detail.reopenUntil ?? null;
     this.statusOptions = (detail.allowedNextStatuses ?? []).filter((status) => status !== detail.ticket?.status);
     this.selectedTags = [...(detail.ticket?.tags ?? [])];
