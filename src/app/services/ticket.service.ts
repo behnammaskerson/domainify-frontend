@@ -114,16 +114,30 @@ export interface TicketMessage {
   canEdit?: boolean;
   canDelete?: boolean;
   hasRevisions?: boolean;
+  seenByCustomer?: boolean;
+  seenByStaff?: boolean;
   editedAt?: string;
   deletedAt?: string;
   createdAt?: string;
   attachments?: TicketAttachmentMeta[];
 }
 
+export interface TicketReplyDraft {
+  body: string;
+  internalNote: boolean;
+  updatedAt?: string;
+}
+
+export interface SaveTicketReplyDraftPayload {
+  body: string;
+  internalNote?: boolean;
+}
+
 export interface TicketDetail {
   ticket: Ticket;
   messages: TicketMessage[];
   canReply: boolean;
+  replyDraft?: TicketReplyDraft | null;
   canClose?: boolean;
   canReopen?: boolean;
   canArchive?: boolean;
@@ -358,6 +372,14 @@ export class TicketService {
       formData.append('attachments', file, file.name);
     }
     return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/replies`, formData);
+  }
+
+  saveReplyDraft(id: number, payload: SaveTicketReplyDraftPayload): Observable<TicketReplyDraft | null> {
+    return this.http.put<TicketReplyDraft | null>(`${this.API_URL}/tickets/mine/${id}/reply-draft`, payload);
+  }
+
+  saveAdminReplyDraft(id: number, payload: SaveTicketReplyDraftPayload): Observable<TicketReplyDraft | null> {
+    return this.http.put<TicketReplyDraft | null>(`${this.API_URL}/admin/tickets/${id}/reply-draft`, payload);
   }
 
   editMessage(ticketId: number, messageId: number, body: string): Observable<TicketDetail> {

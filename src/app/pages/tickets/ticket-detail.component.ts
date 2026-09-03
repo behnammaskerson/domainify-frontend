@@ -1,5 +1,6 @@
 import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -36,6 +37,7 @@ import {
   TicketTag,
   TicketAssigneeOption,
   TicketReplyTemplate,
+  TicketReplyDraft,
   RelatedTicket
 } from '../../services/ticket.service';
 import { renderReplyTemplate, toMentionHandle } from '../../utils/reply-template.util';
@@ -462,6 +464,12 @@ type TicketDetailMode = 'customer' | 'admin';
                         @if (message.deleted) {
                           <span class="deleted-tag">{{ 'tickets.detail.deletedBadge' | translate }}</span>
                         }
+                        @if (showSeenReceipt(message)) {
+                          <span class="seen-tag" [matTooltip]="seenReceiptLabel(message)">
+                            <mat-icon>done_all</mat-icon>
+                            {{ seenReceiptLabel(message) }}
+                          </span>
+                        }
                       </div>
                       <div class="message-meta-actions">
                         @if (isAdmin && message.hasRevisions && (message.id || message.initial)) {
@@ -588,6 +596,12 @@ type TicketDetailMode = 'customer' | 'admin';
               </app-markdown-editor>
               @if (replyForm.controls.body.touched && replyForm.controls.body.hasError('required')) {
                 <p class="field-error">{{ 'tickets.detail.replyRequired' | translate }}</p>
+              }
+              @if (draftSavedAt) {
+                <p class="draft-hint">
+                  <mat-icon>save</mat-icon>
+                  {{ 'tickets.detail.draftSaved' | translate:{ date: (draftSavedAt | localeDate:dateTimeFormat) } }}
+                </p>
               }
 
               @if (isAdmin) {
@@ -957,6 +971,16 @@ type TicketDetailMode = 'customer' | 'admin';
     .field-error {
       margin: 6px 0 0; font-size: 0.75rem; color: var(--mat-form-field-error-text-color, #f44336);
     }
+    .draft-hint {
+      display: inline-flex; align-items: center; gap: 6px; margin: 8px 0 0;
+      font-size: 0.8rem; color: var(--text-muted);
+    }
+    .draft-hint mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    .seen-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.75rem; color: var(--text-muted);
+    }
+    .seen-tag mat-icon { font-size: 14px; width: 14px; height: 14px; }
     .attachment-list, .file-list {
       list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px;
     }
@@ -1065,6 +1089,9 @@ export class TicketDetailComponent implements OnInit {
   editingMessageId: number | null = null;
   editingInitial = false;
   messageActionBusy: number | null = null;
+  draftSavedAt: string | null = null;
+  draftSaving = false;
+  private suppressDraftSave = false;
 
   readonly replyForm = this.fb.nonNullable.group({
     body: ['', [Validators.required, Validators.maxLength(10000)]],
@@ -1133,6 +1160,30 @@ export class TicketDetailComponent implements OnInit {
       this.ticketId = id;
       this.load();
     });
+
+    this.replyForm.valueChanges.pipe(
+      debounceTime(600),
+      distinctUntilChanged((a, b) => a.body === b.body && a.internalNote === b.internalNote),
+      filter(() => !this.suppressDraftSave && !!this.ticketId && this.canReply && !this.submitting),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => this.persistReplyDraft());
+  }
+
+  showSeenReceipt(message: TicketMessage): boolean {
+    if (!message.mine || message.deleted || message.internalNote) {
+      return false;
+    }
+    if (message.staff) {
+      return !!message.seenByCustomer;
+    }
+    return !!message.seenByStaff;
+  }
+
+  seenReceiptLabel(message: TicketMessage): string {
+    if (message.staff) {
+      return this.translate.instant('tickets.detail.seenByCustomer');
+    }
+    return this.translate.instant('tickets.detail.seenBySupport');
   }
 
   private loadAttachmentPolicy(): void {
@@ -1695,6 +1746,7 @@ export class TicketDetailComponent implements OnInit {
         this.applyDetail(detail);
         this.replyForm.reset({ body: '', internalNote: false });
         this.selectedTemplateId = null;
+        this.draftSavedAt = null;
         this.files = [];
         this.submitting = false;
         this.snackBar.open(this.translate.instant('tickets.detail.replySent'), undefined, { duration: 3000 });
@@ -1914,6 +1966,48 @@ export class TicketDetailComponent implements OnInit {
     this.reopenUntil = detail.reopenUntil ?? null;
     this.statusOptions = (detail.allowedNextStatuses ?? []).filter((status) => status !== detail.ticket?.status);
     this.selectedTags = [...(detail.ticket?.tags ?? [])];
+    this.restoreReplyDraft(detail.replyDraft);
+  }
+
+  private restoreReplyDraft(draft?: TicketReplyDraft | null): void {
+    if (!draft?.body?.trim()) {
+      return;
+    }
+    if (this.replyForm.controls.body.value.trim()) {
+      return;
+    }
+    this.suppressDraftSave = true;
+    this.replyForm.patchValue({
+      body: draft.body,
+      internalNote: this.isAdmin ? !!draft.internalNote : false
+    }, { emitEvent: false });
+    this.draftSavedAt = draft.updatedAt ?? null;
+    this.suppressDraftSave = false;
+  }
+
+  private persistReplyDraft(): void {
+    if (!this.ticketId || this.draftSaving || this.suppressDraftSave) {
+      return;
+    }
+    const body = this.replyForm.controls.body.value;
+    const internalNote = this.isAdmin ? this.replyForm.controls.internalNote.value : false;
+    this.draftSaving = true;
+    const request$ = this.isAdmin
+      ? this.ticketService.saveAdminReplyDraft(this.ticketId, { body, internalNote })
+      : this.ticketService.saveReplyDraft(this.ticketId, { body, internalNote });
+
+    request$.subscribe({
+      next: (draft) => {
+        this.draftSaving = false;
+        this.draftSavedAt = draft?.updatedAt ?? (body.trim() ? new Date().toISOString() : null);
+        if (!body.trim()) {
+          this.draftSavedAt = null;
+        }
+      },
+      error: () => {
+        this.draftSaving = false;
+      }
+    });
   }
 
   private scrollToLatest(): void {
