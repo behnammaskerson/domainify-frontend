@@ -15,6 +15,7 @@ import { PageHeroComponent } from '../../components/page-hero/page-hero.componen
 import { TicketPortalNavComponent } from '../../components/ticket-portal-nav/ticket-portal-nav.component';
 import { MarkdownEditorComponent } from '../../components/markdown-editor/markdown-editor.component';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
+import { TicketMergeDialogComponent } from '../../components/ticket-merge-dialog/ticket-merge-dialog.component';
 import { TicketAttachmentViewerDialogComponent } from '../../components/ticket-attachment-viewer-dialog/ticket-attachment-viewer-dialog.component';
 import { LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
 import { MarkdownPipe } from '../../pipes/markdown.pipe';
@@ -63,6 +64,12 @@ type TicketDetailMode = 'customer' | 'admin';
         [title]="ticket?.subject || ('tickets.detail.title' | translate)"
         [subtitle]="ticket?.publicNumber || ('tickets.detail.subtitle' | translate)">
         <div heroActions>
+          @if (ticket && canMerge) {
+            <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="mergeTicket()">
+              <mat-icon>merge_type</mat-icon>
+              {{ 'tickets.detail.merge' | translate }}
+            </button>
+          }
           @if (ticket && canRestore) {
             <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="restoreTicket()">
               <mat-icon>restore_from_trash</mat-icon>
@@ -162,6 +169,35 @@ type TicketDetailMode = 'customer' | 'admin';
               <span class="meta-created-value" dir="ltr">{{ ticket.createdAt | localeDate:dateTimeFormat }}</span>
             </div>
           </div>
+
+          @if (ticket.mergedIntoPublicNumber) {
+            <p class="lifecycle-banner panel-surface merge-banner">
+              <mat-icon>merge_type</mat-icon>
+              <span>
+                {{ 'tickets.detail.mergedIntoNotice' | translate }}
+                @if (isAdmin && ticket.mergedIntoId) {
+                  <a [routerLink]="['/admin/tickets', ticket.mergedIntoId]">
+                    {{ ticket.mergedIntoPublicNumber }}
+                  </a>
+                } @else {
+                  <strong dir="ltr">{{ ticket.mergedIntoPublicNumber }}</strong>
+                }
+              </span>
+            </p>
+          }
+
+          @if (ticket.mergedSourcePublicNumbers; as mergedSources) {
+            @if (mergedSources.length) {
+              <p class="lifecycle-banner panel-surface merge-banner">
+                <mat-icon>call_merge</mat-icon>
+                <span>
+                  {{ 'tickets.detail.mergedFromNotice' | translate: {
+                    numbers: mergedSources.join(', ')
+                  } }}
+                </span>
+              </p>
+            }
+          }
 
           @if (ticket.archived || ticket.deleted) {
             <p class="lifecycle-banner panel-surface" [class.deleted]="ticket.deleted">
@@ -454,6 +490,13 @@ type TicketDetailMode = 'customer' | 'admin';
       border-color: color-mix(in srgb, var(--danger, #c62828) 35%, var(--border-color));
     }
     .lifecycle-banner mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    .merge-banner a {
+      margin-inline-start: 6px;
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .merge-banner a:hover { text-decoration: underline; }
     .tags-card { padding: 16px; margin-bottom: 16px; }
     .tags-header {
       display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 12px;
@@ -636,6 +679,7 @@ export class TicketDetailComponent implements OnInit {
   canUnarchive = false;
   canSoftDelete = false;
   canRestore = false;
+  canMerge = false;
   reopenUntil: string | null = null;
   loading = true;
   submitting = false;
@@ -798,6 +842,40 @@ export class TicketDetailComponent implements OnInit {
         this.showError(this.apiError.resolve(error));
       }
     });
+  }
+
+  mergeTicket(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canMerge || this.lifecycleBusy) {
+      return;
+    }
+    this.dialog
+      .open(TicketMergeDialogComponent, {
+        width: '780px',
+        maxWidth: '90vw',
+        data: {
+          targetTicketId: this.ticketId,
+          targetPublicNumber: this.ticket?.publicNumber
+        }
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (!result?.sourceTicketId || !this.ticketId) {
+          return;
+        }
+        this.lifecycleBusy = true;
+        this.ticketService.mergeAdminTicket(this.ticketId, result.sourceTicketId).subscribe({
+          next: (detail) => {
+            this.applyDetail(detail);
+            this.lifecycleBusy = false;
+            this.scrollToLatest();
+            this.snackBar.open(this.translate.instant('tickets.detail.mergedSuccess'), undefined, { duration: 3000 });
+          },
+          error: (error) => {
+            this.lifecycleBusy = false;
+            this.showError(this.apiError.resolve(error));
+          }
+        });
+      });
   }
 
   softDeleteTicket(): void {
@@ -1099,6 +1177,7 @@ export class TicketDetailComponent implements OnInit {
     this.canUnarchive = !!detail.canUnarchive;
     this.canSoftDelete = !!detail.canSoftDelete;
     this.canRestore = !!detail.canRestore;
+    this.canMerge = !!detail.canMerge;
     this.reopenUntil = detail.reopenUntil ?? null;
     this.statusOptions = (detail.allowedNextStatuses ?? []).filter((status) => status !== detail.ticket?.status);
     this.selectedTags = [...(detail.ticket?.tags ?? [])];

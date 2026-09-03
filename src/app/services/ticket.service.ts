@@ -50,6 +50,9 @@ export interface Ticket {
   deletedAt?: string;
   archived?: boolean;
   deleted?: boolean;
+  mergedIntoId?: number;
+  mergedIntoPublicNumber?: string;
+  mergedSourcePublicNumbers?: string[];
   tags?: TicketTag[];
   createdAt?: string;
   updatedAt?: string;
@@ -92,6 +95,7 @@ export interface TicketDetail {
   canUnarchive?: boolean;
   canSoftDelete?: boolean;
   canRestore?: boolean;
+  canMerge?: boolean;
   reopenUntil?: string;
   reopenWindowDays?: number;
   allowedNextStatuses?: TicketStatus[];
@@ -320,6 +324,12 @@ export class TicketService {
 
   restoreAdminTicket(id: number): Observable<TicketDetail> {
     return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/restore`, {});
+  }
+
+  mergeAdminTicket(targetId: number, sourceTicketId: number): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${targetId}/merge`, {
+      sourceTicketId
+    });
   }
 
   closeMineTicket(id: number): Observable<TicketDetail> {
