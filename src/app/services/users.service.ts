@@ -51,6 +51,13 @@ export interface UpdateProfilePayload {
   phoneNumber?: string | null;
 }
 
+export interface UpdateProfileResponse {
+  user: ManagedUser;
+  accessToken?: string | null;
+  refreshToken?: string | null;
+  tokenType?: string | null;
+}
+
 export interface ChangePasswordPayload {
   currentPassword: string;
   newPassword: string;
@@ -130,8 +137,8 @@ export class UsersService {
     return this.http.get<ManagedUser>(`${this.API_URL}/users/me`);
   }
 
-  updateMe(payload: UpdateProfilePayload): Observable<ManagedUser> {
-    return this.http.put<ManagedUser>(`${this.API_URL}/users/me`, payload);
+  updateMe(payload: UpdateProfilePayload): Observable<UpdateProfileResponse> {
+    return this.http.put<UpdateProfileResponse>(`${this.API_URL}/users/me`, payload);
   }
 
   changePassword(payload: ChangePasswordPayload): Observable<unknown> {
@@ -150,6 +157,26 @@ export class UsersService {
 
   sendVerificationEmail(): Observable<{ message?: string }> {
     return this.http.post<{ message?: string }>(`${this.API_URL}/users/me/send-verification-email`, {});
+  }
+
+  setEmailNotificationsEnabled(enabled: boolean): Observable<ManagedUser> {
+    return this.http.patch<ManagedUser>(`${this.API_URL}/users/me/email-notifications`, { enabled });
+  }
+
+  setUserEmailNotificationsEnabled(id: number, enabled: boolean): Observable<ManagedUser> {
+    return this.http.patch<ManagedUser>(`${this.API_URL}/users/${id}/email-notifications`, { enabled });
+  }
+
+  setSmsNotificationsEnabled(enabled: boolean): Observable<ManagedUser> {
+    return this.http.patch<ManagedUser>(`${this.API_URL}/users/me/sms-notifications`, { enabled });
+  }
+
+  setPreferredLanguage(language: string): Observable<ManagedUser> {
+    return this.http.patch<ManagedUser>(`${this.API_URL}/users/me/preferred-language`, { language });
+  }
+
+  setUserSmsNotificationsEnabled(id: number, enabled: boolean): Observable<ManagedUser> {
+    return this.http.patch<ManagedUser>(`${this.API_URL}/users/${id}/sms-notifications`, { enabled });
   }
 
   sendPhoneVerification(): Observable<{ message?: string }> {

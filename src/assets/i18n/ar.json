@@ -1025,9 +1025,16 @@
     "darkMode": "الوضع الداكن",
     "lightMode": "الوضع الفاتح",
     "languageLabel": "لغة العرض",
-    "languageDesc": "اختر لغتك المفضلة",
+    "languageDesc": "لغة الواجهة ولغة إشعارات البريد وSMS وداخل التطبيق",
     "emailNotifications": "إشعارات البريد",
-    "emailNotificationsDesc": "استلام تنبيهات البريد لأنشطة النطاقات",
+    "emailNotificationsDesc": "تنبيهات بريد للردود الجديدة والتعيين وتغيير حالة التذكرة",
+    "emailNotificationsEnabled": "تم تفعيل تنبيهات بريد التذاكر",
+    "emailNotificationsDisabled": "تم إيقاف تنبيهات بريد التذاكر",
+    "smsNotifications": "إشعارات الرسائل القصيرة",
+    "smsNotificationsDesc": "الاشتراك في تنبيهات SMS حسب أولويات يضبطها المسؤول (يتطلب هاتفاً موثّقاً)",
+    "smsNotificationsNeedPhone": "أضف هاتفاً وتحقق منه في الملف الشخصي لتفعيل تنبيهات SMS.",
+    "smsNotificationsEnabled": "تم تفعيل تنبيهات SMS للتذاكر العاجلة",
+    "smsNotificationsDisabled": "تم إيقاف تنبيهات SMS للتذاكر العاجلة",
     "pushNotifications": "إشعارات المتصفح",
     "pushNotificationsDesc": "احصل على إشعارات فورية في المتصفح",
     "marketingEmails": "رسائل تسويقية",
@@ -1211,10 +1218,20 @@
       "removed": "تمت إزالة الفئة",
       "inactive": "غير نشطة",
       "empty": "لا توجد فئات بعد.",
-      "skillsIntro": "لتخصيص التعيين التلقائي حسب مهارة الفئة، اختر الوكلاء لكل فئة.",
+      "skillsIntro": "لتخصيص التعيين التلقائي حسب مهارة الفئة، اختر الوكلاء لكل فئة. استخدم مفتاح البريد لتعطيل تنبيهات الفئة.",
       "skilledAgents": "الوكلاء المهرة",
       "skilledAgentsHint": "يُستخدم عندما يكون وضع التعيين التلقائي «حسب مهارة الفئة».",
       "skillsSaved": "تم تحديث وكلاء الفئة",
+      "emailNotifications": "تنبيهات البريد لهذه الفئة",
+      "smsNotifications": "تنبيهات SMS لهذه الفئة",
+      "activeToggle": "الفئة نشطة",
+      "emailToggleLabel": "بريد",
+      "smsToggleLabel": "SMS",
+      "activeToggleLabel": "نشط",
+      "emailNotificationsOn": "تم تفعيل تنبيهات بريد الفئة",
+      "emailNotificationsOff": "تم إيقاف تنبيهات بريد الفئة",
+      "smsNotificationsOn": "تم تفعيل تنبيهات SMS للفئة",
+      "smsNotificationsOff": "تم إيقاف تنبيهات SMS للفئة",
       "removeTitle": "إزالة الفئة",
       "removeMessage": "إزالة الفئة «{{name}}»؟ إن كانت مستخدمة في تذاكر موجودة فسيتم تعطيلها بدل الحذف."
     },
@@ -1307,6 +1324,15 @@
       },
       "autoAssignFallbackRoundRobin": "الرجوع للتناوب عند غياب وكيل ماهر",
       "autoAssignFallbackHint": "اضبط الوكلاء المهرة في فئات التذاكر. إن لم يُعيَّن أحد للفئة، يُستخدم التناوب العام بدل ترك التذكرة بلا تعيين.",
+      "emailSection": "إشعارات بريد التذاكر",
+      "emailIntro": "المفتاح الرئيسي لبريد التذاكر (الردود والتعيين وتغيير الحالة). يجب تفعيل SMTP أيضاً.",
+      "ticketEmailNotificationsEnabled": "إرسال إشعارات بريد التذاكر",
+      "ticketEmailNotificationsHint": "عند الإيقاف لا يُرسل أي بريد تذاكر على مستوى النظام. عند التشغيل يمكن للمستخدم والفئة إلغاء الاشتراك.",
+      "emailPriorities": "إرسال البريد لهذه الأولويات",
+      "ticketSmsNotificationsEnabled": "إرسال SMS للتذاكر",
+      "ticketSmsNotificationsHint": "للمستخدمين المشتركين بهاتف موثّق وللأولويات أدناه. يجب ضبط مزوّد SMS.",
+      "smsPriorities": "إرسال SMS لهذه الأولويات",
+      "prioritiesInvalid": "اختر أولوية واحدة على الأقل",
       "saving": "جارٍ الحفظ…",
       "saved": "تم حفظ إعدادات التذاكر"
     },
@@ -1412,7 +1438,11 @@
     "actions": {
       "enable": "تفعيل",
       "disable": "تعطيل",
-      "changeRole": "تغيير الدور"
+      "changeRole": "تغيير الدور",
+      "enableEmailNotifications": "تفعيل تنبيهات البريد",
+      "disableEmailNotifications": "إيقاف تنبيهات البريد",
+      "enableSmsNotifications": "تفعيل تنبيهات SMS",
+      "disableSmsNotifications": "إيقاف تنبيهات SMS"
     },
     "confirm": {
       "deleteTitle": "حذف حساب المستخدم؟",
@@ -1431,7 +1461,11 @@
       "deleted": "تم حذف المستخدم",
       "enabled": "تم تفعيل المستخدم",
       "disabled": "تم تعطيل المستخدم",
-      "roleUpdated": "تم تحديث الدور"
+      "roleUpdated": "تم تحديث الدور",
+      "emailNotificationsEnabled": "تم تفعيل تنبيهات بريد المستخدم",
+      "emailNotificationsDisabled": "تم إيقاف تنبيهات بريد المستخدم",
+      "smsNotificationsEnabled": "تم تفعيل تنبيهات SMS للمستخدم",
+      "smsNotificationsDisabled": "تم إيقاف تنبيهات SMS للمستخدم"
     }
   },
   "common": {
@@ -1456,7 +1490,8 @@
     "turkish": "التركية",
     "copy": "نسخ",
     "close": "إغلاق",
-    "backToTop": "العودة للأعلى"
+    "backToTop": "العودة للأعلى",
+    "rowNumber": "#"
   },
   "paginator": {
     "itemsPerPage": "عناصر لكل صفحة",

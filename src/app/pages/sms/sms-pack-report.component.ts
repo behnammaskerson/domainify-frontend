@@ -78,6 +78,11 @@ import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
                      class="mat-mdc-table users-table"
                      [attr.aria-label]="'sms.packReport.title' | translate">
 
+                <ng-container matColumnDef="rowNumber">
+                  <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
+                  <td mat-cell *matCellDef="let item; let i = index" class="col-row-num">{{ i + 1 }}</td>
+                </ng-container>
+
                 <ng-container matColumnDef="messageId">
                   <th mat-header-cell *matHeaderCellDef>{{ 'sms.packReport.table.messageId' | translate }}</th>
                   <td mat-cell *matCellDef="let item">
@@ -215,6 +220,14 @@ import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
       white-space: nowrap;
     }
 
+    .col-row-num {
+      width: 48px;
+      max-width: 48px;
+      text-align: center;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
     .empty-state {
       padding: 40px 16px;
       text-align: center;
@@ -269,6 +282,7 @@ export class SmsPackReportComponent implements OnInit {
 
   readonly smsDateTimeFormat = SMS_DATETIME_FORMAT;
   readonly displayedColumns = [
+    'rowNumber',
     'messageId',
     'mobile',
     'messageText',

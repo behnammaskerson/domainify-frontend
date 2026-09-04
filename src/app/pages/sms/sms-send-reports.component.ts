@@ -119,6 +119,13 @@ type ReportTab = 'live' | 'archive' | 'packs';
                        class="mat-mdc-table users-table"
                        [attr.aria-label]="'sms.liveSends.title' | translate">
 
+                  <ng-container matColumnDef="rowNumber">
+                    <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
+                    <td mat-cell *matCellDef="let item; let i = index" class="col-row-num">
+                      {{ livePageIndex * livePageSize + i + 1 }}
+                    </td>
+                  </ng-container>
+
                   <ng-container matColumnDef="messageId">
                     <th mat-header-cell *matHeaderCellDef>{{ 'sms.liveSends.table.messageId' | translate }}</th>
                     <td mat-cell *matCellDef="let item">
@@ -210,6 +217,13 @@ type ReportTab = 'live' | 'archive' | 'packs';
                        [dataSource]="archiveItems"
                        class="mat-mdc-table users-table"
                        [attr.aria-label]="'sms.archiveSends.title' | translate">
+
+                  <ng-container matColumnDef="rowNumber">
+                    <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
+                    <td mat-cell *matCellDef="let item; let i = index" class="col-row-num">
+                      {{ archivePageIndex * archivePageSize + i + 1 }}
+                    </td>
+                  </ng-container>
 
                   <ng-container matColumnDef="messageId">
                     <th mat-header-cell *matHeaderCellDef>{{ 'sms.archiveSends.table.messageId' | translate }}</th>
@@ -304,6 +318,13 @@ type ReportTab = 'live' | 'archive' | 'packs';
                        [dataSource]="packItems"
                        class="mat-mdc-table users-table"
                        [attr.aria-label]="'sms.dailyPacks.title' | translate">
+
+                  <ng-container matColumnDef="rowNumber">
+                    <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
+                    <td mat-cell *matCellDef="let item; let i = index" class="col-row-num">
+                      {{ packsPageIndex * packsPageSize + i + 1 }}
+                    </td>
+                  </ng-container>
 
                   <ng-container matColumnDef="packId">
                     <th mat-header-cell *matHeaderCellDef>{{ 'sms.dailyPacks.table.packId' | translate }}</th>
@@ -451,6 +472,14 @@ type ReportTab = 'live' | 'archive' | 'packs';
       white-space: nowrap;
     }
 
+    .col-row-num {
+      width: 48px;
+      max-width: 48px;
+      text-align: center;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
     .empty-state {
       padding: 40px 16px;
       text-align: center;
@@ -513,6 +542,7 @@ export class SmsSendReportsComponent implements OnInit {
   readonly smsDateTimeFormat = SMS_DATETIME_FORMAT;
   readonly maxFilterDate = this.endOfYesterday();
   readonly messageColumns = [
+    'rowNumber',
     'messageId',
     'mobile',
     'messageText',
@@ -522,7 +552,7 @@ export class SmsSendReportsComponent implements OnInit {
     'deliveryState',
     'deliveryDateTime'
   ];
-  readonly packColumns = ['packId', 'recipientCount', 'creationDateTime', 'actions'];
+  readonly packColumns = ['rowNumber', 'packId', 'recipientCount', 'creationDateTime', 'actions'];
   readonly tabs: { id: ReportTab; labelKey: string }[] = [
     { id: 'live', labelKey: 'sms.sendReports.tabs.live' },
     { id: 'archive', labelKey: 'sms.sendReports.tabs.archive' },

@@ -141,6 +141,13 @@ type SourceFilter = 'all' | ScheduledSmsSourceType;
                    [attr.aria-label]="'sms.scheduled.title' | translate"
                    (matSortChange)="onSortChange($event)">
 
+              <ng-container matColumnDef="rowNumber">
+                <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
+                <td mat-cell *matCellDef="let item; let i = index" class="col-row-num">
+                  {{ pageIndex * pageSize + i + 1 }}
+                </td>
+              </ng-container>
+
               <ng-container matColumnDef="sourceType">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header="sourceType">
                   {{ 'sms.scheduled.table.source' | translate }}
@@ -357,6 +364,14 @@ type SourceFilter = 'all' | ScheduledSmsSourceType;
       white-space: nowrap;
     }
 
+    .col-row-num {
+      width: 48px;
+      max-width: 48px;
+      text-align: center;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
     .empty-state {
       padding: 40px 16px;
       text-align: center;
@@ -420,6 +435,7 @@ export class ScheduledSmsComponent implements OnInit {
   sentCount = 0;
 
   readonly displayedColumns = [
+    'rowNumber',
     'sourceType',
     'packId',
     'lineNumber',

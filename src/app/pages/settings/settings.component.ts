@@ -385,7 +385,25 @@ interface SettingsNavItem {
               <span class="setting-label">{{ 'settings.emailNotifications' | translate }}</span>
               <span class="setting-desc">{{ 'settings.emailNotificationsDesc' | translate }}</span>
             </div>
-            <mat-slide-toggle color="primary" checked></mat-slide-toggle>
+            <mat-slide-toggle color="primary"
+                              [checked]="emailNotificationsEnabled"
+                              [disabled]="emailNotificationsSaving"
+                              (change)="onEmailNotificationsToggle($event.checked)">
+            </mat-slide-toggle>
+          </div>
+          <div class="setting-row">
+            <div class="setting-copy">
+              <span class="setting-label">{{ 'settings.smsNotifications' | translate }}</span>
+              <span class="setting-desc">{{ 'settings.smsNotificationsDesc' | translate }}</span>
+              @if (!hasVerifiedPhoneForSms) {
+                <span class="setting-desc warn-hint">{{ 'settings.smsNotificationsNeedPhone' | translate }}</span>
+              }
+            </div>
+            <mat-slide-toggle color="primary"
+                              [checked]="smsNotificationsEnabled"
+                              [disabled]="smsNotificationsSaving || !hasVerifiedPhoneForSms"
+                              (change)="onSmsNotificationsToggle($event.checked)">
+            </mat-slide-toggle>
           </div>
           <div class="setting-row">
             <div class="setting-copy">
@@ -888,6 +906,10 @@ interface SettingsNavItem {
     .email-status.unverified,
     .phone-status.unverified { color: var(--text-muted); }
 
+    .warn-hint {
+      color: var(--warning, #b45309);
+    }
+
     .phone-otp-field {
       width: min(180px, 100%);
       margin: 0;
@@ -1170,10 +1192,18 @@ export class SettingsComponent implements OnInit {
     return !!(raw.phoneCountryCode?.trim() && raw.phoneNumber?.trim());
   }
 
+  get hasVerifiedPhoneForSms(): boolean {
+    return this.hasProfilePhone && this.phoneVerified;
+  }
+
   profileSaving = false;
   verificationSending = false;
   emailVerified = true;
   phoneVerified = true;
+  emailNotificationsEnabled = true;
+  emailNotificationsSaving = false;
+  smsNotificationsEnabled = false;
+  smsNotificationsSaving = false;
   phoneVerificationSending = false;
   phoneVerifying = false;
   phoneOtpCode = '';
@@ -1888,6 +1918,8 @@ export class SettingsComponent implements OnInit {
     this.profileInitials = `${first}${last}`.toUpperCase() || user.email?.charAt(0).toUpperCase() || '?';
     this.emailVerified = user.emailVerified !== false;
     this.phoneVerified = user.phoneVerified !== false;
+    this.emailNotificationsEnabled = user.emailNotificationsEnabled !== false;
+    this.smsNotificationsEnabled = user.smsNotificationsEnabled === true;
     this.phoneOtpSent = false;
     this.phoneOtpCode = '';
     if (!this.emailTestTo && user.email) {
@@ -1910,10 +1942,15 @@ export class SettingsComponent implements OnInit {
       phoneNumber: raw.phoneNumber || null
     };
     this.usersService.updateMe(payload).subscribe({
-      next: (user) => {
+      next: (response) => {
         this.profileSaving = false;
+        const user = response.user;
+        if (response.accessToken && response.refreshToken) {
+          this.authService.applySessionTokens(response.accessToken, response.refreshToken, user);
+        } else {
+          this.authService.setCurrentUser(user);
+        }
         this.applyUser(user);
-        this.authService.setCurrentUser(user);
         this.snack(this.translate.instant('settings.profile.saved'));
         if (!user.emailVerified) {
           this.snack(this.translate.instant('settings.profile.verificationSentHint'));
@@ -1941,6 +1978,54 @@ export class SettingsComponent implements OnInit {
       },
       error: (error) => {
         this.verificationSending = false;
+        this.showError(error);
+      }
+    });
+  }
+
+  onEmailNotificationsToggle(enabled: boolean): void {
+    if (this.emailNotificationsSaving || enabled === this.emailNotificationsEnabled) {
+      return;
+    }
+    const previous = this.emailNotificationsEnabled;
+    this.emailNotificationsEnabled = enabled;
+    this.emailNotificationsSaving = true;
+    this.usersService.setEmailNotificationsEnabled(enabled).subscribe({
+      next: (user) => {
+        this.emailNotificationsSaving = false;
+        this.applyUser(user);
+        this.authService.setCurrentUser(user);
+        this.snack(this.translate.instant(
+          enabled ? 'settings.emailNotificationsEnabled' : 'settings.emailNotificationsDisabled'
+        ));
+      },
+      error: (error) => {
+        this.emailNotificationsSaving = false;
+        this.emailNotificationsEnabled = previous;
+        this.showError(error);
+      }
+    });
+  }
+
+  onSmsNotificationsToggle(enabled: boolean): void {
+    if (this.smsNotificationsSaving || enabled === this.smsNotificationsEnabled || !this.hasVerifiedPhoneForSms) {
+      return;
+    }
+    const previous = this.smsNotificationsEnabled;
+    this.smsNotificationsEnabled = enabled;
+    this.smsNotificationsSaving = true;
+    this.usersService.setSmsNotificationsEnabled(enabled).subscribe({
+      next: (user) => {
+        this.smsNotificationsSaving = false;
+        this.applyUser(user);
+        this.authService.setCurrentUser(user);
+        this.snack(this.translate.instant(
+          enabled ? 'settings.smsNotificationsEnabled' : 'settings.smsNotificationsDisabled'
+        ));
+      },
+      error: (error) => {
+        this.smsNotificationsSaving = false;
+        this.smsNotificationsEnabled = previous;
         this.showError(error);
       }
     });

@@ -68,8 +68,9 @@ import { TicketReplyTemplate, TicketService } from '../../services/ticket.servic
         </form>
 
         <ul class="template-list">
-          @for (template of templates; track template.id) {
+          @for (template of templates; track template.id; let i = $index) {
             <li>
+              <span class="col-row-num">{{ i + 1 }}</span>
               <div class="template-copy">
                 <div class="template-head">
                   <strong>{{ template.title }}</strong>
@@ -115,6 +116,10 @@ import { TicketReplyTemplate, TicketService } from '../../services/ticket.servic
       display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
       padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;
       background: var(--bg-secondary);
+    }
+    .col-row-num {
+      width: 28px; flex-shrink: 0; text-align: center; color: var(--text-muted);
+      font-variant-numeric: tabular-nums; font-size: 0.85rem; font-weight: 600; padding-top: 2px;
     }
     .template-copy { flex: 1; min-width: 0; }
     .template-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 6px; }

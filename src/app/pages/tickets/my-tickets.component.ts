@@ -112,6 +112,13 @@ type StatusFilter = 'ALL' | TicketStatus;
               <table mat-table [dataSource]="tickets" class="mat-mdc-table tickets-table"
                      [attr.aria-label]="'tickets.mine.title' | translate">
 
+                <ng-container matColumnDef="rowNumber">
+                  <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
+                  <td mat-cell *matCellDef="let ticket; let i = index" class="col-row-num">
+                    {{ pageIndex * pageSize + i + 1 }}
+                  </td>
+                </ng-container>
+
                 <ng-container matColumnDef="publicNumber">
                   <th mat-header-cell *matHeaderCellDef>{{ 'tickets.mine.table.id' | translate }}</th>
                   <td mat-cell *matCellDef="let ticket">
@@ -262,6 +269,14 @@ type StatusFilter = 'ALL' | TicketStatus;
       min-width: 960px;
     }
 
+    .col-row-num {
+      width: 48px;
+      max-width: 48px;
+      text-align: center;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
     .ticket-id {
       font-size: 0.85rem;
       font-weight: 600;
@@ -388,7 +403,7 @@ export class MyTicketsComponent implements OnInit, OnDestroy {
   ];
   readonly dateTimeFormat = SMS_DATETIME_FORMAT;
   readonly displayedColumns = [
-    'publicNumber', 'subject', 'category', 'priority', 'status', 'createdAt'
+    'rowNumber', 'publicNumber', 'subject', 'category', 'priority', 'status', 'createdAt'
   ];
 
   tickets: Ticket[] = [];

@@ -515,7 +515,11 @@ export class RegisterComponent implements OnInit {
     }
 
     this.isLoading = true;
-    const { acceptTerms: _acceptTerms, ...payload } = this.registerForm.getRawValue();
+    const { acceptTerms: _acceptTerms, ...formValue } = this.registerForm.getRawValue();
+    const payload = {
+      ...formValue,
+      preferredLanguage: this.translationService.currentLang()
+    };
 
     this.authService.register(payload).subscribe({
       next: () => {

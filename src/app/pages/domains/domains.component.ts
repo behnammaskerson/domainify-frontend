@@ -67,6 +67,11 @@ import { LocaleCurrencyPipe, LocaleDatePipe, LocaleNumberPipe } from '../../pipe
 
         <div class="panel-surface table-wrap">
           <table mat-table [dataSource]="filteredDomains" class="domains-table">
+            <ng-container matColumnDef="rowNumber">
+              <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
+              <td mat-cell *matCellDef="let domain; let i = index" class="col-row-num">{{ i + 1 }}</td>
+            </ng-container>
+
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef>{{ 'domains.table.name' | translate }}</th>
               <td mat-cell *matCellDef="let domain">
@@ -154,6 +159,14 @@ import { LocaleCurrencyPipe, LocaleDatePipe, LocaleNumberPipe } from '../../pipe
       width: 100%;
     }
 
+    .col-row-num {
+      width: 48px;
+      max-width: 48px;
+      text-align: center;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
     .mat-mdc-header-cell {
       font-weight: 700;
       font-size: 0.7rem;
@@ -204,7 +217,7 @@ export class DomainsComponent {
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
 
-  displayedColumns = ['name', 'status', 'price', 'expires', 'actions'];
+  displayedColumns = ['rowNumber', 'name', 'status', 'price', 'expires', 'actions'];
   activeFilter = 'all';
 
   statusFilters = [

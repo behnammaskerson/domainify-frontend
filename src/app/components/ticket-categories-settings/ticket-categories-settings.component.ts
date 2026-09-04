@@ -53,10 +53,11 @@ import { TicketAssigneeOption, TicketCategory, TicketService } from '../../servi
         </form>
 
         <ul class="category-list">
-          @for (category of categories; track category.id) {
+          @for (category of categories; track category.id; let i = $index) {
             <li [class.inactive]="!category.active">
               <div class="row-main">
                 <div class="meta">
+                  <span class="col-row-num">{{ i + 1 }}</span>
                   <strong>{{ category.name }}</strong>
                   <code dir="ltr">{{ category.code }}</code>
                   @if (!category.active) {
@@ -66,9 +67,27 @@ import { TicketAssigneeOption, TicketCategory, TicketService } from '../../servi
                 <div class="actions">
                   <mat-slide-toggle
                     color="primary"
+                    class="labeled-toggle"
+                    [checked]="category.emailNotificationsEnabled !== false"
+                    [disabled]="busyId === category.id"
+                    (change)="toggleEmailNotifications(category, $event.checked)">
+                    {{ 'settings.ticketCategories.emailToggleLabel' | translate }}
+                  </mat-slide-toggle>
+                  <mat-slide-toggle
+                    color="primary"
+                    class="labeled-toggle"
+                    [checked]="category.smsNotificationsEnabled !== false"
+                    [disabled]="busyId === category.id"
+                    (change)="toggleSmsNotifications(category, $event.checked)">
+                    {{ 'settings.ticketCategories.smsToggleLabel' | translate }}
+                  </mat-slide-toggle>
+                  <mat-slide-toggle
+                    color="primary"
+                    class="labeled-toggle"
                     [checked]="category.active"
                     [disabled]="busyId === category.id"
                     (change)="toggleActive(category, $event.checked)">
+                    {{ 'settings.ticketCategories.activeToggleLabel' | translate }}
                   </mat-slide-toggle>
                   <button mat-icon-button
                           type="button"
@@ -155,9 +174,10 @@ import { TicketAssigneeOption, TicketCategory, TicketService } from '../../servi
 
     .row-main {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
+      flex-wrap: wrap;
     }
 
     .meta {
@@ -166,6 +186,16 @@ import { TicketAssigneeOption, TicketCategory, TicketService } from '../../servi
       align-items: center;
       gap: 10px;
       min-width: 0;
+      flex: 1 1 200px;
+    }
+
+    .col-row-num {
+      width: 28px;
+      text-align: center;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.85rem;
+      font-weight: 600;
     }
 
     .meta code {
@@ -185,8 +215,16 @@ import { TicketAssigneeOption, TicketCategory, TicketService } from '../../servi
 
     .actions {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 4px;
+      justify-content: flex-end;
+      gap: 10px 14px;
+      flex: 1 1 280px;
+    }
+
+    .labeled-toggle {
+      font-size: 0.85rem;
+      white-space: nowrap;
     }
 
     .agents-field {
@@ -283,11 +321,65 @@ export class TicketCategoriesSettingsComponent implements OnInit {
       name: category.name,
       code: category.code,
       active,
+      emailNotificationsEnabled: category.emailNotificationsEnabled !== false,
+      smsNotificationsEnabled: category.smsNotificationsEnabled !== false,
       sortOrder: category.sortOrder
     }).subscribe({
       next: () => {
         this.busyId = null;
         this.load();
+      },
+      error: (error) => {
+        this.busyId = null;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  toggleEmailNotifications(category: TicketCategory, enabled: boolean): void {
+    this.busyId = category.id;
+    this.ticketService.updateCategory(category.id, {
+      name: category.name,
+      code: category.code,
+      active: category.active,
+      emailNotificationsEnabled: enabled,
+      smsNotificationsEnabled: category.smsNotificationsEnabled !== false,
+      sortOrder: category.sortOrder
+    }).subscribe({
+      next: () => {
+        this.busyId = null;
+        this.load();
+        this.snack(this.translate.instant(
+          enabled
+            ? 'settings.ticketCategories.emailNotificationsOn'
+            : 'settings.ticketCategories.emailNotificationsOff'
+        ));
+      },
+      error: (error) => {
+        this.busyId = null;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  toggleSmsNotifications(category: TicketCategory, enabled: boolean): void {
+    this.busyId = category.id;
+    this.ticketService.updateCategory(category.id, {
+      name: category.name,
+      code: category.code,
+      active: category.active,
+      emailNotificationsEnabled: category.emailNotificationsEnabled !== false,
+      smsNotificationsEnabled: enabled,
+      sortOrder: category.sortOrder
+    }).subscribe({
+      next: () => {
+        this.busyId = null;
+        this.load();
+        this.snack(this.translate.instant(
+          enabled
+            ? 'settings.ticketCategories.smsNotificationsOn'
+            : 'settings.ticketCategories.smsNotificationsOff'
+        ));
       },
       error: (error) => {
         this.busyId = null;

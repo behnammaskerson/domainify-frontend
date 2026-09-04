@@ -1047,9 +1047,16 @@
     "darkMode": "Koyu Mod",
     "lightMode": "Açık Mod",
     "languageLabel": "Görüntüleme Dili",
-    "languageDesc": "Tercih ettiğiniz dili seçin",
+    "languageDesc": "Arayüz dili ve e-posta, SMS ile uygulama içi bildirimlerin dili",
     "emailNotifications": "E-posta Bildirimleri",
-    "emailNotificationsDesc": "Alan adı etkinlikleri için e-posta uyarıları alın",
+    "emailNotificationsDesc": "Yeni yanıt, atama ve durum değişiklikleri için e-posta uyarıları",
+    "emailNotificationsEnabled": "Bilet e-posta uyarıları açıldı",
+    "emailNotificationsDisabled": "Bilet e-posta uyarıları kapatıldı",
+    "smsNotifications": "SMS Bildirimleri",
+    "smsNotificationsDesc": "Yöneticinin ayarladığı öncelikler için SMS uyarısına katılın (doğrulanmış telefon gerekir)",
+    "smsNotificationsNeedPhone": "SMS için profilde telefon ekleyip doğrulayın.",
+    "smsNotificationsEnabled": "Acil bilet SMS uyarıları açıldı",
+    "smsNotificationsDisabled": "Acil bilet SMS uyarıları kapatıldı",
     "pushNotifications": "Anlık Bildirimler",
     "pushNotificationsDesc": "Gerçek zamanlı tarayıcı bildirimleri alın",
     "marketingEmails": "Pazarlama E-postaları",
@@ -1233,10 +1240,20 @@
       "removed": "Kategori kaldırıldı",
       "inactive": "Pasif",
       "empty": "Henüz kategori yok.",
-      "skillsIntro": "Kategori becerisine göre otomatik atama için her kategoriye ajan seçin.",
+      "skillsIntro": "Kategori becerisine göre otomatik atama için her kategoriye ajan seçin. E-posta anahtarıyla o kategorinin uyarılarını kapatabilirsiniz.",
       "skilledAgents": "Yetkin ajanlar",
       "skilledAgentsHint": "Otomatik atama modu “Kategori becerisine göre” olduğunda kullanılır.",
       "skillsSaved": "Kategori ajanları güncellendi",
+      "emailNotifications": "Bu kategori için e-posta uyarıları",
+      "smsNotifications": "Bu kategori için SMS uyarıları",
+      "activeToggle": "Kategori aktif",
+      "emailToggleLabel": "E-posta",
+      "smsToggleLabel": "SMS",
+      "activeToggleLabel": "Aktif",
+      "emailNotificationsOn": "Kategori e-posta uyarıları açıldı",
+      "emailNotificationsOff": "Kategori e-posta uyarıları kapatıldı",
+      "smsNotificationsOn": "Kategori SMS uyarıları açıldı",
+      "smsNotificationsOff": "Kategori SMS uyarıları kapatıldı",
       "removeTitle": "Kategoriyi kaldır",
       "removeMessage": "\"{{name}}\" kategorisi kaldırılsın mı? Mevcut biletlerde kullanılıyorsa silinmez, pasifleştirilir."
     },
@@ -1329,6 +1346,15 @@
       },
       "autoAssignFallbackRoundRobin": "Yetkin ajan yoksa round-robin’e düş",
       "autoAssignFallbackHint": "Yetkin ajanları Bilet Kategorileri’nde ayarlayın. Kategori için kimse yoksa, bilet atamasız kalmak yerine genel round-robin kullanılır.",
+      "emailSection": "Bilet e-posta bildirimleri",
+      "emailIntro": "Bilet e-postaları için ana anahtar (yanıt, atama, durum). SMTP de açık olmalıdır.",
+      "ticketEmailNotificationsEnabled": "Bilet e-posta bildirimleri gönder",
+      "ticketEmailNotificationsHint": "Kapalıyken sistem genelinde bilet e-postası gönderilmez. Açıkken kullanıcı ve kategori yine vazgeçebilir.",
+      "emailPriorities": "Bu öncelikler için e-posta gönder",
+      "ticketSmsNotificationsEnabled": "Bilet SMS bildirimleri gönder",
+      "ticketSmsNotificationsHint": "SMS’e katılmış, telefonu doğrulanmış kullanıcılara ve aşağıdaki önceliklere. SMS sağlayıcısı yapılandırılmalıdır.",
+      "smsPriorities": "Bu öncelikler için SMS gönder",
+      "prioritiesInvalid": "En az bir öncelik seçin",
       "saving": "Kaydediliyor…",
       "saved": "Bilet ayarları kaydedildi"
     },
@@ -1434,7 +1460,11 @@
     "actions": {
       "enable": "Etkinleştir",
       "disable": "Devre dışı bırak",
-      "changeRole": "Rolü Değiştir"
+      "changeRole": "Rolü Değiştir",
+      "enableEmailNotifications": "E-posta uyarılarını aç",
+      "disableEmailNotifications": "E-posta uyarılarını kapat",
+      "enableSmsNotifications": "SMS uyarılarını aç",
+      "disableSmsNotifications": "SMS uyarılarını kapat"
     },
     "confirm": {
       "deleteTitle": "Kullanıcı hesabı silinsin mi?",
@@ -1453,7 +1483,11 @@
       "deleted": "Kullanıcı silindi",
       "enabled": "Kullanıcı etkinleştirildi",
       "disabled": "Kullanıcı devre dışı bırakıldı",
-      "roleUpdated": "Rol güncellendi"
+      "roleUpdated": "Rol güncellendi",
+      "emailNotificationsEnabled": "Kullanıcı e-posta uyarıları açıldı",
+      "emailNotificationsDisabled": "Kullanıcı e-posta uyarıları kapatıldı",
+      "smsNotificationsEnabled": "Kullanıcı SMS uyarıları açıldı",
+      "smsNotificationsDisabled": "Kullanıcı SMS uyarıları kapatıldı"
     }
   },
   "common": {
@@ -1478,7 +1512,8 @@
     "turkish": "Türkçe",
     "copy": "Kopyala",
     "close": "Kapat",
-    "backToTop": "Yukarı çık"
+    "backToTop": "Yukarı çık",
+    "rowNumber": "#"
   },
   "paginator": {
     "itemsPerPage": "Sayfa başına öğe",

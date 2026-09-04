@@ -77,12 +77,13 @@ type ReadFilter = 'ALL' | 'UNREAD';
             </div>
           } @else {
             <ul class="notification-list">
-              @for (notif of notifications; track notif.id) {
+              @for (notif of notifications; track notif.id; let i = $index) {
                 <li>
                   <button type="button"
                           class="notification-row"
                           [class.unread]="!notif.read"
                           (click)="openNotification(notif)">
+                    <span class="col-row-num">{{ pageIndex * pageSize + i + 1 }}</span>
                     <span class="icon-wrap" [style.color]="notificationService.iconColor(notif.type)">
                       <mat-icon>{{ notificationService.iconName(notif.type) }}</mat-icon>
                     </span>
@@ -216,7 +217,7 @@ type ReadFilter = 'ALL' | 'UNREAD';
     .notification-row {
       width: 100%;
       display: grid;
-      grid-template-columns: auto 1fr auto auto;
+      grid-template-columns: 36px auto 1fr auto auto;
       align-items: center;
       gap: 14px;
       padding: 16px 18px;
@@ -227,6 +228,15 @@ type ReadFilter = 'ALL' | 'UNREAD';
       text-align: start;
       cursor: pointer;
       transition: background 0.18s ease;
+    }
+
+    .col-row-num {
+      width: 28px;
+      text-align: center;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.82rem;
+      font-weight: 600;
     }
 
     .notification-row:hover {

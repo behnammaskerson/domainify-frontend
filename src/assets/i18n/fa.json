@@ -1103,9 +1103,16 @@
     "darkMode": "حالت تاریک",
     "lightMode": "حالت روشن",
     "languageLabel": "زبان نمایش",
-    "languageDesc": "زبان مورد نظر خود را انتخاب کنید",
+    "languageDesc": "زبان رابط و زبان اعلان‌های ایمیل، پیامک و درون‌برنامه",
     "emailNotifications": "اعلان‌های ایمیل",
-    "emailNotificationsDesc": "دریافت هشدارهای ایمیل برای فعالیت‌های دامنه",
+    "emailNotificationsDesc": "هشدار ایمیل برای پاسخ جدید، انتساب و تغییر وضعیت تیکت",
+    "emailNotificationsEnabled": "هشدارهای ایمیل تیکت فعال شد",
+    "emailNotificationsDisabled": "هشدارهای ایمیل تیکت غیرفعال شد",
+    "smsNotifications": "اعلان‌های پیامک",
+    "smsNotificationsDesc": "عضویت برای هشدار پیامکی بر اساس اولویت‌های تنظیم‌شده توسط ادمین (نیاز به موبایل تأییدشده)",
+    "smsNotificationsNeedPhone": "برای فعال‌سازی پیامک، در پروفایل شماره موبایل اضافه و تأیید کنید.",
+    "smsNotificationsEnabled": "هشدار پیامکی تیکت فوری فعال شد",
+    "smsNotificationsDisabled": "هشدار پیامکی تیکت فوری غیرفعال شد",
     "pushNotifications": "اعلان‌های مرورگر",
     "pushNotificationsDesc": "دریافت اعلان‌های آنی مرورگر",
     "marketingEmails": "ایمیل‌های بازاریابی",
@@ -1289,10 +1296,20 @@
       "removed": "دسته‌بندی حذف شد",
       "inactive": "غیرفعال",
       "empty": "هنوز دسته‌بندی‌ای وجود ندارد.",
-      "skillsIntro": "برای تخصیص خودکار بر اساس مهارت دسته، مشخص کنید کدام عامل‌ها هر دسته را پوشش می‌دهند.",
+      "skillsIntro": "برای تخصیص خودکار بر اساس مهارت دسته، مشخص کنید کدام عامل‌ها هر دسته را پوشش می‌دهند. با کلید ایمیل می‌توانید هشدار ایمیل آن دسته را خاموش کنید.",
       "skilledAgents": "عامل‌های ماهر",
       "skilledAgentsHint": "وقتی حالت تخصیص خودکار «بر اساس مهارت دسته» باشد استفاده می‌شود.",
       "skillsSaved": "عامل‌های دسته به‌روز شد",
+      "emailNotifications": "هشدار ایمیل برای این دسته",
+      "smsNotifications": "هشدار پیامک برای این دسته",
+      "activeToggle": "دسته فعال",
+      "emailToggleLabel": "ایمیل",
+      "smsToggleLabel": "پیامک",
+      "activeToggleLabel": "فعال",
+      "emailNotificationsOn": "هشدار ایمیل دسته فعال شد",
+      "emailNotificationsOff": "هشدار ایمیل دسته غیرفعال شد",
+      "smsNotificationsOn": "هشدار پیامک دسته فعال شد",
+      "smsNotificationsOff": "هشدار پیامک دسته غیرفعال شد",
       "removeTitle": "حذف دسته‌بندی",
       "removeMessage": "دسته‌بندی «{{name}}» حذف شود؟ اگر در تیکت‌های موجود استفاده شده باشد، به‌جای حذف غیرفعال می‌شود."
     },
@@ -1385,6 +1402,15 @@
       },
       "autoAssignFallbackRoundRobin": "در نبود عامل ماهر، به نوبت‌گردانی برگرد",
       "autoAssignFallbackHint": "عامل‌های ماهر را در دسته‌بندی تیکت تنظیم کنید. اگر برای دسته‌ای کسی نباشد، به‌جای بدون‌مسئول ماندن، نوبت‌گردانی سراسری اعمال می‌شود.",
+      "emailSection": "اعلان‌های ایمیل تیکت",
+      "emailIntro": "کلید اصلی ایمیل‌های تیکت (پاسخ، انتساب، تغییر وضعیت). SMTP هم باید فعال باشد.",
+      "ticketEmailNotificationsEnabled": "ارسال اعلان‌های ایمیل تیکت",
+      "ticketEmailNotificationsHint": "در حالت خاموش، هیچ ایمیل تیکتی در کل سیستم ارسال نمی‌شود. وقتی روشن است، کاربر و دسته همچنان می‌توانند انصراف دهند.",
+      "emailPriorities": "ارسال ایمیل برای این اولویت‌ها",
+      "ticketSmsNotificationsEnabled": "ارسال پیامک تیکت",
+      "ticketSmsNotificationsHint": "برای کاربران عضو شده با موبایل تأییدشده و اولویت‌های زیر. ارائه‌دهنده پیامک باید پیکربندی شود.",
+      "smsPriorities": "ارسال پیامک برای این اولویت‌ها",
+      "prioritiesInvalid": "حداقل یک اولویت انتخاب کنید",
       "saving": "در حال ذخیره…",
       "saved": "تنظیمات تیکت ذخیره شد"
     },
@@ -1490,7 +1516,11 @@
     "actions": {
       "enable": "فعال‌سازی",
       "disable": "غیرفعال‌سازی",
-      "changeRole": "تغییر نقش"
+      "changeRole": "تغییر نقش",
+      "enableEmailNotifications": "فعال‌سازی هشدار ایمیل",
+      "disableEmailNotifications": "غیرفعال‌سازی هشدار ایمیل",
+      "enableSmsNotifications": "فعال‌سازی هشدار پیامک",
+      "disableSmsNotifications": "غیرفعال‌سازی هشدار پیامک"
     },
     "confirm": {
       "deleteTitle": "حذف حساب کاربری؟",
@@ -1509,7 +1539,11 @@
       "deleted": "کاربر حذف شد",
       "enabled": "کاربر فعال شد",
       "disabled": "کاربر غیرفعال شد",
-      "roleUpdated": "نقش به‌روز شد"
+      "roleUpdated": "نقش به‌روز شد",
+      "emailNotificationsEnabled": "هشدار ایمیل کاربر فعال شد",
+      "emailNotificationsDisabled": "هشدار ایمیل کاربر غیرفعال شد",
+      "smsNotificationsEnabled": "هشدار پیامک کاربر فعال شد",
+      "smsNotificationsDisabled": "هشدار پیامک کاربر غیرفعال شد"
     }
   },
   "common": {
@@ -1534,7 +1568,8 @@
     "turkish": "ترکی",
     "copy": "کپی",
     "close": "بستن",
-    "backToTop": "بازگشت به بالا"
+    "backToTop": "بازگشت به بالا",
+    "rowNumber": "#"
   },
   "paginator": {
     "itemsPerPage": "تعداد در هر صفحه",

@@ -173,6 +173,11 @@ type ReceiveTab = 'latest' | 'live' | 'archive';
                        class="mat-mdc-table users-table"
                        [attr.aria-label]="'sms.receiveReports.tabs.latest' | translate">
 
+                  <ng-container matColumnDef="rowNumber">
+                    <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
+                    <td mat-cell *matCellDef="let item; let i = index" class="col-row-num">{{ i + 1 }}</td>
+                  </ng-container>
+
                   <ng-container matColumnDef="receiveReturnId">
                     <th mat-header-cell *matHeaderCellDef>{{ 'sms.receiveReports.table.receiveReturnId' | translate }}</th>
                     <td mat-cell *matCellDef="let item">
@@ -235,6 +240,13 @@ type ReceiveTab = 'latest' | 'live' | 'archive';
                        [dataSource]="liveItems"
                        class="mat-mdc-table users-table"
                        [attr.aria-label]="'sms.receiveReports.tabs.live' | translate">
+
+                  <ng-container matColumnDef="rowNumber">
+                    <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
+                    <td mat-cell *matCellDef="let item; let i = index" class="col-row-num">
+                      {{ livePageIndex * livePageSize + i + 1 }}
+                    </td>
+                  </ng-container>
 
                   <ng-container matColumnDef="mobile">
                     <th mat-header-cell *matHeaderCellDef>{{ 'sms.receiveReports.table.mobile' | translate }}</th>
@@ -299,6 +311,13 @@ type ReceiveTab = 'latest' | 'live' | 'archive';
                        [dataSource]="archiveItems"
                        class="mat-mdc-table users-table"
                        [attr.aria-label]="'sms.receiveReports.tabs.archive' | translate">
+
+                  <ng-container matColumnDef="rowNumber">
+                    <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
+                    <td mat-cell *matCellDef="let item; let i = index" class="col-row-num">
+                      {{ archivePageIndex * archivePageSize + i + 1 }}
+                    </td>
+                  </ng-container>
 
                   <ng-container matColumnDef="receiveReturnId">
                     <th mat-header-cell *matHeaderCellDef>{{ 'sms.receiveReports.table.receiveReturnId' | translate }}</th>
@@ -472,6 +491,14 @@ type ReceiveTab = 'latest' | 'live' | 'archive';
       white-space: nowrap;
     }
 
+    .col-row-num {
+      width: 48px;
+      max-width: 48px;
+      text-align: center;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
     .empty-state {
       padding: 40px 16px;
       text-align: center;
@@ -509,9 +536,9 @@ export class SmsReceiveReportsComponent implements OnInit {
   readonly smsDateTimeFormat = SMS_DATETIME_FORMAT;
   readonly maxFilterDate = this.endOfYesterday();
   readonly countOptions = [10, 25, 50, 100];
-  readonly latestColumns = ['receiveReturnId', 'mobile', 'messageText', 'number', 'receivedDateTime'];
-  readonly liveColumns = ['mobile', 'messageText', 'number', 'receivedDateTime'];
-  readonly archiveColumns = ['receiveReturnId', 'mobile', 'messageText', 'number', 'receivedDateTime'];
+  readonly latestColumns = ['rowNumber', 'receiveReturnId', 'mobile', 'messageText', 'number', 'receivedDateTime'];
+  readonly liveColumns = ['rowNumber', 'mobile', 'messageText', 'number', 'receivedDateTime'];
+  readonly archiveColumns = ['rowNumber', 'receiveReturnId', 'mobile', 'messageText', 'number', 'receivedDateTime'];
   readonly tabs: { id: ReceiveTab; labelKey: string }[] = [
     { id: 'latest', labelKey: 'sms.receiveReports.tabs.latest' },
     { id: 'live', labelKey: 'sms.receiveReports.tabs.live' },

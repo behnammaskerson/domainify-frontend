@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { TranslationService } from './translation.service';
 
 export interface User {
   id: number;
@@ -18,6 +19,9 @@ export interface User {
   emailVerifiedAt?: string | null;
   phoneVerified?: boolean;
   phoneVerifiedAt?: string | null;
+  emailNotificationsEnabled?: boolean;
+  smsNotificationsEnabled?: boolean;
+  preferredLanguage?: 'en' | 'fa' | 'ar' | 'tr' | string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
   creatorUsername?: string | null;
@@ -47,6 +51,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   confirmPassword: string;
+  preferredLanguage?: string;
 }
 
 export interface TotpSetupResponse {
@@ -66,6 +71,8 @@ export interface TotpEnableResponse {
 export class AuthService {
   private readonly API_URL = 'http://localhost:8080/api';
   private currentUserSubject = new BehaviorSubject<User | null>(this.getUserFromStorage());
+  /** Lazy — do not inject TranslationService eagerly (HttpClient ↔ interceptor cycle). */
+  private readonly injector = inject(Injector);
 
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -178,6 +185,7 @@ export class AuthService {
   setCurrentUser(user: User): void {
     localStorage.setItem('user', JSON.stringify(user));
     this.currentUserSubject.next(user);
+    this.applyPreferredLanguageLater(user.preferredLanguage);
   }
 
   private saveToken(response: AuthResponse): void {
@@ -188,6 +196,20 @@ export class AuthService {
     localStorage.setItem('refreshToken', response.refreshToken);
     localStorage.setItem('user', JSON.stringify(response.user));
     this.currentUserSubject.next(response.user);
+    this.applyPreferredLanguageLater(response.user.preferredLanguage);
+  }
+
+  private applyPreferredLanguageLater(lang: string | null | undefined): void {
+    queueMicrotask(() => {
+      this.injector.get(TranslationService).applyPreferredLanguage(lang);
+    });
+  }
+
+  /** Apply tokens returned after an identity change (e.g. profile email update). */
+  applySessionTokens(accessToken: string, refreshToken: string, user: User): void {
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    this.setCurrentUser(user);
   }
 
   private clearToken(): void {

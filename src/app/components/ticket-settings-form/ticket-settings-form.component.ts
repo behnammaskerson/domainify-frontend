@@ -10,7 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ApiErrorService } from '../../services/api-error.service';
-import { TicketAttachmentKind, TicketAutoAssignMode, TicketService } from '../../services/ticket.service';
+import { TicketAttachmentKind, TicketAutoAssignMode, TicketPriority, TicketService } from '../../services/ticket.service';
 
 @Component({
   selector: 'app-ticket-settings-form',
@@ -86,6 +86,48 @@ import { TicketAttachmentKind, TicketAutoAssignMode, TicketService } from '../..
           </section>
 
           <section class="section">
+            <h3>{{ 'settings.ticketSettings.emailSection' | translate }}</h3>
+            <p class="section-hint">{{ 'settings.ticketSettings.emailIntro' | translate }}</p>
+            <mat-checkbox formControlName="ticketEmailNotificationsEnabled" color="primary">
+              {{ 'settings.ticketSettings.ticketEmailNotificationsEnabled' | translate }}
+            </mat-checkbox>
+            <p class="section-hint">{{ 'settings.ticketSettings.ticketEmailNotificationsHint' | translate }}</p>
+            <div class="kinds" role="group" [attr.aria-label]="'settings.ticketSettings.emailPriorities' | translate">
+              <p class="kinds-label">{{ 'settings.ticketSettings.emailPriorities' | translate }}</p>
+              @for (priority of priorities; track priority) {
+                <mat-checkbox
+                  [checked]="isEmailPrioritySelected(priority)"
+                  [disabled]="!form.controls.ticketEmailNotificationsEnabled.value"
+                  (change)="toggleEmailPriority(priority, $event.checked)">
+                  {{ ('tickets.priorities.' + priority) | translate }}
+                </mat-checkbox>
+              }
+              @if (form.controls.emailNotificationPriorities.touched && form.controls.emailNotificationPriorities.invalid) {
+                <p class="field-error">{{ 'settings.ticketSettings.prioritiesInvalid' | translate }}</p>
+              }
+            </div>
+
+            <mat-checkbox formControlName="ticketSmsNotificationsEnabled" color="primary">
+              {{ 'settings.ticketSettings.ticketSmsNotificationsEnabled' | translate }}
+            </mat-checkbox>
+            <p class="section-hint">{{ 'settings.ticketSettings.ticketSmsNotificationsHint' | translate }}</p>
+            <div class="kinds" role="group" [attr.aria-label]="'settings.ticketSettings.smsPriorities' | translate">
+              <p class="kinds-label">{{ 'settings.ticketSettings.smsPriorities' | translate }}</p>
+              @for (priority of priorities; track priority) {
+                <mat-checkbox
+                  [checked]="isSmsPrioritySelected(priority)"
+                  [disabled]="!form.controls.ticketSmsNotificationsEnabled.value"
+                  (change)="toggleSmsPriority(priority, $event.checked)">
+                  {{ ('tickets.priorities.' + priority) | translate }}
+                </mat-checkbox>
+              }
+              @if (form.controls.smsNotificationPriorities.touched && form.controls.smsNotificationPriorities.invalid) {
+                <p class="field-error">{{ 'settings.ticketSettings.prioritiesInvalid' | translate }}</p>
+              }
+            </div>
+          </section>
+
+          <section class="section">
             <h3>{{ 'settings.ticketSettings.autoAssignSection' | translate }}</h3>
             <p class="section-hint">{{ 'settings.ticketSettings.autoAssignIntro' | translate }}</p>
             <mat-form-field appearance="outline" class="full-field">
@@ -147,7 +189,7 @@ import { TicketAttachmentKind, TicketAutoAssignMode, TicketService } from '../..
           </section>
 
           <div class="actions">
-            <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving || !hasKinds">
+            <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving || !hasKinds || !hasPriorities">
               {{ (saving ? 'settings.ticketSettings.saving' : 'common.save') | translate }}
             </button>
           </div>
@@ -200,6 +242,7 @@ export class TicketSettingsFormComponent implements OnInit {
   saving = false;
 
   readonly attachmentKinds: TicketAttachmentKind[] = ['IMAGE', 'PDF', 'LOG', 'DOCUMENT'];
+  readonly priorities: TicketPriority[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
   readonly autoAssignModes: TicketAutoAssignMode[] = ['OFF', 'ROUND_ROBIN', 'CATEGORY_SKILL'];
 
   readonly form = this.fb.nonNullable.group({
@@ -211,6 +254,16 @@ export class TicketSettingsFormComponent implements OnInit {
     slaLowHours: [168, [Validators.required, Validators.min(1), Validators.max(8760)]],
     autoAssignMode: this.fb.nonNullable.control<TicketAutoAssignMode>('OFF', [Validators.required]),
     autoAssignFallbackRoundRobin: [true],
+    ticketEmailNotificationsEnabled: [true],
+    ticketSmsNotificationsEnabled: [true],
+    emailNotificationPriorities: this.fb.nonNullable.control<TicketPriority[]>(
+      ['LOW', 'MEDIUM', 'HIGH', 'URGENT'],
+      [Validators.required, Validators.minLength(1)]
+    ),
+    smsNotificationPriorities: this.fb.nonNullable.control<TicketPriority[]>(
+      ['URGENT'],
+      [Validators.required, Validators.minLength(1)]
+    ),
     maxAttachments: [5, [Validators.required, Validators.min(1), Validators.max(20)]],
     maxAttachmentSizeMb: [5, [Validators.required, Validators.min(1), Validators.max(50)]],
     allowedAttachmentKinds: this.fb.nonNullable.control<TicketAttachmentKind[]>(
@@ -221,6 +274,11 @@ export class TicketSettingsFormComponent implements OnInit {
 
   get hasKinds(): boolean {
     return (this.form.controls.allowedAttachmentKinds.value?.length ?? 0) > 0;
+  }
+
+  get hasPriorities(): boolean {
+    return (this.form.controls.emailNotificationPriorities.value?.length ?? 0) > 0
+      && (this.form.controls.smsNotificationPriorities.value?.length ?? 0) > 0;
   }
 
   ngOnInit(): void {
@@ -241,9 +299,37 @@ export class TicketSettingsFormComponent implements OnInit {
     this.form.controls.allowedAttachmentKinds.updateValueAndValidity();
   }
 
+  isEmailPrioritySelected(priority: TicketPriority): boolean {
+    return this.form.controls.emailNotificationPriorities.value.includes(priority);
+  }
+
+  toggleEmailPriority(priority: TicketPriority, checked: boolean): void {
+    const current = [...this.form.controls.emailNotificationPriorities.value];
+    const next = checked
+      ? (current.includes(priority) ? current : [...current, priority])
+      : current.filter((item) => item !== priority);
+    this.form.controls.emailNotificationPriorities.setValue(next);
+    this.form.controls.emailNotificationPriorities.markAsTouched();
+    this.form.controls.emailNotificationPriorities.updateValueAndValidity();
+  }
+
+  isSmsPrioritySelected(priority: TicketPriority): boolean {
+    return this.form.controls.smsNotificationPriorities.value.includes(priority);
+  }
+
+  toggleSmsPriority(priority: TicketPriority, checked: boolean): void {
+    const current = [...this.form.controls.smsNotificationPriorities.value];
+    const next = checked
+      ? (current.includes(priority) ? current : [...current, priority])
+      : current.filter((item) => item !== priority);
+    this.form.controls.smsNotificationPriorities.setValue(next);
+    this.form.controls.smsNotificationPriorities.markAsTouched();
+    this.form.controls.smsNotificationPriorities.updateValueAndValidity();
+  }
+
   save(): void {
     this.form.markAllAsTouched();
-    if (this.form.invalid || this.saving || !this.hasKinds) {
+    if (this.form.invalid || this.saving || !this.hasKinds || !this.hasPriorities) {
       return;
     }
     this.saving = true;
@@ -257,6 +343,10 @@ export class TicketSettingsFormComponent implements OnInit {
       slaLowHours: Number(value.slaLowHours),
       autoAssignMode: value.autoAssignMode,
       autoAssignFallbackRoundRobin: !!value.autoAssignFallbackRoundRobin,
+      ticketEmailNotificationsEnabled: !!value.ticketEmailNotificationsEnabled,
+      ticketSmsNotificationsEnabled: !!value.ticketSmsNotificationsEnabled,
+      emailNotificationPriorities: [...value.emailNotificationPriorities],
+      smsNotificationPriorities: [...value.smsNotificationPriorities],
       maxAttachments: Number(value.maxAttachments),
       maxAttachmentSizeMb: Number(value.maxAttachmentSizeMb),
       allowedAttachmentKinds: [...value.allowedAttachmentKinds]
@@ -296,6 +386,10 @@ export class TicketSettingsFormComponent implements OnInit {
     slaLowHours?: number;
     autoAssignMode?: TicketAutoAssignMode;
     autoAssignFallbackRoundRobin?: boolean;
+    ticketEmailNotificationsEnabled?: boolean;
+    ticketSmsNotificationsEnabled?: boolean;
+    emailNotificationPriorities?: TicketPriority[];
+    smsNotificationPriorities?: TicketPriority[];
     maxAttachments?: number;
     maxAttachmentSizeMb?: number;
     allowedAttachmentKinds?: TicketAttachmentKind[];
@@ -303,6 +397,12 @@ export class TicketSettingsFormComponent implements OnInit {
     const kinds = (settings.allowedAttachmentKinds?.length
       ? settings.allowedAttachmentKinds
       : this.attachmentKinds) as TicketAttachmentKind[];
+    const emailPriorities = (settings.emailNotificationPriorities?.length
+      ? settings.emailNotificationPriorities
+      : this.priorities) as TicketPriority[];
+    const smsPriorities = (settings.smsNotificationPriorities?.length
+      ? settings.smsNotificationPriorities
+      : (['URGENT'] as TicketPriority[]));
     this.form.reset({
       reopenWindowDays: settings.reopenWindowDays ?? 14,
       autoArchiveClosedAfterDays: settings.autoArchiveClosedAfterDays ?? 90,
@@ -312,6 +412,10 @@ export class TicketSettingsFormComponent implements OnInit {
       slaLowHours: settings.slaLowHours ?? 168,
       autoAssignMode: settings.autoAssignMode ?? 'OFF',
       autoAssignFallbackRoundRobin: settings.autoAssignFallbackRoundRobin !== false,
+      ticketEmailNotificationsEnabled: settings.ticketEmailNotificationsEnabled !== false,
+      ticketSmsNotificationsEnabled: settings.ticketSmsNotificationsEnabled !== false,
+      emailNotificationPriorities: [...emailPriorities],
+      smsNotificationPriorities: [...smsPriorities],
       maxAttachments: settings.maxAttachments ?? 5,
       maxAttachmentSizeMb: settings.maxAttachmentSizeMb ?? 5,
       allowedAttachmentKinds: [...kinds]

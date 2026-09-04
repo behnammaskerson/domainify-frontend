@@ -19,6 +19,8 @@ export interface TicketCategory {
   code: string;
   name: string;
   active: boolean;
+  emailNotificationsEnabled?: boolean;
+  smsNotificationsEnabled?: boolean;
   sortOrder: number;
   agentIds?: number[];
 }
@@ -27,6 +29,8 @@ export interface TicketCategoryRequest {
   name: string;
   code?: string;
   active?: boolean;
+  emailNotificationsEnabled?: boolean;
+  smsNotificationsEnabled?: boolean;
   sortOrder?: number;
 }
 
@@ -174,6 +178,10 @@ export interface TicketSettings {
   slaLowHours: number;
   autoAssignMode: TicketAutoAssignMode;
   autoAssignFallbackRoundRobin: boolean;
+  ticketEmailNotificationsEnabled: boolean;
+  ticketSmsNotificationsEnabled: boolean;
+  emailNotificationPriorities: TicketPriority[];
+  smsNotificationPriorities: TicketPriority[];
 }
 
 export interface TicketAttachmentPolicy {

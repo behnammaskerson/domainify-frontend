@@ -84,6 +84,12 @@ export interface TicketLinkDialogResult {
                 </mat-checkbox>
               </td>
             </ng-container>
+            <ng-container matColumnDef="rowNumber">
+              <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
+              <td mat-cell *matCellDef="let row; let i = index" class="col-row-num">
+                {{ pageIndex * pageSize + i + 1 }}
+              </td>
+            </ng-container>
             <ng-container matColumnDef="publicNumber">
               <th mat-header-cell *matHeaderCellDef>{{ 'tickets.detail.linkColNumber' | translate }}</th>
               <td mat-cell *matCellDef="let row" dir="ltr">{{ row.publicNumber }}</td>
@@ -179,6 +185,14 @@ export interface TicketLinkDialogResult {
 
     .link-table { width: 100%; }
 
+    .col-row-num {
+      width: 48px;
+      max-width: 48px;
+      text-align: center;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
     .link-table tr.mat-mdc-row { cursor: pointer; }
 
     .link-table tr.mat-mdc-row:hover {
@@ -212,7 +226,7 @@ export class TicketLinkDialogComponent implements OnInit, OnDestroy {
   private readonly dialogRef = inject(MatDialogRef<TicketLinkDialogComponent, TicketLinkDialogResult>);
   readonly data = inject<TicketLinkDialogData>(MAT_DIALOG_DATA);
 
-  readonly displayedColumns = ['select', 'publicNumber', 'subject', 'requester', 'status', 'updatedAt'];
+  readonly displayedColumns = ['select', 'rowNumber', 'publicNumber', 'subject', 'requester', 'status', 'updatedAt'];
   readonly dateTimeFormat = SMS_DATETIME_FORMAT;
   private readonly excluded = new Set(this.data.excludedTicketIds ?? [this.data.targetTicketId]);
 

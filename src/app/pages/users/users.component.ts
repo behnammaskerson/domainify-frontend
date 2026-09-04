@@ -453,15 +453,18 @@ export class UserFormDialogComponent {
               <div class="panel-surface empty-state">{{ 'common.noData' | translate }}</div>
             } @else {
               <div class="users-tiles">
-                @for (user of users; track user.id) {
+                @for (user of users; track user.id; let i = $index) {
                   <article class="user-tile">
                     <div class="user-tile-top">
-                      <div class="user-avatar user-avatar-lg" [attr.aria-hidden]="true">
-                        @if (avatarUrl(user); as src) {
-                          <img [src]="src" [alt]="user.firstName + ' ' + user.lastName">
-                        } @else {
-                          <span class="user-avatar-initials">{{ initials(user) }}</span>
-                        }
+                      <div class="user-tile-identity">
+                        <span class="col-row-num tile-row-num">{{ pageIndex * pageSize + i + 1 }}</span>
+                        <div class="user-avatar user-avatar-lg" [attr.aria-hidden]="true">
+                          @if (avatarUrl(user); as src) {
+                            <img [src]="src" [alt]="user.firstName + ' ' + user.lastName">
+                          } @else {
+                            <span class="user-avatar-initials">{{ initials(user) }}</span>
+                          }
+                        </div>
                       </div>
                       <button mat-icon-button
                               type="button"
@@ -477,6 +480,18 @@ export class UserFormDialogComponent {
                         <button mat-menu-item type="button" (click)="toggleEnabled(user)">
                           <mat-icon>{{ user.enabled ? 'block' : 'check_circle' }}</mat-icon>
                           {{ (user.enabled ? 'users.actions.disable' : 'users.actions.enable') | translate }}
+                        </button>
+                        <button mat-menu-item type="button" (click)="toggleEmailNotifications(user)">
+                          <mat-icon>{{ user.emailNotificationsEnabled === false ? 'mark_email_read' : 'unsubscribe' }}</mat-icon>
+                          {{ (user.emailNotificationsEnabled === false
+                            ? 'users.actions.enableEmailNotifications'
+                            : 'users.actions.disableEmailNotifications') | translate }}
+                        </button>
+                        <button mat-menu-item type="button" (click)="toggleSmsNotifications(user)">
+                          <mat-icon>{{ user.smsNotificationsEnabled ? 'sms' : 'sms_failed' }}</mat-icon>
+                          {{ (user.smsNotificationsEnabled
+                            ? 'users.actions.disableSmsNotifications'
+                            : 'users.actions.enableSmsNotifications') | translate }}
                         </button>
                         <button mat-menu-item type="button" [matMenuTriggerFor]="tileRoleMenu">
                           <mat-icon>badge</mat-icon>
@@ -547,6 +562,13 @@ export class UserFormDialogComponent {
                    class="mat-mdc-table users-table"
                    [attr.aria-label]="'users.title' | translate"
                    (matSortChange)="onSortChange($event)">
+
+              <ng-container matColumnDef="rowNumber">
+                <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
+                <td mat-cell *matCellDef="let user; let i = index" class="col-row-num">
+                  {{ pageIndex * pageSize + i + 1 }}
+                </td>
+              </ng-container>
 
               <ng-container matColumnDef="avatar">
                 <th mat-header-cell *matHeaderCellDef class="col-avatar">{{ 'users.table.avatar' | translate }}</th>
@@ -674,6 +696,18 @@ export class UserFormDialogComponent {
                     <button mat-menu-item type="button" (click)="toggleEnabled(user)">
                       <mat-icon>{{ user.enabled ? 'block' : 'check_circle' }}</mat-icon>
                       {{ (user.enabled ? 'users.actions.disable' : 'users.actions.enable') | translate }}
+                    </button>
+                    <button mat-menu-item type="button" (click)="toggleEmailNotifications(user)">
+                      <mat-icon>{{ user.emailNotificationsEnabled === false ? 'mark_email_read' : 'unsubscribe' }}</mat-icon>
+                      {{ (user.emailNotificationsEnabled === false
+                        ? 'users.actions.enableEmailNotifications'
+                        : 'users.actions.disableEmailNotifications') | translate }}
+                    </button>
+                    <button mat-menu-item type="button" (click)="toggleSmsNotifications(user)">
+                      <mat-icon>{{ user.smsNotificationsEnabled ? 'sms' : 'sms_failed' }}</mat-icon>
+                      {{ (user.smsNotificationsEnabled
+                        ? 'users.actions.disableSmsNotifications'
+                        : 'users.actions.enableSmsNotifications') | translate }}
                     </button>
                     <button mat-menu-item type="button" [matMenuTriggerFor]="roleMenu">
                       <mat-icon>badge</mat-icon>
@@ -1016,6 +1050,13 @@ export class UserFormDialogComponent {
       margin-bottom: 8px;
     }
 
+    .user-tile-identity {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
     .user-avatar {
       width: 40px;
       height: 40px;
@@ -1133,6 +1174,20 @@ export class UserFormDialogComponent {
       overflow: hidden;
     }
 
+    .col-row-num {
+      width: 48px;
+      max-width: 48px;
+      text-align: center;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tile-row-num {
+      font-size: 0.78rem;
+      font-weight: 600;
+      line-height: 1;
+    }
+
     .col-avatar {
       width: 64px;
       padding-inline: 12px 8px !important;
@@ -1225,6 +1280,7 @@ export class UsersComponent implements OnInit {
   private readonly textFilter$ = new Subject<{ key: 'firstName' | 'lastName' | 'email'; value: string }>();
 
   displayedColumns = [
+    'rowNumber',
     'avatar',
     'firstName',
     'lastName',
@@ -1536,6 +1592,32 @@ export class UsersComponent implements OnInit {
         },
         error: (error) => this.showError(error)
       });
+    });
+  }
+
+  toggleEmailNotifications(user: ManagedUser): void {
+    const next = user.emailNotificationsEnabled === false;
+    this.usersService.setUserEmailNotificationsEnabled(user.id, next).subscribe({
+      next: () => {
+        this.snack(this.translate.instant(
+          next ? 'users.messages.emailNotificationsEnabled' : 'users.messages.emailNotificationsDisabled'
+        ));
+        this.loadUsers();
+      },
+      error: (error) => this.showError(error)
+    });
+  }
+
+  toggleSmsNotifications(user: ManagedUser): void {
+    const next = !user.smsNotificationsEnabled;
+    this.usersService.setUserSmsNotificationsEnabled(user.id, next).subscribe({
+      next: () => {
+        this.snack(this.translate.instant(
+          next ? 'users.messages.smsNotificationsEnabled' : 'users.messages.smsNotificationsDisabled'
+        ));
+        this.loadUsers();
+      },
+      error: (error) => this.showError(error)
     });
   }
 

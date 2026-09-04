@@ -44,9 +44,12 @@ import { TicketService, TicketTag } from '../../services/ticket.service';
         </form>
 
         <ul class="tag-list">
-          @for (tag of tags; track tag.id) {
+          @for (tag of tags; track tag.id; let i = $index) {
             <li>
-              <span class="tag-chip">{{ tag.name }}</span>
+              <div class="tag-main">
+                <span class="col-row-num">{{ i + 1 }}</span>
+                <span class="tag-chip">{{ tag.name }}</span>
+              </div>
               <button mat-icon-button
                       type="button"
                       [disabled]="busyId === tag.id"
@@ -72,6 +75,11 @@ import { TicketService, TicketTag } from '../../services/ticket.service';
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
       padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 8px;
       background: var(--bg-secondary);
+    }
+    .tag-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .col-row-num {
+      width: 28px; text-align: center; color: var(--text-muted);
+      font-variant-numeric: tabular-nums; font-size: 0.85rem; font-weight: 600;
     }
     .tag-chip {
       display: inline-flex; padding: 3px 10px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;
