@@ -358,6 +358,29 @@
       "transferHistoryHint": "Ajanlar ve departmanlar arasındaki önceki teslimler.",
       "transferAssigneeLabel": "Atanan",
       "transferQueueLabel": "Kuyruk",
+      "escalate": "Yükselt",
+      "escalateTitle": "Bileti yükselt",
+      "escalateIntro": "{{number}} için aciliyeti artırın — önceliği yükseltin ve gerekirse yeniden atayın.",
+      "escalateBumpPriority": "Önceliği bir seviye yükselt",
+      "escalatePriority": "Öncelik",
+      "escalateAssignee": "Atanan",
+      "escalateQueue": "Kuyruk / departman",
+      "escalateNote": "Yükseltme notu",
+      "escalateNotePlaceholder": "Bu bilet neden yükseltiliyor?",
+      "escalateNoteHint": "Not dahili not olarak kaydedilir.",
+      "escalateNeedChange": "Yükseltmek için önceliği, atananı veya kuyruğu değiştirin.",
+      "escalateConfirm": "Yükselt",
+      "escalateSuccess": "Bilet yükseltildi",
+      "escalatedNotice": "Bu bilet yükseltildi.",
+      "escalationHistoryTitle": "Yükseltme geçmişi",
+      "escalationHistoryHint": "Manuel ve SLA ihlali yükseltmeleri.",
+      "escalateSystem": "Sistem",
+      "escalatePriorityLabel": "Öncelik",
+      "escalateSlaBreachNote": "Otomatik yükseltme: SLA son tarihi aşıldı.",
+      "escalateTrigger": {
+        "MANUAL": "Manuel",
+        "SLA_BREACH": "SLA ihlali"
+      },
       "workflowHint": "Durum değişiklikleri yapılandırılmış iş akışını izler.",
       "manageWorkflow": "İş akışını yönet",
       "tagsTitle": "Etiketler",
@@ -487,6 +510,7 @@
         "watching": "Takip edilenler",
         "mentions": "Bahsetmeler",
         "overdue": "Gecikmiş",
+        "escalated": "Yükseltilen",
         "archived": "Arşivlenen",
         "deleted": "Silinen"
       },
@@ -1675,6 +1699,9 @@
     "TICKET_TRANSFER_INVALID": "Aktarım için yeni atanan ve/veya kuyruk gerekli",
     "TICKET_TRANSFER_NO_CHANGE": "Aktarım atananı veya kuyruğu değiştirmelidir",
     "TICKET_TRANSFER_NOTE_TOO_LONG": "Aktarım notu en fazla 2000 karakter olabilir",
+    "TICKET_ESCALATION_INVALID": "Yükseltme için öncelik, atanan ve/veya kuyruk değişikliği gerekli",
+    "TICKET_ESCALATION_NO_CHANGE": "Yükseltme önceliği, atananı veya kuyruğu değiştirmelidir",
+    "TICKET_ESCALATION_NOTE_TOO_LONG": "Yükseltme notu en fazla 2000 karakter olabilir",
     "TICKET_PRIORITY_REQUIRED": "Bilet önceliği gerekli",
     "TICKET_ATTACHMENTS_LIMIT": "Bu yükleme için çok fazla ek dosya",
     "TICKET_ATTACHMENT_INVALID": "Geçersiz ek. İzin verilen türleri ve boyut sınırlarını Bilet Ayarları'ndan kontrol edin",
@@ -1779,7 +1806,9 @@
       "TICKET_CLOSED": "{{ticketNumber}} kapatıldı",
       "TICKET_REOPENED": "{{ticketNumber}} yeniden açıldı",
       "TICKET_WATCHER_ADDED": "{{ticketNumber}} için takipçi olarak eklendiniz",
-      "TICKET_TRANSFERRED": "{{ticketNumber}} size aktarıldı"
+      "TICKET_TRANSFERRED": "{{ticketNumber}} size aktarıldı",
+      "TICKET_ESCALATED": "{{ticketNumber}} yükseltildi",
+      "TICKET_ESCALATED_AUTO": "{{ticketNumber}} otomatik yükseltildi (SLA ihlali)"
     }
   },
   "toolbar": {

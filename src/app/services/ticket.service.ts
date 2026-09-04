@@ -75,6 +75,8 @@ export interface Ticket {
   assigneeName?: string;
   dueAt?: string;
   overdue?: boolean;
+  escalatedAt?: string | null;
+  escalated?: boolean;
   closedAt?: string;
   archivedAt?: string;
   deletedAt?: string;
@@ -93,7 +95,7 @@ export interface Ticket {
   attachments?: TicketAttachmentMeta[];
 }
 
-export type TicketInboxView = 'ALL' | 'UNASSIGNED' | 'MINE' | 'MY_QUEUE' | 'WATCHING' | 'MENTIONS' | 'OVERDUE' | 'ARCHIVED' | 'DELETED';
+export type TicketInboxView = 'ALL' | 'UNASSIGNED' | 'MINE' | 'MY_QUEUE' | 'WATCHING' | 'MENTIONS' | 'OVERDUE' | 'ESCALATED' | 'ARCHIVED' | 'DELETED';
 
 export interface TicketTag {
   id: number;
@@ -173,8 +175,10 @@ export interface TicketDetail {
   canWatch?: boolean;
   watching?: boolean;
   canTransfer?: boolean;
+  canEscalate?: boolean;
   watchers?: TicketAssigneeOption[];
   transfers?: TicketTransfer[];
+  escalations?: TicketEscalation[];
   reopenUntil?: string;
   reopenWindowDays?: number;
   allowedNextStatuses?: TicketStatus[];
@@ -184,6 +188,25 @@ export interface TicketTransfer {
   id: number;
   transferredById?: number | null;
   transferredByName?: string | null;
+  fromAssigneeId?: number | null;
+  fromAssigneeName?: string | null;
+  toAssigneeId?: number | null;
+  toAssigneeName?: string | null;
+  fromQueueId?: number | null;
+  fromQueueName?: string | null;
+  toQueueId?: number | null;
+  toQueueName?: string | null;
+  note?: string | null;
+  createdAt?: string;
+}
+
+export interface TicketEscalation {
+  id: number;
+  triggerType?: 'MANUAL' | 'SLA_BREACH';
+  escalatedById?: number | null;
+  escalatedByName?: string | null;
+  fromPriority?: TicketPriority | null;
+  toPriority?: TicketPriority | null;
   fromAssigneeId?: number | null;
   fromAssigneeName?: string | null;
   toAssigneeId?: number | null;
@@ -528,6 +551,22 @@ export class TicketService {
     }
   ): Observable<TicketDetail> {
     return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/transfer`, payload);
+  }
+
+  escalateAdminTicket(
+    id: number,
+    payload: {
+      bumpPriority?: boolean;
+      priority?: TicketPriority | null;
+      priorityChanged?: boolean;
+      assigneeId?: number | null;
+      assigneeChanged?: boolean;
+      queueId?: number | null;
+      queueChanged?: boolean;
+      note?: string;
+    }
+  ): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/escalate`, payload);
   }
 
   closeAdminTicket(id: number): Observable<TicketDetail> {

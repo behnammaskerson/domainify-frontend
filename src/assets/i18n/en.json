@@ -359,6 +359,29 @@
       "transferHistoryHint": "Past handoffs between agents and departments.",
       "transferAssigneeLabel": "Assignee",
       "transferQueueLabel": "Queue",
+      "escalate": "Escalate",
+      "escalateTitle": "Escalate ticket",
+      "escalateIntro": "Raise urgency for {{number}} — bump priority and optionally reassign.",
+      "escalateBumpPriority": "Bump priority one level",
+      "escalatePriority": "Priority",
+      "escalateAssignee": "Assignee",
+      "escalateQueue": "Queue / department",
+      "escalateNote": "Escalation note",
+      "escalateNotePlaceholder": "Why is this being escalated?",
+      "escalateNoteHint": "The note is saved as an internal note.",
+      "escalateNeedChange": "Change priority, assignee, or queue to escalate.",
+      "escalateConfirm": "Escalate",
+      "escalateSuccess": "Ticket escalated",
+      "escalatedNotice": "This ticket has been escalated.",
+      "escalationHistoryTitle": "Escalation history",
+      "escalationHistoryHint": "Manual and SLA-breach escalations.",
+      "escalateSystem": "System",
+      "escalatePriorityLabel": "Priority",
+      "escalateSlaBreachNote": "Automatic escalation: SLA due date breached.",
+      "escalateTrigger": {
+        "MANUAL": "Manual",
+        "SLA_BREACH": "SLA breach"
+      },
       "workflowHint": "Status changes follow the configured workflow.",
       "manageWorkflow": "Manage workflow",
       "tagsTitle": "Tags",
@@ -488,6 +511,7 @@
         "watching": "Watching",
         "mentions": "Mentions",
         "overdue": "Overdue",
+        "escalated": "Escalated",
         "archived": "Archived",
         "deleted": "Deleted"
       },
@@ -1754,6 +1778,9 @@
     "TICKET_TRANSFER_INVALID": "Transfer requires a new assignee and/or queue",
     "TICKET_TRANSFER_NO_CHANGE": "Transfer must change assignee or queue",
     "TICKET_TRANSFER_NOTE_TOO_LONG": "Transfer note must be at most 2000 characters",
+    "TICKET_ESCALATION_INVALID": "Escalation requires a priority, assignee, and/or queue change",
+    "TICKET_ESCALATION_NO_CHANGE": "Escalation must change priority, assignee, or queue",
+    "TICKET_ESCALATION_NOTE_TOO_LONG": "Escalation note must be at most 2000 characters",
     "TICKET_PRIORITY_REQUIRED": "Ticket priority is required",
     "TICKET_ATTACHMENTS_LIMIT": "Too many attachments for this upload",
     "TICKET_ATTACHMENT_INVALID": "Invalid attachment. Check allowed types and size limits in Ticket Settings",
@@ -1858,7 +1885,9 @@
       "TICKET_CLOSED": "{{ticketNumber}} was closed",
       "TICKET_REOPENED": "{{ticketNumber}} was reopened",
       "TICKET_WATCHER_ADDED": "You were added as a watcher on {{ticketNumber}}",
-      "TICKET_TRANSFERRED": "{{ticketNumber}} was transferred to you"
+      "TICKET_TRANSFERRED": "{{ticketNumber}} was transferred to you",
+      "TICKET_ESCALATED": "{{ticketNumber}} was escalated",
+      "TICKET_ESCALATED_AUTO": "{{ticketNumber}} was auto-escalated (SLA breach)"
     }
   },
   "toolbar": {

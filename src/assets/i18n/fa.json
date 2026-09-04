@@ -358,6 +358,29 @@
       "transferHistoryHint": "واگذاری‌های قبلی بین عوامل و دپارتمان‌ها.",
       "transferAssigneeLabel": "مسئول",
       "transferQueueLabel": "صف",
+      "escalate": "تشدید",
+      "escalateTitle": "تشدید تیکت",
+      "escalateIntro": "فوریت {{number}} را بالا ببرید — اولویت را افزایش دهید و در صورت نیاز دوباره تخصیص دهید.",
+      "escalateBumpPriority": "یک سطح افزایش اولویت",
+      "escalatePriority": "اولویت",
+      "escalateAssignee": "مسئول",
+      "escalateQueue": "صف / دپارتمان",
+      "escalateNote": "یادداشت تشدید",
+      "escalateNotePlaceholder": "چرا این تیکت تشدید می‌شود؟",
+      "escalateNoteHint": "یادداشت به‌عنوان یادداشت داخلی ذخیره می‌شود.",
+      "escalateNeedChange": "برای تشدید، اولویت، مسئول یا صف را تغییر دهید.",
+      "escalateConfirm": "تشدید",
+      "escalateSuccess": "تیکت تشدید شد",
+      "escalatedNotice": "این تیکت تشدید شده است.",
+      "escalationHistoryTitle": "تاریخچه تشدید",
+      "escalationHistoryHint": "تشدیدهای دستی و نقض SLA.",
+      "escalateSystem": "سیستم",
+      "escalatePriorityLabel": "اولویت",
+      "escalateSlaBreachNote": "تشدید خودکار: مهلت SLA نقض شده است.",
+      "escalateTrigger": {
+        "MANUAL": "دستی",
+        "SLA_BREACH": "نقض SLA"
+      },
       "workflowHint": "تغییر وضعیت بر اساس گردش‌کار پیکربندی‌شده انجام می‌شود.",
       "manageWorkflow": "مدیریت گردش‌کار",
       "tagsTitle": "برچسب‌ها",
@@ -487,6 +510,7 @@
         "watching": "در حال دنبال",
         "mentions": "منشن‌ها",
         "overdue": "سررسید گذشته",
+        "escalated": "تشدیدشده",
         "archived": "بایگانی‌شده",
         "deleted": "حذف‌شده"
       },
@@ -1731,6 +1755,9 @@
     "TICKET_TRANSFER_INVALID": "انتقال نیاز به مسئول و/یا صف جدید دارد",
     "TICKET_TRANSFER_NO_CHANGE": "انتقال باید مسئول یا صف را تغییر دهد",
     "TICKET_TRANSFER_NOTE_TOO_LONG": "یادداشت انتقال حداکثر ۲۰۰۰ کاراکتر است",
+    "TICKET_ESCALATION_INVALID": "تشدید نیاز به تغییر اولویت، مسئول و/یا صف دارد",
+    "TICKET_ESCALATION_NO_CHANGE": "تشدید باید اولویت، مسئول یا صف را تغییر دهد",
+    "TICKET_ESCALATION_NOTE_TOO_LONG": "یادداشت تشدید حداکثر ۲۰۰۰ کاراکتر است",
     "TICKET_PRIORITY_REQUIRED": "اولویت تیکت الزامی است",
     "TICKET_ATTACHMENTS_LIMIT": "تعداد پیوست‌ها بیش از حد مجاز است",
     "TICKET_ATTACHMENT_INVALID": "پیوست نامعتبر است. انواع و اندازه مجاز را در تنظیمات تیکت بررسی کنید",
@@ -1835,7 +1862,9 @@
       "TICKET_CLOSED": "{{ticketNumber}} بسته شد",
       "TICKET_REOPENED": "{{ticketNumber}} دوباره باز شد",
       "TICKET_WATCHER_ADDED": "به‌عنوان دنبال‌کننده به {{ticketNumber}} اضافه شدید",
-      "TICKET_TRANSFERRED": "{{ticketNumber}} به شما منتقل شد"
+      "TICKET_TRANSFERRED": "{{ticketNumber}} به شما منتقل شد",
+      "TICKET_ESCALATED": "{{ticketNumber}} تشدید شد",
+      "TICKET_ESCALATED_AUTO": "{{ticketNumber}} به‌صورت خودکار تشدید شد (نقض SLA)"
     }
   },
   "toolbar": {

@@ -21,6 +21,7 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-
 import { TicketMergeDialogComponent } from '../../components/ticket-merge-dialog/ticket-merge-dialog.component';
 import { TicketSplitDialogComponent } from '../../components/ticket-split-dialog/ticket-split-dialog.component';
 import { TicketLinkDialogComponent } from '../../components/ticket-link-dialog/ticket-link-dialog.component';
+import { TicketEscalateDialogComponent } from '../../components/ticket-escalate-dialog/ticket-escalate-dialog.component';
 import { TicketTransferDialogComponent } from '../../components/ticket-transfer-dialog/ticket-transfer-dialog.component';
 import { TicketMessageRevisionsDialogComponent } from '../../components/ticket-message-revisions-dialog/ticket-message-revisions-dialog.component';
 import { DatetimeFilterFieldComponent } from '../../components/datetime-filter-field/datetime-filter-field.component';
@@ -42,7 +43,8 @@ import {
   TicketReplyTemplate,
   TicketReplyDraft,
   RelatedTicket,
-  TicketTransfer
+  TicketTransfer,
+  TicketEscalation
 } from '../../services/ticket.service';
 import { renderReplyTemplate, toMentionHandle } from '../../utils/reply-template.util';
 import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
@@ -96,6 +98,12 @@ type TicketDetailMode = 'customer' | 'admin';
             <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="transferTicket()">
               <mat-icon>swap_horiz</mat-icon>
               {{ 'tickets.detail.transfer' | translate }}
+            </button>
+          }
+          @if (ticket && canEscalate) {
+            <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="escalateTicket()">
+              <mat-icon>trending_up</mat-icon>
+              {{ 'tickets.detail.escalate' | translate }}
             </button>
           }
           @if (ticket && canSplit) {
@@ -303,6 +311,13 @@ type TicketDetailMode = 'customer' | 'admin';
             </p>
           }
 
+          @if (ticket.escalated) {
+            <p class="lifecycle-banner panel-surface escalated-banner">
+              <mat-icon>trending_up</mat-icon>
+              <span>{{ 'tickets.detail.escalatedNotice' | translate }}</span>
+            </p>
+          }
+
           @if (isAdmin && canEditDueDate) {
             <div class="sla-card panel-surface">
               <div class="tags-header">
@@ -475,6 +490,59 @@ type TicketDetailMode = 'customer' | 'admin';
                       </span>
                     </div>
                     @if (item.note) {
+                      <p class="transfer-note">{{ item.note }}</p>
+                    }
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+
+          @if (isAdmin && escalations.length) {
+            <div class="tags-card panel-surface">
+              <div class="tags-header">
+                <div>
+                  <h2>{{ 'tickets.detail.escalationHistoryTitle' | translate }}</h2>
+                  <p>{{ 'tickets.detail.escalationHistoryHint' | translate }}</p>
+                </div>
+              </div>
+              <ul class="transfer-history">
+                @for (item of escalations; track item.id) {
+                  <li>
+                    <div class="transfer-meta">
+                      <span>
+                        {{ item.escalatedByName || ('tickets.detail.escalateSystem' | translate) }}
+                        · {{ ('tickets.detail.escalateTrigger.' + (item.triggerType || 'MANUAL')) | translate }}
+                      </span>
+                      <span class="muted-inline" dir="ltr">{{ item.createdAt | localeDate:dateTimeFormat }}</span>
+                    </div>
+                    <div class="transfer-line">
+                      <span>
+                        {{ 'tickets.detail.escalatePriorityLabel' | translate }}:
+                        {{ item.fromPriority ? (('tickets.priorities.' + item.fromPriority) | translate) : '—' }}
+                        →
+                        {{ item.toPriority ? (('tickets.priorities.' + item.toPriority) | translate) : '—' }}
+                      </span>
+                    </div>
+                    <div class="transfer-line">
+                      <span>
+                        {{ 'tickets.detail.transferAssigneeLabel' | translate }}:
+                        {{ item.fromAssigneeName || ('tickets.detail.unassigned' | translate) }}
+                        →
+                        {{ item.toAssigneeName || ('tickets.detail.unassigned' | translate) }}
+                      </span>
+                    </div>
+                    <div class="transfer-line">
+                      <span>
+                        {{ 'tickets.detail.transferQueueLabel' | translate }}:
+                        {{ item.fromQueueName || ('tickets.detail.noQueue' | translate) }}
+                        →
+                        {{ item.toQueueName || ('tickets.detail.noQueue' | translate) }}
+                      </span>
+                    </div>
+                    @if (item.triggerType === 'SLA_BREACH') {
+                      <p class="transfer-note">{{ 'tickets.detail.escalateSlaBreachNote' | translate }}</p>
+                    } @else if (item.note) {
                       <p class="transfer-note">{{ item.note }}</p>
                     }
                   </li>
@@ -957,6 +1025,10 @@ type TicketDetailMode = 'customer' | 'admin';
     .overdue-banner {
       color: var(--danger, #c62828);
       border-color: color-mix(in srgb, var(--danger, #c62828) 35%, var(--border-color));
+    }
+    .escalated-banner {
+      color: var(--warning, #c47d0e);
+      border-color: color-mix(in srgb, var(--warning, #c47d0e) 35%, var(--border-color));
     }
     .sla-card { padding: 16px; margin-bottom: 16px; }
     .sla-actions {
@@ -1444,8 +1516,10 @@ export class TicketDetailComponent implements OnInit {
   canWatch = false;
   watching = false;
   canTransfer = false;
+  canEscalate = false;
   watchers: TicketAssigneeOption[] = [];
   transfers: TicketTransfer[] = [];
+  escalations: TicketEscalation[] = [];
   watcherToAddId: number | null = null;
   watcherBusy = false;
   draftDueAt: string | null = null;
@@ -1725,6 +1799,43 @@ export class TicketDetailComponent implements OnInit {
             this.applyDetail(detail);
             this.lifecycleBusy = false;
             this.snackBar.open(this.translate.instant('tickets.detail.transferSuccess'), undefined, { duration: 3000 });
+          },
+          error: (error) => {
+            this.lifecycleBusy = false;
+            this.showError(this.apiError.resolve(error));
+          }
+        });
+      });
+  }
+
+  escalateTicket(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canEscalate || this.lifecycleBusy || !this.ticket) {
+      return;
+    }
+    this.dialog
+      .open(TicketEscalateDialogComponent, {
+        width: '480px',
+        maxWidth: '95vw',
+        data: {
+          publicNumber: this.ticket.publicNumber,
+          priority: this.ticket.priority,
+          assigneeId: this.ticket.assigneeId ?? null,
+          queueId: this.ticket.queue?.id ?? null,
+          assignees: this.assignees,
+          queues: this.queues
+        }
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (!result || !this.ticketId) {
+          return;
+        }
+        this.lifecycleBusy = true;
+        this.ticketService.escalateAdminTicket(this.ticketId, result).subscribe({
+          next: (detail) => {
+            this.applyDetail(detail);
+            this.lifecycleBusy = false;
+            this.snackBar.open(this.translate.instant('tickets.detail.escalateSuccess'), undefined, { duration: 3000 });
           },
           error: (error) => {
             this.lifecycleBusy = false;
@@ -2536,8 +2647,10 @@ export class TicketDetailComponent implements OnInit {
     this.canWatch = !!detail.canWatch;
     this.watching = !!detail.watching;
     this.canTransfer = !!detail.canTransfer;
+    this.canEscalate = !!detail.canEscalate;
     this.watchers = [...(detail.watchers ?? [])];
     this.transfers = [...(detail.transfers ?? [])];
+    this.escalations = [...(detail.escalations ?? [])];
     this.draftDueAt = detail.ticket?.dueAt ?? null;
     this.reopenUntil = detail.reopenUntil ?? null;
     this.statusOptions = (detail.allowedNextStatuses ?? []).filter((status) => status !== detail.ticket?.status);

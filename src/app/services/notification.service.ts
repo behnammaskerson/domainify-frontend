@@ -15,7 +15,8 @@ export type NotificationType =
   | 'TICKET_CLOSED'
   | 'TICKET_REOPENED'
   | 'TICKET_WATCHER_ADDED'
-  | 'TICKET_TRANSFERRED';
+  | 'TICKET_TRANSFERRED'
+  | 'TICKET_ESCALATED';
 
 export type TicketStatus = 'NEW' | 'OPEN' | 'PENDING' | 'ON_HOLD' | 'RESOLVED' | 'CLOSED';
 
@@ -119,7 +120,10 @@ export class NotificationService {
   }
 
   messageText(notif: AppNotification): string {
-    const key = `notifications.types.${notif.type}`;
+    const autoEscalated = notif.type === 'TICKET_ESCALATED' && !notif.actorName;
+    const key = autoEscalated
+      ? 'notifications.types.TICKET_ESCALATED_AUTO'
+      : `notifications.types.${notif.type}`;
     const actor = notif.actorName || this.translate.instant('notifications.someone');
     const ticketNumber = notif.ticketPublicNumber || `#${notif.ticketId ?? ''}`;
     const statusFrom = notif.statusFrom
@@ -156,6 +160,8 @@ export class NotificationService {
         return 'visibility';
       case 'TICKET_TRANSFERRED':
         return 'swap_horiz';
+      case 'TICKET_ESCALATED':
+        return 'trending_up';
       case 'TICKET_CLOSED':
         return 'lock';
       case 'TICKET_REOPENED':
@@ -172,6 +178,7 @@ export class NotificationService {
       case 'TICKET_MENTION':
       case 'TICKET_WATCHER_ADDED':
       case 'TICKET_TRANSFERRED':
+      case 'TICKET_ESCALATED':
         return 'var(--accent)';
       case 'TICKET_CLOSED':
         return 'var(--text-muted)';

@@ -706,6 +706,7 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
     { id: 'WATCHING', labelKey: 'tickets.adminInbox.views.watching' },
     { id: 'MENTIONS', labelKey: 'tickets.adminInbox.views.mentions' },
     { id: 'OVERDUE', labelKey: 'tickets.adminInbox.views.overdue' },
+    { id: 'ESCALATED', labelKey: 'tickets.adminInbox.views.escalated' },
     { id: 'ARCHIVED', labelKey: 'tickets.adminInbox.views.archived' },
     { id: 'DELETED', labelKey: 'tickets.adminInbox.views.deleted' }
   ];
