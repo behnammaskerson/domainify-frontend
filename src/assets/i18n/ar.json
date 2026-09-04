@@ -137,6 +137,7 @@
     "smsDailyPacks": "حزم اليوم"
   },
   "tickets": {
+    "agentUnavailable": "غير متاح",
     "categoriesPage": {
       "eyebrow": "الدعم",
       "title": "فئات التذاكر",
@@ -501,6 +502,9 @@
       "title": "صندوق التذاكر",
       "subtitle": "إدارة وتصنيف تذاكر دعم العملاء.",
       "refresh": "تحديث",
+      "presenceAvailable": "متاح",
+      "presenceAway": "غير متاح",
+      "presenceHint": "حدد ما إذا كان التعيين التلقائي يمكنه إسناد تذاكر جديدة إليك",
       "viewsLabel": "عروض الصندوق",
       "views": {
         "all": "الكل",
@@ -1098,6 +1102,10 @@
     "smsNotificationsNeedPhone": "أضف هاتفاً وتحقق منه في الملف الشخصي لتفعيل تنبيهات SMS.",
     "smsNotificationsEnabled": "تم تفعيل تنبيهات SMS للتذاكر العاجلة",
     "smsNotificationsDisabled": "تم إيقاف تنبيهات SMS للتذاكر العاجلة",
+    "ticketAvailability": "متاح للتذاكر",
+    "ticketAvailabilityDesc": "عند الإيقاف، يتخطاك التعيين التلقائي. يمكن للزملاء تعيين التذاكر أو نقلها إليك يدويًا.",
+    "ticketAvailabilityEnabled": "أنت متاح للتعيين التلقائي للتذاكر",
+    "ticketAvailabilityDisabled": "أنت غير متاح للتعيين التلقائي للتذاكر",
     "pushNotifications": "إشعارات المتصفح",
     "pushNotificationsDesc": "احصل على إشعارات فورية في المتصفح",
     "marketingEmails": "رسائل تسويقية",
@@ -1399,7 +1407,7 @@
       "autoAssignSection": "التعيين التلقائي",
       "autoAssignIntro": "عيّن التذاكر الجديدة تلقائياً إلى وكيل عند إنشائها.",
       "autoAssignMode": "وضع التعيين",
-      "autoAssignModeHint": "التناوب يمر على كل المشرفين المفعّلين. مهارة الفئة وعضوية الطابور تستخدمان الوكلاء المرتبطين بفئة أو طابور التذكرة.",
+      "autoAssignModeHint": "التناوب يمر على المشرفين المفعّلين والمتاحين. مهارة الفئة وعضوية الطابور تستخدمان الوكلاء المتاحين المرتبطين بفئة أو طابور التذكرة. يتخطى التعيين التلقائي غير المتاحين ويمكن تعيينهم يدويًا.",
       "autoAssignModes": {
         "OFF": "إيقاف (يدوي / المطالبة بالرد)",
         "ROUND_ROBIN": "تناوب",
@@ -1529,7 +1537,9 @@
       "enableEmailNotifications": "تفعيل تنبيهات البريد",
       "disableEmailNotifications": "إيقاف تنبيهات البريد",
       "enableSmsNotifications": "تفعيل تنبيهات SMS",
-      "disableSmsNotifications": "إيقاف تنبيهات SMS"
+      "disableSmsNotifications": "إيقاف تنبيهات SMS",
+      "markTicketAvailable": "تعيين كمتاح للتذاكر",
+      "markTicketUnavailable": "تعيين كغير متاح للتذاكر"
     },
     "confirm": {
       "deleteTitle": "حذف حساب المستخدم؟",
@@ -1552,7 +1562,9 @@
       "emailNotificationsEnabled": "تم تفعيل تنبيهات بريد المستخدم",
       "emailNotificationsDisabled": "تم إيقاف تنبيهات بريد المستخدم",
       "smsNotificationsEnabled": "تم تفعيل تنبيهات SMS للمستخدم",
-      "smsNotificationsDisabled": "تم إيقاف تنبيهات SMS للمستخدم"
+      "smsNotificationsDisabled": "تم إيقاف تنبيهات SMS للمستخدم",
+      "ticketAvailable": "تم تعليم المستخدم كمتاح للتعيين التلقائي",
+      "ticketUnavailable": "تم تعليم المستخدم كغير متاح للتعيين التلقائي"
     }
   },
   "common": {

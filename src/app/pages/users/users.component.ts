@@ -493,6 +493,14 @@ export class UserFormDialogComponent {
                             ? 'users.actions.disableSmsNotifications'
                             : 'users.actions.enableSmsNotifications') | translate }}
                         </button>
+                        @if (user.role === 'ADMIN') {
+                          <button mat-menu-item type="button" (click)="toggleTicketAvailability(user)">
+                            <mat-icon>{{ user.ticketAvailable === false ? 'check_circle' : 'do_not_disturb_on' }}</mat-icon>
+                            {{ (user.ticketAvailable === false
+                              ? 'users.actions.markTicketAvailable'
+                              : 'users.actions.markTicketUnavailable') | translate }}
+                          </button>
+                        }
                         <button mat-menu-item type="button" [matMenuTriggerFor]="tileRoleMenu">
                           <mat-icon>badge</mat-icon>
                           {{ 'users.actions.changeRole' | translate }}
@@ -709,6 +717,14 @@ export class UserFormDialogComponent {
                         ? 'users.actions.disableSmsNotifications'
                         : 'users.actions.enableSmsNotifications') | translate }}
                     </button>
+                    @if (user.role === 'ADMIN') {
+                      <button mat-menu-item type="button" (click)="toggleTicketAvailability(user)">
+                        <mat-icon>{{ user.ticketAvailable === false ? 'check_circle' : 'do_not_disturb_on' }}</mat-icon>
+                        {{ (user.ticketAvailable === false
+                          ? 'users.actions.markTicketAvailable'
+                          : 'users.actions.markTicketUnavailable') | translate }}
+                      </button>
+                    }
                     <button mat-menu-item type="button" [matMenuTriggerFor]="roleMenu">
                       <mat-icon>badge</mat-icon>
                       {{ 'users.actions.changeRole' | translate }}
@@ -1614,6 +1630,22 @@ export class UsersComponent implements OnInit {
       next: () => {
         this.snack(this.translate.instant(
           next ? 'users.messages.smsNotificationsEnabled' : 'users.messages.smsNotificationsDisabled'
+        ));
+        this.loadUsers();
+      },
+      error: (error) => this.showError(error)
+    });
+  }
+
+  toggleTicketAvailability(user: ManagedUser): void {
+    if (user.role !== 'ADMIN') {
+      return;
+    }
+    const next = user.ticketAvailable === false;
+    this.usersService.setUserTicketAvailable(user.id, next).subscribe({
+      next: () => {
+        this.snack(this.translate.instant(
+          next ? 'users.messages.ticketAvailable' : 'users.messages.ticketUnavailable'
         ));
         this.loadUsers();
       },

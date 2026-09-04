@@ -121,6 +121,7 @@ export interface TicketAssigneeOption {
   id: number;
   name: string;
   email: string;
+  available?: boolean;
 }
 
 export interface TicketMessage {

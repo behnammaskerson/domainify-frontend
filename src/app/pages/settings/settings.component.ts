@@ -405,6 +405,19 @@ interface SettingsNavItem {
                               (change)="onSmsNotificationsToggle($event.checked)">
             </mat-slide-toggle>
           </div>
+          @if (authService.isAdmin()) {
+            <div class="setting-row">
+              <div class="setting-copy">
+                <span class="setting-label">{{ 'settings.ticketAvailability' | translate }}</span>
+                <span class="setting-desc">{{ 'settings.ticketAvailabilityDesc' | translate }}</span>
+              </div>
+              <mat-slide-toggle color="primary"
+                                [checked]="ticketAvailable"
+                                [disabled]="ticketAvailabilitySaving"
+                                (change)="onTicketAvailabilityToggle($event.checked)">
+              </mat-slide-toggle>
+            </div>
+          }
           <div class="setting-row">
             <div class="setting-copy">
               <span class="setting-label">{{ 'settings.pushNotifications' | translate }}</span>
@@ -1204,6 +1217,8 @@ export class SettingsComponent implements OnInit {
   emailNotificationsSaving = false;
   smsNotificationsEnabled = false;
   smsNotificationsSaving = false;
+  ticketAvailable = true;
+  ticketAvailabilitySaving = false;
   phoneVerificationSending = false;
   phoneVerifying = false;
   phoneOtpCode = '';
@@ -1920,6 +1935,7 @@ export class SettingsComponent implements OnInit {
     this.phoneVerified = user.phoneVerified !== false;
     this.emailNotificationsEnabled = user.emailNotificationsEnabled !== false;
     this.smsNotificationsEnabled = user.smsNotificationsEnabled === true;
+    this.ticketAvailable = user.ticketAvailable !== false;
     this.phoneOtpSent = false;
     this.phoneOtpCode = '';
     if (!this.emailTestTo && user.email) {
@@ -2026,6 +2042,30 @@ export class SettingsComponent implements OnInit {
       error: (error) => {
         this.smsNotificationsSaving = false;
         this.smsNotificationsEnabled = previous;
+        this.showError(error);
+      }
+    });
+  }
+
+  onTicketAvailabilityToggle(enabled: boolean): void {
+    if (!this.authService.isAdmin() || this.ticketAvailabilitySaving || enabled === this.ticketAvailable) {
+      return;
+    }
+    const previous = this.ticketAvailable;
+    this.ticketAvailable = enabled;
+    this.ticketAvailabilitySaving = true;
+    this.usersService.setTicketAvailable(enabled).subscribe({
+      next: (user) => {
+        this.ticketAvailabilitySaving = false;
+        this.applyUser(user);
+        this.authService.setCurrentUser(user);
+        this.snack(this.translate.instant(
+          enabled ? 'settings.ticketAvailabilityEnabled' : 'settings.ticketAvailabilityDisabled'
+        ));
+      },
+      error: (error) => {
+        this.ticketAvailabilitySaving = false;
+        this.ticketAvailable = previous;
         this.showError(error);
       }
     });

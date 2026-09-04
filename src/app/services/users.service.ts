@@ -171,12 +171,20 @@ export class UsersService {
     return this.http.patch<ManagedUser>(`${this.API_URL}/users/me/sms-notifications`, { enabled });
   }
 
+  setTicketAvailable(enabled: boolean): Observable<ManagedUser> {
+    return this.http.patch<ManagedUser>(`${this.API_URL}/users/me/ticket-availability`, { enabled });
+  }
+
   setPreferredLanguage(language: string): Observable<ManagedUser> {
     return this.http.patch<ManagedUser>(`${this.API_URL}/users/me/preferred-language`, { language });
   }
 
   setUserSmsNotificationsEnabled(id: number, enabled: boolean): Observable<ManagedUser> {
     return this.http.patch<ManagedUser>(`${this.API_URL}/users/${id}/sms-notifications`, { enabled });
+  }
+
+  setUserTicketAvailable(id: number, enabled: boolean): Observable<ManagedUser> {
+    return this.http.patch<ManagedUser>(`${this.API_URL}/users/${id}/ticket-availability`, { enabled });
   }
 
   sendPhoneVerification(): Observable<{ message?: string }> {

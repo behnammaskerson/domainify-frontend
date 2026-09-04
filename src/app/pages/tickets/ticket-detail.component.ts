@@ -259,6 +259,9 @@ type TicketDetailMode = 'customer' | 'admin';
                           @for (assignee of assignees; track assignee.id) {
                             <mat-option [value]="assignee.id">
                               {{ assignee.name || assignee.email }}
+                              @if (assignee.available === false) {
+                                <span class="muted-inline"> — {{ 'tickets.agentUnavailable' | translate }}</span>
+                              }
                             </mat-option>
                           }
                         </mat-select>

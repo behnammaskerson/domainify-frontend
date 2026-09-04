@@ -21,6 +21,7 @@ export interface User {
   phoneVerifiedAt?: string | null;
   emailNotificationsEnabled?: boolean;
   smsNotificationsEnabled?: boolean;
+  ticketAvailable?: boolean;
   preferredLanguage?: 'en' | 'fa' | 'ar' | 'tr' | string | null;
   createdAt?: string | null;
   updatedAt?: string | null;

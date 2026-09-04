@@ -12,12 +12,13 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 import { DatetimeFilterFieldComponent } from '../../components/datetime-filter-field/datetime-filter-field.component';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
 import { ApiErrorService } from '../../services/api-error.service';
+import { AuthService } from '../../services/auth.service';
 import {
   Ticket,
   TicketAssigneeOption,
@@ -29,6 +30,7 @@ import {
   TicketStatus,
   TicketTag
 } from '../../services/ticket.service';
+import { UsersService } from '../../services/users.service';
 import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
 
 const UNASSIGNED_VALUE = '__unassigned__';
@@ -63,6 +65,16 @@ const UNASSIGNED_VALUE = '__unassigned__';
         [title]="'tickets.adminInbox.title' | translate"
         [subtitle]="'tickets.adminInbox.subtitle' | translate">
         <div heroActions>
+          <button mat-stroked-button
+                  type="button"
+                  class="presence-btn"
+                  [class.away]="!ticketAvailable"
+                  [disabled]="ticketAvailabilitySaving"
+                  (click)="toggleTicketAvailability()"
+                  [matTooltip]="'tickets.adminInbox.presenceHint' | translate">
+            <mat-icon>{{ ticketAvailable ? 'check_circle' : 'do_not_disturb_on' }}</mat-icon>
+            {{ (ticketAvailable ? 'tickets.adminInbox.presenceAvailable' : 'tickets.adminInbox.presenceAway') | translate }}
+          </button>
           <button mat-stroked-button type="button" (click)="reload()" [disabled]="loading">
             <mat-icon>refresh</mat-icon>
             {{ 'tickets.adminInbox.refresh' | translate }}
@@ -159,7 +171,12 @@ const UNASSIGNED_VALUE = '__unassigned__';
                     <mat-option [value]="''">{{ 'tickets.adminInbox.filters.any' | translate }}</mat-option>
                     <mat-option [value]="unassignedValue">{{ 'tickets.adminInbox.unassigned' | translate }}</mat-option>
                     @for (assignee of assignees; track assignee.id) {
-                      <mat-option [value]="assignee.id">{{ assignee.name || assignee.email }}</mat-option>
+                      <mat-option [value]="assignee.id">
+                        {{ assignee.name || assignee.email }}
+                        @if (assignee.available === false) {
+                          — {{ 'tickets.agentUnavailable' | translate }}
+                        }
+                      </mat-option>
                     }
                   </mat-select>
                 </mat-form-field>
@@ -681,6 +698,10 @@ const UNASSIGNED_VALUE = '__unassigned__';
 
     .muted { color: var(--text-muted); }
     .result-count { margin: 0; font-size: 0.85rem; }
+    .presence-btn.away {
+      border-color: color-mix(in srgb, var(--warning) 55%, var(--border-color));
+      color: var(--warning);
+    }
 
     @media (max-width: 720px) {
       .search-field { width: 100%; }
@@ -692,8 +713,11 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly ticketService = inject(TicketService);
+  private readonly usersService = inject(UsersService);
+  private readonly authService = inject(AuthService);
   private readonly apiError = inject(ApiErrorService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly translate = inject(TranslateService);
 
   readonly unassignedValue = UNASSIGNED_VALUE;
   readonly statuses: TicketStatus[] = ['NEW', 'OPEN', 'PENDING', 'ON_HOLD', 'RESOLVED', 'CLOSED'];
@@ -721,6 +745,8 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
   assignees: TicketAssigneeOption[] = [];
   tags: TicketTag[] = [];
   loading = false;
+  ticketAvailable = true;
+  ticketAvailabilitySaving = false;
   inboxView: TicketInboxView = 'ALL';
   searchInput = '';
   searchQuery = '';
@@ -761,6 +787,10 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.authService.refreshCurrentUser().subscribe({
+      next: (user) => { this.ticketAvailable = user.ticketAvailable !== false; },
+      error: () => { this.ticketAvailable = true; }
+    });
     this.ticketService.listAllCategories().subscribe({
       next: (categories) => { this.categories = categories ?? []; },
       error: () => { this.categories = []; }
@@ -864,6 +894,35 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
 
   reload(): void {
     this.load();
+  }
+
+  toggleTicketAvailability(): void {
+    if (this.ticketAvailabilitySaving) {
+      return;
+    }
+    const next = !this.ticketAvailable;
+    const previous = this.ticketAvailable;
+    this.ticketAvailable = next;
+    this.ticketAvailabilitySaving = true;
+    this.usersService.setTicketAvailable(next).subscribe({
+      next: (user) => {
+        this.ticketAvailabilitySaving = false;
+        this.ticketAvailable = user.ticketAvailable !== false;
+        this.authService.setCurrentUser(user);
+        this.snackBar.open(
+          this.translate.instant(
+            next ? 'settings.ticketAvailabilityEnabled' : 'settings.ticketAvailabilityDisabled'
+          ),
+          undefined,
+          { duration: 2500 }
+        );
+      },
+      error: (error) => {
+        this.ticketAvailabilitySaving = false;
+        this.ticketAvailable = previous;
+        this.snackBar.open(this.apiError.resolve(error), undefined, { duration: 4000 });
+      }
+    });
   }
 
   private load(): void {

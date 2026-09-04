@@ -138,6 +138,7 @@
     "smsDailyPacks": "Today's Packs"
   },
   "tickets": {
+    "agentUnavailable": "Away",
     "categoriesPage": {
       "eyebrow": "Support",
       "title": "Ticket Categories",
@@ -502,6 +503,9 @@
       "title": "Ticket Inbox",
       "subtitle": "Manage and triage customer support tickets.",
       "refresh": "Refresh",
+      "presenceAvailable": "Available",
+      "presenceAway": "Away",
+      "presenceHint": "Toggle whether auto-assign can give you new tickets",
       "viewsLabel": "Inbox views",
       "views": {
         "all": "All",
@@ -1199,6 +1203,10 @@
     "smsNotificationsNeedPhone": "Add and verify a phone number in your profile to enable SMS alerts.",
     "smsNotificationsEnabled": "Urgent ticket SMS alerts enabled",
     "smsNotificationsDisabled": "Urgent ticket SMS alerts disabled",
+    "ticketAvailability": "Available for tickets",
+    "ticketAvailabilityDesc": "When off, auto-assign skips you. Colleagues can still assign or transfer tickets to you manually.",
+    "ticketAvailabilityEnabled": "You are available for ticket auto-assign",
+    "ticketAvailabilityDisabled": "You are unavailable for ticket auto-assign",
     "pushNotifications": "Push Notifications",
     "pushNotificationsDesc": "Get real-time browser notifications",
     "marketingEmails": "Marketing Emails",
@@ -1500,7 +1508,7 @@
       "autoAssignSection": "Auto-assign",
       "autoAssignIntro": "Automatically assign new tickets to an agent when they are created.",
       "autoAssignMode": "Assignment mode",
-      "autoAssignModeHint": "Round-robin rotates among all enabled admins. Category skill and queue membership use agents linked to the ticket category or queue.",
+      "autoAssignModeHint": "Round-robin rotates among available enabled admins. Category skill and queue membership use available agents linked to the ticket category or queue. Unavailable agents are skipped by auto-assign but can still be assigned manually.",
       "autoAssignModes": {
         "OFF": "Off (manual / claim on reply)",
         "ROUND_ROBIN": "Round-robin",
@@ -1630,7 +1638,9 @@
       "enableEmailNotifications": "Enable email alerts",
       "disableEmailNotifications": "Disable email alerts",
       "enableSmsNotifications": "Enable SMS alerts",
-      "disableSmsNotifications": "Disable SMS alerts"
+      "disableSmsNotifications": "Disable SMS alerts",
+      "markTicketAvailable": "Mark available for tickets",
+      "markTicketUnavailable": "Mark unavailable for tickets"
     },
     "confirm": {
       "deleteTitle": "Delete user account?",
@@ -1653,7 +1663,9 @@
       "emailNotificationsEnabled": "User email alerts enabled",
       "emailNotificationsDisabled": "User email alerts disabled",
       "smsNotificationsEnabled": "User SMS alerts enabled",
-      "smsNotificationsDisabled": "User SMS alerts disabled"
+      "smsNotificationsDisabled": "User SMS alerts disabled",
+      "ticketAvailable": "User marked available for ticket auto-assign",
+      "ticketUnavailable": "User marked unavailable for ticket auto-assign"
     }
   },
   "common": {

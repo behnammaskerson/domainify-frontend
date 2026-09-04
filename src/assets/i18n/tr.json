@@ -137,6 +137,7 @@
     "smsDailyPacks": "Günün Paketleri"
   },
   "tickets": {
+    "agentUnavailable": "Uzakta",
     "categoriesPage": {
       "eyebrow": "Destek",
       "title": "Bilet Kategorileri",
@@ -501,6 +502,9 @@
       "title": "Bilet Gelen Kutusu",
       "subtitle": "Müşteri destek biletlerini yönetin ve önceliklendirin.",
       "refresh": "Yenile",
+      "presenceAvailable": "Müsait",
+      "presenceAway": "Uzakta",
+      "presenceHint": "Otomatik atamanın size yeni bilet verip veremeyeceğini değiştirin",
       "viewsLabel": "Gelen kutusu görünümleri",
       "views": {
         "all": "Tümü",
@@ -1120,6 +1124,10 @@
     "smsNotificationsNeedPhone": "SMS için profilde telefon ekleyip doğrulayın.",
     "smsNotificationsEnabled": "Acil bilet SMS uyarıları açıldı",
     "smsNotificationsDisabled": "Acil bilet SMS uyarıları kapatıldı",
+    "ticketAvailability": "Biletler için müsait",
+    "ticketAvailabilityDesc": "Kapalıyken otomatik atama sizi atlar. Meslektaşlar yine de size manuel atama veya aktarım yapabilir.",
+    "ticketAvailabilityEnabled": "Bilet otomatik ataması için müsaitesiniz",
+    "ticketAvailabilityDisabled": "Bilet otomatik ataması için müsait değilsiniz",
     "pushNotifications": "Anlık Bildirimler",
     "pushNotificationsDesc": "Gerçek zamanlı tarayıcı bildirimleri alın",
     "marketingEmails": "Pazarlama E-postaları",
@@ -1421,7 +1429,7 @@
       "autoAssignSection": "Otomatik atama",
       "autoAssignIntro": "Yeni biletleri oluşturulduğunda otomatik olarak bir ajana atayın.",
       "autoAssignMode": "Atama modu",
-      "autoAssignModeHint": "Round-robin tüm etkin adminler arasında döner. Kategori becerisi ve kuyruk üyeliği, bilet kategorisine veya kuyruğuna bağlı ajanları kullanır.",
+      "autoAssignModeHint": "Round-robin müsait etkin adminler arasında döner. Kategori becerisi ve kuyruk üyeliği, bağlı müsait ajanları kullanır. Müsait olmayanlar otomatik atamada atlanır; yine de manuel atanabilir.",
       "autoAssignModes": {
         "OFF": "Kapalı (manuel / yanıtla sahiplen)",
         "ROUND_ROBIN": "Round-robin",
@@ -1551,7 +1559,9 @@
       "enableEmailNotifications": "E-posta uyarılarını aç",
       "disableEmailNotifications": "E-posta uyarılarını kapat",
       "enableSmsNotifications": "SMS uyarılarını aç",
-      "disableSmsNotifications": "SMS uyarılarını kapat"
+      "disableSmsNotifications": "SMS uyarılarını kapat",
+      "markTicketAvailable": "Biletler için müsait yap",
+      "markTicketUnavailable": "Biletler için müsait değil yap"
     },
     "confirm": {
       "deleteTitle": "Kullanıcı hesabı silinsin mi?",
@@ -1574,7 +1584,9 @@
       "emailNotificationsEnabled": "Kullanıcı e-posta uyarıları açıldı",
       "emailNotificationsDisabled": "Kullanıcı e-posta uyarıları kapatıldı",
       "smsNotificationsEnabled": "Kullanıcı SMS uyarıları açıldı",
-      "smsNotificationsDisabled": "Kullanıcı SMS uyarıları kapatıldı"
+      "smsNotificationsDisabled": "Kullanıcı SMS uyarıları kapatıldı",
+      "ticketAvailable": "Kullanıcı bilet otomatik ataması için müsait yapıldı",
+      "ticketUnavailable": "Kullanıcı bilet otomatik ataması için müsait değil yapıldı"
     }
   },
   "common": {

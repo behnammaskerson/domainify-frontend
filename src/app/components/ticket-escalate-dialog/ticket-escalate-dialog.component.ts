@@ -73,7 +73,12 @@ const PRIORITY_ORDER: TicketPriority[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
         <mat-select [(ngModel)]="assigneeId">
           <mat-option [value]="null">{{ 'tickets.detail.unassigned' | translate }}</mat-option>
           @for (assignee of data.assignees; track assignee.id) {
-            <mat-option [value]="assignee.id">{{ assignee.name || assignee.email }}</mat-option>
+            <mat-option [value]="assignee.id">
+              {{ assignee.name || assignee.email }}
+              @if (assignee.available === false) {
+                — {{ 'tickets.agentUnavailable' | translate }}
+              }
+            </mat-option>
           }
         </mat-select>
       </mat-form-field>

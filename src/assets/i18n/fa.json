@@ -137,6 +137,7 @@
     "smsDailyPacks": "مجموعه ارسال‌های روز"
   },
   "tickets": {
+    "agentUnavailable": "خارج از دسترس",
     "categoriesPage": {
       "eyebrow": "پشتیبانی",
       "title": "دسته‌بندی تیکت‌ها",
@@ -501,6 +502,9 @@
       "title": "صندوق تیکت",
       "subtitle": "مدیریت و اولویت‌بندی تیکت‌های پشتیبانی مشتریان.",
       "refresh": "بازخوانی",
+      "presenceAvailable": "در دسترس",
+      "presenceAway": "غیرفعال",
+      "presenceHint": "تعیین کنید آیا تخصیص خودکار می‌تواند تیکت جدید به شما بدهد",
       "viewsLabel": "نمای صندوق",
       "views": {
         "all": "همه",
@@ -1176,6 +1180,10 @@
     "smsNotificationsNeedPhone": "برای فعال‌سازی پیامک، در پروفایل شماره موبایل اضافه و تأیید کنید.",
     "smsNotificationsEnabled": "هشدار پیامکی تیکت فوری فعال شد",
     "smsNotificationsDisabled": "هشدار پیامکی تیکت فوری غیرفعال شد",
+    "ticketAvailability": "در دسترس برای تیکت",
+    "ticketAvailabilityDesc": "در حالت خاموش، تخصیص خودکار شما را رد می‌کند. همکاران همچنان می‌توانند دستی به شما تخصیص یا انتقال دهند.",
+    "ticketAvailabilityEnabled": "برای تخصیص خودکار تیکت در دسترس هستید",
+    "ticketAvailabilityDisabled": "برای تخصیص خودکار تیکت غیرفعال هستید",
     "pushNotifications": "اعلان‌های مرورگر",
     "pushNotificationsDesc": "دریافت اعلان‌های آنی مرورگر",
     "marketingEmails": "ایمیل‌های بازاریابی",
@@ -1477,7 +1485,7 @@
       "autoAssignSection": "تخصیص خودکار",
       "autoAssignIntro": "تیکت‌های جدید را هنگام ایجاد به‌طور خودکار به یک عامل اختصاص دهید.",
       "autoAssignMode": "حالت تخصیص",
-      "autoAssignModeHint": "نوبت‌گردانی بین همه ادمین‌های فعال است. مهارت دسته و عضویت صف از عامل‌های متصل به دسته یا صف تیکت استفاده می‌کنند.",
+      "autoAssignModeHint": "نوبت‌گردانی بین ادمین‌های فعال و در دسترس است. مهارت دسته و عضویت صف از عامل‌های در دسترس متصل به دسته یا صف استفاده می‌کنند. عامل‌های غیرفعال از تخصیص خودکار کنار گذاشته می‌شوند ولی همچنان می‌توان دستی تخصیص داد.",
       "autoAssignModes": {
         "OFF": "خاموش (دستی / ادعا با پاسخ)",
         "ROUND_ROBIN": "نوبت‌گردانی",
@@ -1607,7 +1615,9 @@
       "enableEmailNotifications": "فعال‌سازی هشدار ایمیل",
       "disableEmailNotifications": "غیرفعال‌سازی هشدار ایمیل",
       "enableSmsNotifications": "فعال‌سازی هشدار پیامک",
-      "disableSmsNotifications": "غیرفعال‌سازی هشدار پیامک"
+      "disableSmsNotifications": "غیرفعال‌سازی هشدار پیامک",
+      "markTicketAvailable": "علامت‌گذاری در دسترس برای تیکت",
+      "markTicketUnavailable": "علامت‌گذاری غیرفعال برای تیکت"
     },
     "confirm": {
       "deleteTitle": "حذف حساب کاربری؟",
@@ -1630,7 +1640,9 @@
       "emailNotificationsEnabled": "هشدار ایمیل کاربر فعال شد",
       "emailNotificationsDisabled": "هشدار ایمیل کاربر غیرفعال شد",
       "smsNotificationsEnabled": "هشدار پیامک کاربر فعال شد",
-      "smsNotificationsDisabled": "هشدار پیامک کاربر غیرفعال شد"
+      "smsNotificationsDisabled": "هشدار پیامک کاربر غیرفعال شد",
+      "ticketAvailable": "کاربر برای تخصیص خودکار تیکت در دسترس شد",
+      "ticketUnavailable": "کاربر برای تخصیص خودکار تیکت غیرفعال شد"
     }
   },
   "common": {
