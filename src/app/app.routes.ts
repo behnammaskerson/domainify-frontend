@@ -93,6 +93,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/tickets/ticket-categories-page.component').then(m => m.TicketCategoriesPageComponent)
       },
       {
+        path: 'tickets/queues',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/tickets/ticket-queues-page.component').then(m => m.TicketQueuesPageComponent)
+      },
+      {
         path: 'tickets/tags',
         canActivate: [AdminGuard],
         loadComponent: () => import('./pages/tickets/ticket-tags-page.component').then(m => m.TicketTagsPageComponent)

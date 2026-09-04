@@ -24,6 +24,7 @@ import {
   TicketCategory,
   TicketInboxView,
   TicketPriority,
+  TicketQueue,
   TicketService,
   TicketStatus,
   TicketTag
@@ -125,6 +126,16 @@ const UNASSIGNED_VALUE = '__unassigned__';
                     <mat-option [value]="''">{{ 'tickets.adminInbox.filters.any' | translate }}</mat-option>
                     @for (category of categories; track category.id) {
                       <mat-option [value]="category.id">{{ category.name }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filter-control" subscriptSizing="dynamic">
+                  <mat-label>{{ 'tickets.adminInbox.filters.queue' | translate }}</mat-label>
+                  <mat-select [(ngModel)]="filterQueueId" (selectionChange)="onFiltersChanged()">
+                    <mat-option [value]="''">{{ 'tickets.adminInbox.filters.any' | translate }}</mat-option>
+                    @for (queue of queues; track queue.id) {
+                      <mat-option [value]="queue.id">{{ queue.name }}</mat-option>
                     }
                   </mat-select>
                 </mat-form-field>
@@ -287,6 +298,13 @@ const UNASSIGNED_VALUE = '__unassigned__';
                       <th mat-header-cell *matHeaderCellDef>{{ 'tickets.adminInbox.table.requester' | translate }}</th>
                       <td mat-cell *matCellDef="let ticket">
                         <span class="requester">{{ ticket.requesterName || ticket.requesterEmail || '—' }}</span>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="queue">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tickets.adminInbox.table.queue' | translate }}</th>
+                      <td mat-cell *matCellDef="let ticket">
+                        {{ ticket.queue?.name || '—' }}
                       </td>
                     </ng-container>
 
@@ -684,18 +702,21 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
     { id: 'ALL', labelKey: 'tickets.adminInbox.views.all' },
     { id: 'UNASSIGNED', labelKey: 'tickets.adminInbox.views.unassigned' },
     { id: 'MINE', labelKey: 'tickets.adminInbox.views.mine' },
+    { id: 'MY_QUEUE', labelKey: 'tickets.adminInbox.views.myQueue' },
+    { id: 'WATCHING', labelKey: 'tickets.adminInbox.views.watching' },
     { id: 'MENTIONS', labelKey: 'tickets.adminInbox.views.mentions' },
     { id: 'OVERDUE', labelKey: 'tickets.adminInbox.views.overdue' },
     { id: 'ARCHIVED', labelKey: 'tickets.adminInbox.views.archived' },
     { id: 'DELETED', labelKey: 'tickets.adminInbox.views.deleted' }
   ];
   readonly displayedColumns = [
-    'rowNumber', 'publicNumber', 'subject', 'requester', 'assignee', 'priority', 'status', 'dueAt', 'updatedAt'
+    'rowNumber', 'publicNumber', 'subject', 'requester', 'queue', 'assignee', 'priority', 'status', 'dueAt', 'updatedAt'
   ];
   readonly dateTimeFormat = SMS_DATETIME_FORMAT;
 
   tickets: Ticket[] = [];
   categories: TicketCategory[] = [];
+  queues: TicketQueue[] = [];
   assignees: TicketAssigneeOption[] = [];
   tags: TicketTag[] = [];
   loading = false;
@@ -709,6 +730,7 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
   filterStatus: TicketStatus | '' = '';
   filterPriority: TicketPriority | '' = '';
   filterCategoryId: number | '' = '';
+  filterQueueId: number | '' = '';
   filterTagId: number | '' = '';
   filterAssigneeValue: number | typeof UNASSIGNED_VALUE | '' = '';
   filterCustomerInput = '';
@@ -728,6 +750,7 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
     if (this.filterStatus) count++;
     if (this.filterPriority) count++;
     if (this.filterCategoryId !== '') count++;
+    if (this.filterQueueId !== '') count++;
     if (this.filterTagId !== '') count++;
     if (this.filterAssigneeValue !== '') count++;
     if (this.filterCustomer.trim()) count++;
@@ -740,6 +763,10 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
     this.ticketService.listAllCategories().subscribe({
       next: (categories) => { this.categories = categories ?? []; },
       error: () => { this.categories = []; }
+    });
+    this.ticketService.listAllQueues().subscribe({
+      next: (queues) => { this.queues = (queues ?? []).filter((q) => q.active); },
+      error: () => { this.queues = []; }
     });
     this.ticketService.listAdminAssignees().subscribe({
       next: (assignees) => { this.assignees = assignees ?? []; },
@@ -817,6 +844,7 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
     this.filterStatus = '';
     this.filterPriority = '';
     this.filterCategoryId = '';
+    this.filterQueueId = '';
     this.filterTagId = '';
     this.filterAssigneeValue = '';
     this.filterCustomerInput = '';
@@ -846,6 +874,7 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
       status: this.filterStatus || undefined,
       priority: this.filterPriority || undefined,
       categoryId: this.filterCategoryId === '' ? undefined : Number(this.filterCategoryId),
+      queueId: this.filterQueueId === '' ? undefined : Number(this.filterQueueId),
       tagId: this.filterTagId === '' ? undefined : Number(this.filterTagId),
       unassigned: this.filterAssigneeValue === UNASSIGNED_VALUE || undefined,
       assigneeId: typeof this.filterAssigneeValue === 'number' ? this.filterAssigneeValue : undefined,

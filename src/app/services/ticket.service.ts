@@ -34,6 +34,22 @@ export interface TicketCategoryRequest {
   sortOrder?: number;
 }
 
+export interface TicketQueue {
+  id: number;
+  code: string;
+  name: string;
+  active: boolean;
+  sortOrder: number;
+  agentIds?: number[];
+}
+
+export interface TicketQueueRequest {
+  name: string;
+  code?: string;
+  active?: boolean;
+  sortOrder?: number;
+}
+
 export interface TicketAttachmentMeta {
   id?: number;
   fileName?: string;
@@ -47,6 +63,7 @@ export interface Ticket {
   subject?: string;
   description?: string;
   category?: TicketCategory | null;
+  queue?: TicketQueue | null;
   priority?: TicketPriority;
   status?: TicketStatus;
   channel?: TicketChannel;
@@ -76,7 +93,7 @@ export interface Ticket {
   attachments?: TicketAttachmentMeta[];
 }
 
-export type TicketInboxView = 'ALL' | 'UNASSIGNED' | 'MINE' | 'MENTIONS' | 'OVERDUE' | 'ARCHIVED' | 'DELETED';
+export type TicketInboxView = 'ALL' | 'UNASSIGNED' | 'MINE' | 'MY_QUEUE' | 'WATCHING' | 'MENTIONS' | 'OVERDUE' | 'ARCHIVED' | 'DELETED';
 
 export interface TicketTag {
   id: number;
@@ -153,9 +170,30 @@ export interface TicketDetail {
   canSplit?: boolean;
   canLinkRelated?: boolean;
   canEditDueDate?: boolean;
+  canWatch?: boolean;
+  watching?: boolean;
+  canTransfer?: boolean;
+  watchers?: TicketAssigneeOption[];
+  transfers?: TicketTransfer[];
   reopenUntil?: string;
   reopenWindowDays?: number;
   allowedNextStatuses?: TicketStatus[];
+}
+
+export interface TicketTransfer {
+  id: number;
+  transferredById?: number | null;
+  transferredByName?: string | null;
+  fromAssigneeId?: number | null;
+  fromAssigneeName?: string | null;
+  toAssigneeId?: number | null;
+  toAssigneeName?: string | null;
+  fromQueueId?: number | null;
+  fromQueueName?: string | null;
+  toQueueId?: number | null;
+  toQueueName?: string | null;
+  note?: string | null;
+  createdAt?: string;
 }
 
 export interface SplitTicketResult {
@@ -164,7 +202,7 @@ export interface SplitTicketResult {
 }
 
 export type TicketAttachmentKind = 'IMAGE' | 'PDF' | 'LOG' | 'DOCUMENT';
-export type TicketAutoAssignMode = 'OFF' | 'ROUND_ROBIN' | 'CATEGORY_SKILL';
+export type TicketAutoAssignMode = 'OFF' | 'ROUND_ROBIN' | 'CATEGORY_SKILL' | 'QUEUE_MEMBERSHIP';
 
 export interface TicketSettings {
   reopenWindowDays: number;
@@ -178,6 +216,7 @@ export interface TicketSettings {
   slaLowHours: number;
   autoAssignMode: TicketAutoAssignMode;
   autoAssignFallbackRoundRobin: boolean;
+  defaultQueueId?: number | null;
   ticketEmailNotificationsEnabled: boolean;
   ticketSmsNotificationsEnabled: boolean;
   emailNotificationPriorities: TicketPriority[];
@@ -232,6 +271,7 @@ export interface AdminInboxParams {
   status?: TicketStatus;
   priority?: TicketPriority;
   categoryId?: number;
+  queueId?: number;
   assigneeId?: number;
   unassigned?: boolean;
   createdFrom?: string;
@@ -293,6 +333,28 @@ export class TicketService {
     return this.http.delete<void>(`${this.API_URL}/admin/ticket-categories/${id}`);
   }
 
+  listAllQueues(): Observable<TicketQueue[]> {
+    return this.http.get<TicketQueue[]>(`${this.API_URL}/admin/ticket-queues`);
+  }
+
+  createQueue(payload: TicketQueueRequest): Observable<TicketQueue> {
+    return this.http.post<TicketQueue>(`${this.API_URL}/admin/ticket-queues`, payload);
+  }
+
+  updateQueue(id: number, payload: TicketQueueRequest): Observable<TicketQueue> {
+    return this.http.put<TicketQueue>(`${this.API_URL}/admin/ticket-queues/${id}`, payload);
+  }
+
+  deleteQueue(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/admin/ticket-queues/${id}`);
+  }
+
+  updateQueueAgents(queueId: number, agentIds: number[]): Observable<TicketQueue> {
+    return this.http.put<TicketQueue>(`${this.API_URL}/admin/ticket-queues/${queueId}/agents`, {
+      agentIds
+    });
+  }
+
   listMine(params?: MyTicketsParams): Observable<PagedTickets> {
     let httpParams = new HttpParams();
     if (params?.status) {
@@ -323,6 +385,9 @@ export class TicketService {
     }
     if (params?.categoryId != null) {
       httpParams = httpParams.set('categoryId', String(params.categoryId));
+    }
+    if (params?.queueId != null) {
+      httpParams = httpParams.set('queueId', String(params.queueId));
     }
     if (params?.unassigned) {
       httpParams = httpParams.set('unassigned', 'true');
@@ -448,6 +513,23 @@ export class TicketService {
     return this.http.patch<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/assignee`, { assigneeId });
   }
 
+  updateAdminTicketQueue(id: number, queueId: number | null): Observable<TicketDetail> {
+    return this.http.patch<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/queue`, { queueId });
+  }
+
+  transferAdminTicket(
+    id: number,
+    payload: {
+      assigneeId?: number | null;
+      assigneeChanged?: boolean;
+      queueId?: number | null;
+      queueChanged?: boolean;
+      note?: string;
+    }
+  ): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/transfer`, payload);
+  }
+
   closeAdminTicket(id: number): Observable<TicketDetail> {
     return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/close`, {});
   }
@@ -495,6 +577,22 @@ export class TicketService {
     return this.http.delete<TicketDetail>(
       `${this.API_URL}/admin/tickets/${ticketId}/related/${relatedTicketId}`
     );
+  }
+
+  watchAdminTicket(ticketId: number): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${ticketId}/watch`, {});
+  }
+
+  unwatchAdminTicket(ticketId: number): Observable<TicketDetail> {
+    return this.http.delete<TicketDetail>(`${this.API_URL}/admin/tickets/${ticketId}/watch`);
+  }
+
+  addAdminTicketWatcher(ticketId: number, userId: number): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${ticketId}/watchers`, { userId });
+  }
+
+  removeAdminTicketWatcher(ticketId: number, userId: number): Observable<TicketDetail> {
+    return this.http.delete<TicketDetail>(`${this.API_URL}/admin/tickets/${ticketId}/watchers/${userId}`);
   }
 
   updateAdminTicketDueDate(

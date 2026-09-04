@@ -13,7 +13,9 @@ export type NotificationType =
   | 'TICKET_ASSIGNED'
   | 'TICKET_UNASSIGNED'
   | 'TICKET_CLOSED'
-  | 'TICKET_REOPENED';
+  | 'TICKET_REOPENED'
+  | 'TICKET_WATCHER_ADDED'
+  | 'TICKET_TRANSFERRED';
 
 export type TicketStatus = 'NEW' | 'OPEN' | 'PENDING' | 'ON_HOLD' | 'RESOLVED' | 'CLOSED';
 
@@ -150,6 +152,10 @@ export class NotificationService {
         return 'person_add';
       case 'TICKET_UNASSIGNED':
         return 'person_remove';
+      case 'TICKET_WATCHER_ADDED':
+        return 'visibility';
+      case 'TICKET_TRANSFERRED':
+        return 'swap_horiz';
       case 'TICKET_CLOSED':
         return 'lock';
       case 'TICKET_REOPENED':
@@ -164,6 +170,8 @@ export class NotificationService {
       case 'TICKET_CREATED':
         return 'var(--info)';
       case 'TICKET_MENTION':
+      case 'TICKET_WATCHER_ADDED':
+      case 'TICKET_TRANSFERRED':
         return 'var(--accent)';
       case 'TICKET_CLOSED':
         return 'var(--text-muted)';

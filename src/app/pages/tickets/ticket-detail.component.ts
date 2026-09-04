@@ -21,6 +21,7 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-
 import { TicketMergeDialogComponent } from '../../components/ticket-merge-dialog/ticket-merge-dialog.component';
 import { TicketSplitDialogComponent } from '../../components/ticket-split-dialog/ticket-split-dialog.component';
 import { TicketLinkDialogComponent } from '../../components/ticket-link-dialog/ticket-link-dialog.component';
+import { TicketTransferDialogComponent } from '../../components/ticket-transfer-dialog/ticket-transfer-dialog.component';
 import { TicketMessageRevisionsDialogComponent } from '../../components/ticket-message-revisions-dialog/ticket-message-revisions-dialog.component';
 import { DatetimeFilterFieldComponent } from '../../components/datetime-filter-field/datetime-filter-field.component';
 import { TicketAttachmentViewerDialogComponent } from '../../components/ticket-attachment-viewer-dialog/ticket-attachment-viewer-dialog.component';
@@ -37,9 +38,11 @@ import {
   TicketStatus,
   TicketTag,
   TicketAssigneeOption,
+  TicketQueue,
   TicketReplyTemplate,
   TicketReplyDraft,
-  RelatedTicket
+  RelatedTicket,
+  TicketTransfer
 } from '../../services/ticket.service';
 import { renderReplyTemplate, toMentionHandle } from '../../utils/reply-template.util';
 import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
@@ -79,6 +82,22 @@ type TicketDetailMode = 'customer' | 'admin';
         [title]="ticket?.subject || ('tickets.detail.title' | translate)"
         [subtitle]="ticket?.publicNumber || ('tickets.detail.subtitle' | translate)">
         <div heroActions>
+          @if (ticket && canWatch) {
+            <button mat-stroked-button
+                    type="button"
+                    [disabled]="watcherBusy"
+                    [class.watching]="watching"
+                    (click)="toggleWatch()">
+              <mat-icon>{{ watching ? 'visibility' : 'visibility_off' }}</mat-icon>
+              {{ (watching ? 'tickets.detail.unwatch' : 'tickets.detail.watch') | translate }}
+            </button>
+          }
+          @if (ticket && canTransfer) {
+            <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="transferTicket()">
+              <mat-icon>swap_horiz</mat-icon>
+              {{ 'tickets.detail.transfer' | translate }}
+            </button>
+          }
           @if (ticket && canSplit) {
             <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="splitTicket()">
               <mat-icon>call_split</mat-icon>
@@ -151,91 +170,129 @@ type TicketDetailMode = 'customer' | 'admin';
           </div>
         } @else {
           <div class="meta-bar panel-surface">
-            <div class="meta-item">
-              <span class="meta-label">{{ 'tickets.detail.meta.status' | translate }}</span>
-              @if (isAdmin && statusOptions.length) {
-                <mat-form-field appearance="outline" class="status-field" subscriptSizing="dynamic">
-                  <mat-select
-                    [value]="ticket.status"
-                    [disabled]="statusUpdating"
-                    (selectionChange)="onStatusChange($event.value)">
-                    <mat-option [value]="ticket.status">
-                      {{ ('tickets.statuses.' + ticket.status) | translate }}
-                    </mat-option>
-                    @for (status of statusOptions; track status) {
-                      <mat-option [value]="status">
-                        {{ ('tickets.statuses.' + status) | translate }}
-                      </mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
-              } @else {
-                <span class="status-pill" [attr.data-status]="ticket.status">
-                  {{ ('tickets.statuses.' + ticket.status) | translate }}
-                </span>
-              }
-            </div>
-            <div class="meta-item">
-              <span class="meta-label">{{ 'tickets.detail.meta.priority' | translate }}</span>
-              <span class="priority-pill" [attr.data-priority]="ticket.priority">
-                {{ ('tickets.priorities.' + ticket.priority) | translate }}
-              </span>
-            </div>
-            <div class="meta-item">
-              <span class="meta-label">{{ 'tickets.detail.meta.category' | translate }}</span>
-              <span>{{ ticket.category?.name || '—' }}</span>
-            </div>
-            <div class="meta-item meta-assignee">
-              <span class="meta-label">{{ 'tickets.detail.meta.assignee' | translate }}</span>
-              @if (isAdmin && !ticket.deleted) {
-                <div class="assignee-controls">
-                  <mat-form-field appearance="outline" class="assignee-field" subscriptSizing="dynamic">
-                    <mat-select
-                      [value]="ticket.assigneeId ?? unassignedValue"
-                      [disabled]="assigneeUpdating"
-                      (selectionChange)="onAssigneeChange($event.value)">
-                      <mat-option [value]="unassignedValue">
-                        {{ 'tickets.detail.unassigned' | translate }}
-                      </mat-option>
-                      @for (assignee of assignees; track assignee.id) {
-                        <mat-option [value]="assignee.id">
-                          {{ assignee.name || assignee.email }}
+            <div class="meta-row meta-row--primary">
+              <div class="meta-item">
+                <span class="meta-label">{{ 'tickets.detail.meta.status' | translate }}</span>
+                <div class="meta-value">
+                  @if (isAdmin && statusOptions.length) {
+                    <mat-form-field appearance="outline" class="meta-field" subscriptSizing="dynamic">
+                      <mat-select
+                        [value]="ticket.status"
+                        [disabled]="statusUpdating"
+                        (selectionChange)="onStatusChange($event.value)">
+                        <mat-option [value]="ticket.status">
+                          {{ ('tickets.statuses.' + ticket.status) | translate }}
                         </mat-option>
-                      }
-                    </mat-select>
-                  </mat-form-field>
-                  @if (canAssignToMe) {
-                    <button mat-stroked-button
-                            type="button"
-                            class="assign-me-btn"
-                            [disabled]="assigneeUpdating"
-                            [matTooltip]="'tickets.detail.assignToMe' | translate"
-                            (click)="assignToMe()">
-                      <mat-icon>person</mat-icon>
-                      <span class="assign-me-label">{{ 'tickets.detail.assignToMe' | translate }}</span>
-                    </button>
+                        @for (status of statusOptions; track status) {
+                          <mat-option [value]="status">
+                            {{ ('tickets.statuses.' + status) | translate }}
+                          </mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  } @else {
+                    <span class="status-pill" [attr.data-status]="ticket.status">
+                      {{ ('tickets.statuses.' + ticket.status) | translate }}
+                    </span>
                   }
                 </div>
-              } @else if (ticket.assigneeName || ticket.assigneeEmail) {
-                <span>{{ ticket.assigneeName || ticket.assigneeEmail }}</span>
-              } @else {
-                <span class="muted-inline">{{ 'tickets.detail.unassigned' | translate }}</span>
-              }
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">{{ 'tickets.detail.meta.priority' | translate }}</span>
+                <div class="meta-value">
+                  <span class="priority-pill" [attr.data-priority]="ticket.priority">
+                    {{ ('tickets.priorities.' + ticket.priority) | translate }}
+                  </span>
+                </div>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">{{ 'tickets.detail.meta.category' | translate }}</span>
+                <div class="meta-value">
+                  <span class="meta-text">{{ ticket.category?.name || '—' }}</span>
+                </div>
+              </div>
+              <div class="meta-item meta-queue">
+                <span class="meta-label">{{ 'tickets.detail.meta.queue' | translate }}</span>
+                <div class="meta-value">
+                  @if (isAdmin && !ticket.deleted) {
+                    <mat-form-field appearance="outline" class="meta-field" subscriptSizing="dynamic">
+                      <mat-select
+                        [value]="ticket.queue?.id ?? noQueueValue"
+                        [disabled]="queueUpdating"
+                        (selectionChange)="onQueueChange($event.value)">
+                        <mat-option [value]="noQueueValue">
+                          {{ 'tickets.detail.noQueue' | translate }}
+                        </mat-option>
+                        @for (queue of queues; track queue.id) {
+                          <mat-option [value]="queue.id">{{ queue.name }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  } @else {
+                    <span class="meta-text">{{ ticket.queue?.name || '—' }}</span>
+                  }
+                </div>
+              </div>
             </div>
-            <div class="meta-item meta-created">
-              <span class="meta-label">{{ 'tickets.detail.meta.created' | translate }}</span>
-              <span class="meta-created-value" dir="ltr">{{ ticket.createdAt | localeDate:dateTimeFormat }}</span>
-            </div>
-            <div class="meta-item meta-due" [class.overdue]="ticket.overdue">
-              <span class="meta-label">{{ 'tickets.detail.meta.dueAt' | translate }}</span>
-              @if (ticket.dueAt) {
-                <span class="meta-due-value" dir="ltr">{{ ticket.dueAt | localeDate:dateTimeFormat }}</span>
-                @if (ticket.overdue) {
-                  <span class="overdue-pill">{{ 'tickets.detail.overdue' | translate }}</span>
-                }
-              } @else {
-                <span class="meta-due-value muted-inline">—</span>
-              }
+            <div class="meta-row meta-row--secondary">
+              <div class="meta-item meta-assignee">
+                <span class="meta-label">{{ 'tickets.detail.meta.assignee' | translate }}</span>
+                <div class="meta-value">
+                  @if (isAdmin && !ticket.deleted) {
+                    <div class="assignee-controls">
+                      <mat-form-field appearance="outline" class="meta-field" subscriptSizing="dynamic">
+                        <mat-select
+                          [value]="ticket.assigneeId ?? unassignedValue"
+                          [disabled]="assigneeUpdating"
+                          (selectionChange)="onAssigneeChange($event.value)">
+                          <mat-option [value]="unassignedValue">
+                            {{ 'tickets.detail.unassigned' | translate }}
+                          </mat-option>
+                          @for (assignee of assignees; track assignee.id) {
+                            <mat-option [value]="assignee.id">
+                              {{ assignee.name || assignee.email }}
+                            </mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                      @if (canAssignToMe) {
+                        <button mat-stroked-button
+                                type="button"
+                                class="assign-me-btn"
+                                [disabled]="assigneeUpdating"
+                                [matTooltip]="'tickets.detail.assignToMe' | translate"
+                                (click)="assignToMe()">
+                          <mat-icon>person</mat-icon>
+                          <span class="assign-me-label">{{ 'tickets.detail.assignToMe' | translate }}</span>
+                        </button>
+                      }
+                    </div>
+                  } @else if (ticket.assigneeName || ticket.assigneeEmail) {
+                    <span class="meta-text">{{ ticket.assigneeName || ticket.assigneeEmail }}</span>
+                  } @else {
+                    <span class="meta-text muted-inline">{{ 'tickets.detail.unassigned' | translate }}</span>
+                  }
+                </div>
+              </div>
+              <div class="meta-item meta-created">
+                <span class="meta-label">{{ 'tickets.detail.meta.created' | translate }}</span>
+                <div class="meta-value meta-value--center">
+                  <span class="meta-datetime" dir="ltr">{{ ticket.createdAt | localeDate:dateTimeFormat }}</span>
+                </div>
+              </div>
+              <div class="meta-item meta-due" [class.overdue]="ticket.overdue">
+                <span class="meta-label">{{ 'tickets.detail.meta.dueAt' | translate }}</span>
+                <div class="meta-value meta-value--center">
+                  @if (ticket.dueAt) {
+                    <span class="meta-datetime" dir="ltr">{{ ticket.dueAt | localeDate:dateTimeFormat }}</span>
+                    @if (ticket.overdue) {
+                      <span class="overdue-pill">{{ 'tickets.detail.overdue' | translate }}</span>
+                    }
+                  } @else {
+                    <span class="meta-datetime muted-inline">—</span>
+                  }
+                </div>
+              </div>
             </div>
           </div>
 
@@ -340,6 +397,90 @@ type TicketDetailMode = 'customer' | 'admin';
                 {{ (ticket.deleted ? 'tickets.detail.deletedNotice' : 'tickets.detail.archivedNotice') | translate }}
               </span>
             </p>
+          }
+
+          @if (isAdmin) {
+            <div class="tags-card panel-surface">
+              <div class="tags-header">
+                <div>
+                  <h2>{{ 'tickets.detail.watchersTitle' | translate }}</h2>
+                  <p>{{ 'tickets.detail.watchersHint' | translate }}</p>
+                </div>
+              </div>
+              <div class="selected-tags">
+                @for (watcher of watchers; track watcher.id) {
+                  <button type="button"
+                          class="tag-chip selected"
+                          [disabled]="watcherBusy"
+                          (click)="removeWatcher(watcher)">
+                    {{ watcher.name || watcher.email }}
+                    <mat-icon>close</mat-icon>
+                  </button>
+                } @empty {
+                  <span class="muted-inline">{{ 'tickets.detail.noWatchers' | translate }}</span>
+                }
+              </div>
+              @if (canWatch) {
+                <div class="freeform-row">
+                  <mat-form-field appearance="outline" class="freeform-field" subscriptSizing="dynamic">
+                    <mat-label>{{ 'tickets.detail.addWatcher' | translate }}</mat-label>
+                    <mat-select [(ngModel)]="watcherToAddId" [ngModelOptions]="{standalone: true}">
+                      @for (candidate of availableWatcherCandidates; track candidate.id) {
+                        <mat-option [value]="candidate.id">
+                          {{ candidate.name || candidate.email }}
+                        </mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  <button mat-stroked-button
+                          type="button"
+                          [disabled]="watcherBusy || watcherToAddId == null"
+                          (click)="addWatcher()">
+                    {{ 'tickets.detail.addWatcherAction' | translate }}
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          @if (isAdmin && transfers.length) {
+            <div class="tags-card panel-surface">
+              <div class="tags-header">
+                <div>
+                  <h2>{{ 'tickets.detail.transferHistoryTitle' | translate }}</h2>
+                  <p>{{ 'tickets.detail.transferHistoryHint' | translate }}</p>
+                </div>
+              </div>
+              <ul class="transfer-history">
+                @for (item of transfers; track item.id) {
+                  <li>
+                    <div class="transfer-meta">
+                      <span>{{ item.transferredByName || '—' }}</span>
+                      <span class="muted-inline" dir="ltr">{{ item.createdAt | localeDate:dateTimeFormat }}</span>
+                    </div>
+                    <div class="transfer-line">
+                      <span>
+                        {{ 'tickets.detail.transferAssigneeLabel' | translate }}:
+                        {{ item.fromAssigneeName || ('tickets.detail.unassigned' | translate) }}
+                        →
+                        {{ item.toAssigneeName || ('tickets.detail.unassigned' | translate) }}
+                      </span>
+                    </div>
+                    <div class="transfer-line">
+                      <span>
+                        {{ 'tickets.detail.transferQueueLabel' | translate }}:
+                        {{ item.fromQueueName || ('tickets.detail.noQueue' | translate) }}
+                        →
+                        {{ item.toQueueName || ('tickets.detail.noQueue' | translate) }}
+                      </span>
+                    </div>
+                    @if (item.note) {
+                      <p class="transfer-note">{{ item.note }}</p>
+                    }
+                  </li>
+                }
+              </ul>
+            </div>
           }
 
           @if (isAdmin) {
@@ -727,53 +868,88 @@ type TicketDetailMode = 'customer' | 'admin';
       min-width: 0;
       box-sizing: border-box;
     }
+    [heroActions] {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
     .muted { color: var(--text-muted); padding: 12px 4px; }
     .empty-state, .closed-notice {
       display: flex; flex-direction: column; align-items: center; gap: 10px;
       padding: 32px 20px; text-align: center; color: var(--text-muted);
     }
     .meta-bar {
-      display: grid;
-      grid-template-columns: minmax(140px, 1.1fr) minmax(100px, 0.8fr) minmax(110px, 1fr) minmax(180px, 1.5fr) minmax(120px, 1fr) minmax(120px, 1fr);
-      gap: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
       padding: 14px 16px;
       margin-bottom: 16px;
-      align-items: start;
     }
-    .meta-item { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-    .meta-item span[dir='ltr'] { white-space: nowrap; }
-    .meta-assignee {
-      grid-column: span 1;
+    .meta-row {
+      display: grid;
+      gap: 12px 16px;
+      align-items: start;
       min-width: 0;
     }
-    .meta-created {
+    .meta-row--primary {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .meta-row--secondary {
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+    .meta-value {
+      display: flex;
       align-items: center;
-      text-align: center;
-    }
-    .meta-created-value {
-      display: block;
+      min-height: 40px;
+      min-width: 0;
       width: 100%;
-      text-align: center;
-      white-space: nowrap;
     }
+    .meta-value > .meta-field,
+    .meta-value > .assignee-controls {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .meta-value--center {
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      text-align: center;
+    }
+    .meta-text,
+    .meta-datetime {
+      display: block;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      line-height: 1.3;
+    }
+    .meta-datetime { font-variant-numeric: tabular-nums; }
+    .meta-queue,
+    .meta-assignee { min-width: 0; }
+    .meta-created,
     .meta-due {
       align-items: center;
       text-align: center;
     }
-    .meta-due-value {
-      display: block;
-      width: 100%;
-      text-align: center;
-      white-space: nowrap;
-    }
-    .meta-due.overdue .meta-due-value { color: var(--danger, #c62828); font-weight: 600; }
+    .meta-due.overdue .meta-datetime { color: var(--danger, #c62828); font-weight: 600; }
     .overdue-pill {
-      display: inline-block;
-      margin-top: 4px;
+      display: inline-flex;
+      align-items: center;
       padding: 2px 8px;
       border-radius: 999px;
       font-size: 0.75rem;
       font-weight: 600;
+      line-height: 1.2;
       color: var(--danger, #c62828);
       background: color-mix(in srgb, var(--danger, #c62828) 12%, transparent);
       border: 1px solid color-mix(in srgb, var(--danger, #c62828) 35%, var(--border-color));
@@ -793,59 +969,64 @@ type TicketDetailMode = 'customer' | 'admin';
     .meta-label {
       font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;
     }
-    .status-field,
-    .assignee-field {
+    .meta-field {
       width: 100%;
       max-width: none;
+      margin: 0 !important;
+      display: block;
+      --mat-form-field-container-height: 40px;
+      --mat-form-field-container-vertical-padding: 0;
+      --mat-form-field-outlined-container-shape: 8px;
     }
-    .status-field ::ng-deep .mat-mdc-form-field-subscript-wrapper,
-    .assignee-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    .meta-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
       display: none;
     }
-    .status-field ::ng-deep .mat-mdc-text-field-wrapper,
-    .assignee-field ::ng-deep .mat-mdc-text-field-wrapper {
+    .meta-field ::ng-deep .mat-mdc-text-field-wrapper {
       height: 40px;
       background: var(--bg-secondary);
+      padding: 0 !important;
     }
-    .status-field ::ng-deep .mat-mdc-form-field-flex,
-    .assignee-field ::ng-deep .mat-mdc-form-field-flex {
+    .meta-field ::ng-deep .mat-mdc-form-field-flex {
       height: 40px;
-      align-items: center;
-    }
-    .status-field ::ng-deep .mat-mdc-form-field-infix,
-    .assignee-field ::ng-deep .mat-mdc-form-field-infix {
       min-height: 40px;
-      padding-top: 0;
-      padding-bottom: 0;
+      align-items: center;
+      padding: 0 12px !important;
+    }
+    .meta-field ::ng-deep .mat-mdc-form-field-infix {
+      min-height: 40px !important;
+      height: 40px;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
       display: flex;
       align-items: center;
       border-top: none;
+      width: auto;
     }
-    .status-field ::ng-deep .mdc-notched-outline__notch,
-    .assignee-field ::ng-deep .mdc-notched-outline__notch {
+    .meta-field ::ng-deep .mdc-notched-outline__notch {
       display: none;
     }
-    .status-field ::ng-deep .mat-mdc-select-trigger,
-    .assignee-field ::ng-deep .mat-mdc-select-trigger {
+    .meta-field ::ng-deep .mat-mdc-select {
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    .meta-field ::ng-deep .mat-mdc-select-trigger {
       height: 40px;
       align-items: center;
     }
-    .status-field ::ng-deep .mat-mdc-select-value,
-    .assignee-field ::ng-deep .mat-mdc-select-value {
+    .meta-field ::ng-deep .mat-mdc-select-value {
       display: flex;
       align-items: center;
       max-width: 100%;
     }
-    .status-field ::ng-deep .mat-mdc-select-value-text,
-    .assignee-field ::ng-deep .mat-mdc-select-value-text {
+    .meta-field ::ng-deep .mat-mdc-select-value-text {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       line-height: 1.25;
     }
-    .status-field ::ng-deep .mat-mdc-select-arrow-wrapper,
-    .assignee-field ::ng-deep .mat-mdc-select-arrow-wrapper {
-      transform: none;
+    .meta-field ::ng-deep .mat-mdc-select-arrow-wrapper {
+      transform: none !important;
       height: 40px;
       display: flex;
       align-items: center;
@@ -870,6 +1051,43 @@ type TicketDetailMode = 'customer' | 'admin';
     }
     .assign-me-btn .assign-me-label {
       margin-inline-start: 4px;
+    }
+    button.watching {
+      border-color: color-mix(in srgb, var(--accent) 45%, var(--border-color));
+      color: var(--accent);
+    }
+    .transfer-history {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .transfer-history li {
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+    }
+    .transfer-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .transfer-line {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .transfer-note {
+      margin: 8px 0 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      white-space: pre-wrap;
     }
     .muted-inline { color: var(--text-muted); }
     .workflow-hint {
@@ -1140,12 +1358,22 @@ type TicketDetailMode = 'customer' | 'admin';
     .attachments-header h3 { margin: 0 0 4px; font-size: 0.95rem; }
     .attachments-header p { margin: 0; color: var(--text-muted); font-size: 0.82rem; }
     .actions { display: flex; justify-content: flex-end; }
-    @media (max-width: 1200px) {
-      .meta-bar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .meta-assignee { grid-column: span 1; }
+    @media (max-width: 1100px) {
+      .meta-row--primary,
+      .meta-row--secondary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .meta-created,
+      .meta-due {
+        align-items: flex-start;
+        text-align: start;
+      }
+      .meta-value--center {
+        justify-content: flex-start;
+        text-align: start;
+      }
     }
     @media (max-width: 900px) {
-      .meta-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .assign-me-label { display: none; }
       .assign-me-btn {
         width: 40px !important;
@@ -1153,15 +1381,9 @@ type TicketDetailMode = 'customer' | 'admin';
       }
     }
     @media (max-width: 600px) {
-      .meta-bar { grid-template-columns: 1fr; }
-      .meta-created,
-      .meta-due {
-        align-items: flex-start;
-        text-align: start;
-      }
-      .meta-created-value,
-      .meta-due-value {
-        text-align: start;
+      .meta-row--primary,
+      .meta-row--secondary {
+        grid-template-columns: 1fr;
       }
       .assignee-controls {
         grid-template-columns: minmax(0, 1fr) auto;
@@ -1219,6 +1441,13 @@ export class TicketDetailComponent implements OnInit {
   canSplit = false;
   canLinkRelated = false;
   canEditDueDate = false;
+  canWatch = false;
+  watching = false;
+  canTransfer = false;
+  watchers: TicketAssigneeOption[] = [];
+  transfers: TicketTransfer[] = [];
+  watcherToAddId: number | null = null;
+  watcherBusy = false;
   draftDueAt: string | null = null;
   dueDateSaving = false;
   reopenUntil: string | null = null;
@@ -1226,6 +1455,7 @@ export class TicketDetailComponent implements OnInit {
   submitting = false;
   statusUpdating = false;
   assigneeUpdating = false;
+  queueUpdating = false;
   lifecycleBusy = false;
   tagsSaving = false;
   busyAttachmentId: number | null = null;
@@ -1234,7 +1464,9 @@ export class TicketDetailComponent implements OnInit {
   catalogTags: TicketTag[] = [];
   replyTemplates: TicketReplyTemplate[] = [];
   assignees: TicketAssigneeOption[] = [];
+  queues: TicketQueue[] = [];
   readonly unassignedValue = '__unassigned__';
+  readonly noQueueValue = '__no_queue__';
   selectedTemplateId: number | null = null;
   selectedTags: TicketTag[] = [];
   freeformTag = '';
@@ -1264,6 +1496,11 @@ export class TicketDetailComponent implements OnInit {
     }
     const myId = this.currentUser()?.id;
     return myId != null && this.ticket.assigneeId !== myId;
+  }
+
+  get availableWatcherCandidates(): TicketAssigneeOption[] {
+    const watchingIds = new Set(this.watchers.map((watcher) => watcher.id));
+    return this.assignees.filter((assignee) => !watchingIds.has(assignee.id));
   }
 
   get mentionCandidates(): MentionCandidate[] {
@@ -1306,6 +1543,7 @@ export class TicketDetailComponent implements OnInit {
       this.loadCatalogTags();
       this.loadReplyTemplates();
       this.loadAssignees();
+      this.loadQueues();
     }
 
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
@@ -1460,6 +1698,42 @@ export class TicketDetailComponent implements OnInit {
     });
   }
 
+  transferTicket(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canTransfer || this.lifecycleBusy || !this.ticket) {
+      return;
+    }
+    this.dialog
+      .open(TicketTransferDialogComponent, {
+        width: '480px',
+        maxWidth: '95vw',
+        data: {
+          publicNumber: this.ticket.publicNumber,
+          assigneeId: this.ticket.assigneeId ?? null,
+          queueId: this.ticket.queue?.id ?? null,
+          assignees: this.assignees,
+          queues: this.queues
+        }
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (!result || !this.ticketId) {
+          return;
+        }
+        this.lifecycleBusy = true;
+        this.ticketService.transferAdminTicket(this.ticketId, result).subscribe({
+          next: (detail) => {
+            this.applyDetail(detail);
+            this.lifecycleBusy = false;
+            this.snackBar.open(this.translate.instant('tickets.detail.transferSuccess'), undefined, { duration: 3000 });
+          },
+          error: (error) => {
+            this.lifecycleBusy = false;
+            this.showError(this.apiError.resolve(error));
+          }
+        });
+      });
+  }
+
   mergeTicket(): void {
     if (!this.isAdmin || !this.ticketId || !this.canMerge || this.lifecycleBusy) {
       return;
@@ -1588,6 +1862,69 @@ export class TicketDetailComponent implements OnInit {
       },
       error: (error) => {
         this.lifecycleBusy = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  toggleWatch(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canWatch || this.watcherBusy) {
+      return;
+    }
+    this.watcherBusy = true;
+    const wasWatching = this.watching;
+    const request$ = wasWatching
+      ? this.ticketService.unwatchAdminTicket(this.ticketId)
+      : this.ticketService.watchAdminTicket(this.ticketId);
+    request$.subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.watcherBusy = false;
+        this.snackBar.open(
+          this.translate.instant(wasWatching ? 'tickets.detail.unwatchedSuccess' : 'tickets.detail.watchedSuccess'),
+          undefined,
+          { duration: 2500 }
+        );
+      },
+      error: (error) => {
+        this.watcherBusy = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  addWatcher(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canWatch || this.watcherBusy || this.watcherToAddId == null) {
+      return;
+    }
+    this.watcherBusy = true;
+    this.ticketService.addAdminTicketWatcher(this.ticketId, this.watcherToAddId).subscribe({
+      next: (detail) => {
+        this.watcherToAddId = null;
+        this.applyDetail(detail);
+        this.watcherBusy = false;
+        this.snackBar.open(this.translate.instant('tickets.detail.watcherAddedSuccess'), undefined, { duration: 2500 });
+      },
+      error: (error) => {
+        this.watcherBusy = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  removeWatcher(watcher: TicketAssigneeOption): void {
+    if (!this.isAdmin || !this.ticketId || this.watcherBusy || watcher?.id == null) {
+      return;
+    }
+    this.watcherBusy = true;
+    this.ticketService.removeAdminTicketWatcher(this.ticketId, watcher.id).subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.watcherBusy = false;
+        this.snackBar.open(this.translate.instant('tickets.detail.watcherRemovedSuccess'), undefined, { duration: 2500 });
+      },
+      error: (error) => {
+        this.watcherBusy = false;
         this.showError(this.apiError.resolve(error));
       }
     });
@@ -1768,6 +2105,13 @@ export class TicketDetailComponent implements OnInit {
     this.ticketService.listAdminAssignees().subscribe({
       next: (assignees) => { this.assignees = assignees ?? []; },
       error: () => { this.assignees = []; }
+    });
+  }
+
+  private loadQueues(): void {
+    this.ticketService.listAllQueues().subscribe({
+      next: (queues) => { this.queues = (queues ?? []).filter((q) => q.active); },
+      error: () => { this.queues = []; }
     });
   }
 
@@ -2089,6 +2433,29 @@ export class TicketDetailComponent implements OnInit {
     this.setAssignee(assigneeId);
   }
 
+  onQueueChange(value: number | string): void {
+    if (!this.isAdmin || !this.ticketId || !this.ticket || this.queueUpdating) {
+      return;
+    }
+    const queueId = value === this.noQueueValue ? null : Number(value);
+    const currentId = this.ticket.queue?.id ?? null;
+    if (queueId === currentId || (queueId != null && Number.isNaN(queueId))) {
+      return;
+    }
+    this.queueUpdating = true;
+    this.ticketService.updateAdminTicketQueue(this.ticketId, queueId).subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.queueUpdating = false;
+        this.snackBar.open(this.translate.instant('tickets.detail.queueUpdated'), undefined, { duration: 3000 });
+      },
+      error: (error) => {
+        this.queueUpdating = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
   assignToMe(): void {
     const myId = this.currentUser()?.id;
     if (myId == null || !this.canAssignToMe) {
@@ -2166,6 +2533,11 @@ export class TicketDetailComponent implements OnInit {
     this.canSplit = !!detail.canSplit;
     this.canLinkRelated = !!detail.canLinkRelated;
     this.canEditDueDate = !!detail.canEditDueDate;
+    this.canWatch = !!detail.canWatch;
+    this.watching = !!detail.watching;
+    this.canTransfer = !!detail.canTransfer;
+    this.watchers = [...(detail.watchers ?? [])];
+    this.transfers = [...(detail.transfers ?? [])];
     this.draftDueAt = detail.ticket?.dueAt ?? null;
     this.reopenUntil = detail.reopenUntil ?? null;
     this.statusOptions = (detail.allowedNextStatuses ?? []).filter((status) => status !== detail.ticket?.status);

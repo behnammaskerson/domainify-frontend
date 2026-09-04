@@ -96,6 +96,14 @@ interface NavGroupChild {
                [matTooltipPosition]="tooltipPosition()">
               <mat-icon>category</mat-icon>
             </a>
+            <a class="nav-link"
+               routerLink="/tickets/queues"
+               routerLinkActive="active"
+               (click)="onNavigate()"
+               [matTooltip]="'menu.ticketQueues' | translate"
+               [matTooltipPosition]="tooltipPosition()">
+              <mat-icon>groups</mat-icon>
+            </a>
           }
         } @else {
           <div class="nav-group" [class.expanded]="supportExpanded">
@@ -440,6 +448,7 @@ export class SidebarComponent implements OnInit {
     { icon: 'add_box', labelKey: 'menu.createTicket', route: '/tickets/new' },
     { icon: 'inbox', labelKey: 'menu.ticketInbox', route: '/admin/tickets/inbox' },
     { icon: 'category', labelKey: 'menu.ticketCategories', route: '/tickets/categories' },
+    { icon: 'groups', labelKey: 'menu.ticketQueues', route: '/tickets/queues' },
     { icon: 'label', labelKey: 'menu.ticketTags', route: '/tickets/tags' },
     { icon: 'quickreply', labelKey: 'menu.ticketReplyTemplates', route: '/tickets/reply-templates' },
     { icon: 'tune', labelKey: 'menu.ticketSettings', route: '/tickets/settings' },
@@ -461,6 +470,7 @@ export class SidebarComponent implements OnInit {
     }
     return this.supportNavChildren.filter((child) =>
       child.route !== '/tickets/categories'
+      && child.route !== '/tickets/queues'
       && child.route !== '/tickets/tags'
       && child.route !== '/tickets/reply-templates'
       && child.route !== '/tickets/settings'

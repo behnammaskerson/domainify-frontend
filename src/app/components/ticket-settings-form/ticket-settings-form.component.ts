@@ -10,7 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ApiErrorService } from '../../services/api-error.service';
-import { TicketAttachmentKind, TicketAutoAssignMode, TicketPriority, TicketService } from '../../services/ticket.service';
+import { TicketAttachmentKind, TicketAutoAssignMode, TicketPriority, TicketQueue, TicketService } from '../../services/ticket.service';
 
 @Component({
   selector: 'app-ticket-settings-form',
@@ -141,12 +141,23 @@ import { TicketAttachmentKind, TicketAutoAssignMode, TicketPriority, TicketServi
               </mat-select>
               <mat-hint>{{ 'settings.ticketSettings.autoAssignModeHint' | translate }}</mat-hint>
             </mat-form-field>
-            @if (form.controls.autoAssignMode.value === 'CATEGORY_SKILL') {
+            @if (form.controls.autoAssignMode.value === 'CATEGORY_SKILL'
+                || form.controls.autoAssignMode.value === 'QUEUE_MEMBERSHIP') {
               <mat-checkbox formControlName="autoAssignFallbackRoundRobin" color="primary">
                 {{ 'settings.ticketSettings.autoAssignFallbackRoundRobin' | translate }}
               </mat-checkbox>
               <p class="section-hint">{{ 'settings.ticketSettings.autoAssignFallbackHint' | translate }}</p>
             }
+            <mat-form-field appearance="outline" class="full-field">
+              <mat-label>{{ 'settings.ticketSettings.defaultQueue' | translate }}</mat-label>
+              <mat-select formControlName="defaultQueueId">
+                <mat-option [value]="null">{{ 'settings.ticketSettings.defaultQueueNone' | translate }}</mat-option>
+                @for (queue of queues; track queue.id) {
+                  <mat-option [value]="queue.id">{{ queue.name }}</mat-option>
+                }
+              </mat-select>
+              <mat-hint>{{ 'settings.ticketSettings.defaultQueueHint' | translate }}</mat-hint>
+            </mat-form-field>
           </section>
 
           <section class="section">
@@ -243,7 +254,8 @@ export class TicketSettingsFormComponent implements OnInit {
 
   readonly attachmentKinds: TicketAttachmentKind[] = ['IMAGE', 'PDF', 'LOG', 'DOCUMENT'];
   readonly priorities: TicketPriority[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
-  readonly autoAssignModes: TicketAutoAssignMode[] = ['OFF', 'ROUND_ROBIN', 'CATEGORY_SKILL'];
+  readonly autoAssignModes: TicketAutoAssignMode[] = ['OFF', 'ROUND_ROBIN', 'CATEGORY_SKILL', 'QUEUE_MEMBERSHIP'];
+  queues: TicketQueue[] = [];
 
   readonly form = this.fb.nonNullable.group({
     reopenWindowDays: [14, [Validators.required, Validators.min(1), Validators.max(3650)]],
@@ -254,6 +266,7 @@ export class TicketSettingsFormComponent implements OnInit {
     slaLowHours: [168, [Validators.required, Validators.min(1), Validators.max(8760)]],
     autoAssignMode: this.fb.nonNullable.control<TicketAutoAssignMode>('OFF', [Validators.required]),
     autoAssignFallbackRoundRobin: [true],
+    defaultQueueId: this.fb.control<number | null>(null),
     ticketEmailNotificationsEnabled: [true],
     ticketSmsNotificationsEnabled: [true],
     emailNotificationPriorities: this.fb.nonNullable.control<TicketPriority[]>(
@@ -282,6 +295,10 @@ export class TicketSettingsFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.ticketService.listAllQueues().subscribe({
+      next: (queues) => { this.queues = (queues ?? []).filter((q) => q.active); },
+      error: () => { this.queues = []; }
+    });
     this.load();
   }
 
@@ -343,6 +360,7 @@ export class TicketSettingsFormComponent implements OnInit {
       slaLowHours: Number(value.slaLowHours),
       autoAssignMode: value.autoAssignMode,
       autoAssignFallbackRoundRobin: !!value.autoAssignFallbackRoundRobin,
+      defaultQueueId: value.defaultQueueId ?? null,
       ticketEmailNotificationsEnabled: !!value.ticketEmailNotificationsEnabled,
       ticketSmsNotificationsEnabled: !!value.ticketSmsNotificationsEnabled,
       emailNotificationPriorities: [...value.emailNotificationPriorities],
@@ -386,6 +404,7 @@ export class TicketSettingsFormComponent implements OnInit {
     slaLowHours?: number;
     autoAssignMode?: TicketAutoAssignMode;
     autoAssignFallbackRoundRobin?: boolean;
+    defaultQueueId?: number | null;
     ticketEmailNotificationsEnabled?: boolean;
     ticketSmsNotificationsEnabled?: boolean;
     emailNotificationPriorities?: TicketPriority[];
@@ -412,6 +431,7 @@ export class TicketSettingsFormComponent implements OnInit {
       slaLowHours: settings.slaLowHours ?? 168,
       autoAssignMode: settings.autoAssignMode ?? 'OFF',
       autoAssignFallbackRoundRobin: settings.autoAssignFallbackRoundRobin !== false,
+      defaultQueueId: settings.defaultQueueId ?? null,
       ticketEmailNotificationsEnabled: settings.ticketEmailNotificationsEnabled !== false,
       ticketSmsNotificationsEnabled: settings.ticketSmsNotificationsEnabled !== false,
       emailNotificationPriorities: [...emailPriorities],

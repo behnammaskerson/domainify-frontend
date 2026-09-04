@@ -178,6 +178,13 @@ import { TranslateModule } from '@ngx-translate/core';
       flex-wrap: wrap;
     }
 
+    .hero-actions > * {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
     .hero-actions:empty {
       display: none;
     }
