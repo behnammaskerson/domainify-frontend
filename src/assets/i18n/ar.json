@@ -322,6 +322,10 @@
       "sending": "جارٍ الإرسال…",
       "replySent": "تم إرسال الرد",
       "statusUpdated": "تم تحديث الحالة",
+      "assignedSuccess": "تم تعيين التذكرة",
+      "unassignedSuccess": "تم إلغاء تعيين التذكرة",
+      "assignToMe": "تعييني",
+      "unassigned": "غير معيّن",
       "workflowHint": "تتبع تغييرات الحالة سير العمل المضبوط.",
       "manageWorkflow": "إدارة سير العمل",
       "tagsTitle": "الوسوم",
@@ -413,6 +417,7 @@
         "status": "الحالة",
         "priority": "الأولوية",
         "category": "الفئة",
+        "assignee": "المعيَّن",
         "created": "تاريخ الإنشاء",
         "dueAt": "تاريخ الاستحقاق",
         "dueTime": "الوقت"
@@ -1206,6 +1211,10 @@
       "removed": "تمت إزالة الفئة",
       "inactive": "غير نشطة",
       "empty": "لا توجد فئات بعد.",
+      "skillsIntro": "لتخصيص التعيين التلقائي حسب مهارة الفئة، اختر الوكلاء لكل فئة.",
+      "skilledAgents": "الوكلاء المهرة",
+      "skilledAgentsHint": "يُستخدم عندما يكون وضع التعيين التلقائي «حسب مهارة الفئة».",
+      "skillsSaved": "تم تحديث وكلاء الفئة",
       "removeTitle": "إزالة الفئة",
       "removeMessage": "إزالة الفئة «{{name}}»؟ إن كانت مستخدمة في تذاكر موجودة فسيتم تعطيلها بدل الحذف."
     },
@@ -1287,6 +1296,17 @@
         "LOG": "سجلات / نص (.txt و.log)",
         "DOCUMENT": "مستندات (DOC وDOCX)"
       },
+      "autoAssignSection": "التعيين التلقائي",
+      "autoAssignIntro": "عيّن التذاكر الجديدة تلقائياً إلى وكيل عند إنشائها.",
+      "autoAssignMode": "وضع التعيين",
+      "autoAssignModeHint": "التناوب يمر على كل المشرفين المفعّلين. مهارة الفئة تستخدم الوكلاء المرتبطين بفئة التذكرة.",
+      "autoAssignModes": {
+        "OFF": "إيقاف (يدوي / المطالبة بالرد)",
+        "ROUND_ROBIN": "تناوب",
+        "CATEGORY_SKILL": "حسب مهارة الفئة"
+      },
+      "autoAssignFallbackRoundRobin": "الرجوع للتناوب عند غياب وكيل ماهر",
+      "autoAssignFallbackHint": "اضبط الوكلاء المهرة في فئات التذاكر. إن لم يُعيَّن أحد للفئة، يُستخدم التناوب العام بدل ترك التذكرة بلا تعيين.",
       "saving": "جارٍ الحفظ…",
       "saved": "تم حفظ إعدادات التذاكر"
     },
@@ -1622,6 +1642,7 @@
       "TICKET_MENTION": "أشار {{actor}} إليك في {{ticketNumber}}",
       "TICKET_STATUS_CHANGED": "حالة {{ticketNumber}}: {{statusFrom}} ← {{statusTo}}",
       "TICKET_ASSIGNED": "تم تعيين {{ticketNumber}} لك",
+      "TICKET_UNASSIGNED": "أُلغي تعيين {{ticketNumber}} عنك",
       "TICKET_CLOSED": "تم إغلاق {{ticketNumber}}",
       "TICKET_REOPENED": "تم إعادة فتح {{ticketNumber}}"
     }

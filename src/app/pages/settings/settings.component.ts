@@ -1879,7 +1879,9 @@ export class SettingsComponent implements OnInit {
       phoneCountryCode: user.phoneCountryCode ?? '',
       phoneNumber: digits,
       phoneDisplay: country && digits ? formatPhoneDigits(digits, country.iso) : ''
-    });
+    }, { emitEvent: false });
+    this.profileForm.markAsPristine();
+    this.profileForm.markAsUntouched();
     this.avatarSrc = this.usersService.resolveAvatarUrl(user.avatarUrl);
     const first = user.firstName?.charAt(0) ?? '';
     const last = user.lastName?.charAt(0) ?? '';

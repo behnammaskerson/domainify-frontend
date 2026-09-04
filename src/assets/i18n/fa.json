@@ -322,6 +322,10 @@
       "sending": "در حال ارسال…",
       "replySent": "پاسخ ارسال شد",
       "statusUpdated": "وضعیت به‌روز شد",
+      "assignedSuccess": "تیکت اختصاص یافت",
+      "unassignedSuccess": "اختصاص تیکت برداشته شد",
+      "assignToMe": "اختصاص به من",
+      "unassigned": "بدون مسئول",
       "workflowHint": "تغییر وضعیت بر اساس گردش‌کار پیکربندی‌شده انجام می‌شود.",
       "manageWorkflow": "مدیریت گردش‌کار",
       "tagsTitle": "برچسب‌ها",
@@ -413,6 +417,7 @@
         "status": "وضعیت",
         "priority": "اولویت",
         "category": "دسته‌بندی",
+        "assignee": "مسئول",
         "created": "ایجاد",
         "dueAt": "سررسید",
         "dueTime": "زمان"
@@ -1284,6 +1289,10 @@
       "removed": "دسته‌بندی حذف شد",
       "inactive": "غیرفعال",
       "empty": "هنوز دسته‌بندی‌ای وجود ندارد.",
+      "skillsIntro": "برای تخصیص خودکار بر اساس مهارت دسته، مشخص کنید کدام عامل‌ها هر دسته را پوشش می‌دهند.",
+      "skilledAgents": "عامل‌های ماهر",
+      "skilledAgentsHint": "وقتی حالت تخصیص خودکار «بر اساس مهارت دسته» باشد استفاده می‌شود.",
+      "skillsSaved": "عامل‌های دسته به‌روز شد",
       "removeTitle": "حذف دسته‌بندی",
       "removeMessage": "دسته‌بندی «{{name}}» حذف شود؟ اگر در تیکت‌های موجود استفاده شده باشد، به‌جای حذف غیرفعال می‌شود."
     },
@@ -1365,6 +1374,17 @@
         "LOG": "لاگ / متن (.txt، .log)",
         "DOCUMENT": "اسناد (DOC، DOCX)"
       },
+      "autoAssignSection": "تخصیص خودکار",
+      "autoAssignIntro": "تیکت‌های جدید را هنگام ایجاد به‌طور خودکار به یک عامل اختصاص دهید.",
+      "autoAssignMode": "حالت تخصیص",
+      "autoAssignModeHint": "نوبت‌گردانی بین همه ادمین‌های فعال است. مهارت دسته از عامل‌های متصل به دسته تیکت استفاده می‌کند.",
+      "autoAssignModes": {
+        "OFF": "خاموش (دستی / ادعا با پاسخ)",
+        "ROUND_ROBIN": "نوبت‌گردانی",
+        "CATEGORY_SKILL": "بر اساس مهارت دسته"
+      },
+      "autoAssignFallbackRoundRobin": "در نبود عامل ماهر، به نوبت‌گردانی برگرد",
+      "autoAssignFallbackHint": "عامل‌های ماهر را در دسته‌بندی تیکت تنظیم کنید. اگر برای دسته‌ای کسی نباشد، به‌جای بدون‌مسئول ماندن، نوبت‌گردانی سراسری اعمال می‌شود.",
       "saving": "در حال ذخیره…",
       "saved": "تنظیمات تیکت ذخیره شد"
     },
@@ -1700,6 +1720,7 @@
       "TICKET_MENTION": "{{actor}} شما را در {{ticketNumber}} منشن کرد",
       "TICKET_STATUS_CHANGED": "وضعیت {{ticketNumber}}: {{statusFrom}} ← {{statusTo}}",
       "TICKET_ASSIGNED": "{{ticketNumber}} به شما اختصاص یافت",
+      "TICKET_UNASSIGNED": "اختصاص {{ticketNumber}} از شما برداشته شد",
       "TICKET_CLOSED": "{{ticketNumber}} بسته شد",
       "TICKET_REOPENED": "{{ticketNumber}} دوباره باز شد"
     }

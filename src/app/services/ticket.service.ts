@@ -20,6 +20,7 @@ export interface TicketCategory {
   name: string;
   active: boolean;
   sortOrder: number;
+  agentIds?: number[];
 }
 
 export interface TicketCategoryRequest {
@@ -159,6 +160,7 @@ export interface SplitTicketResult {
 }
 
 export type TicketAttachmentKind = 'IMAGE' | 'PDF' | 'LOG' | 'DOCUMENT';
+export type TicketAutoAssignMode = 'OFF' | 'ROUND_ROBIN' | 'CATEGORY_SKILL';
 
 export interface TicketSettings {
   reopenWindowDays: number;
@@ -170,6 +172,8 @@ export interface TicketSettings {
   slaHighHours: number;
   slaMediumHours: number;
   slaLowHours: number;
+  autoAssignMode: TicketAutoAssignMode;
+  autoAssignFallbackRoundRobin: boolean;
 }
 
 export interface TicketAttachmentPolicy {
@@ -432,6 +436,10 @@ export class TicketService {
     return this.http.patch<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/status`, { status });
   }
 
+  assignAdminTicket(id: number, assigneeId: number | null): Observable<TicketDetail> {
+    return this.http.patch<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/assignee`, { assigneeId });
+  }
+
   closeAdminTicket(id: number): Observable<TicketDetail> {
     return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/close`, {});
   }
@@ -546,6 +554,12 @@ export class TicketService {
 
   saveTicketSettings(settings: TicketSettings): Observable<TicketSettings> {
     return this.http.put<TicketSettings>(`${this.API_URL}/admin/ticket-settings`, settings);
+  }
+
+  updateCategoryAgents(categoryId: number, agentIds: number[]): Observable<TicketCategory> {
+    return this.http.put<TicketCategory>(`${this.API_URL}/admin/ticket-categories/${categoryId}/agents`, {
+      agentIds
+    });
   }
 
   getAttachmentPolicy(): Observable<TicketAttachmentPolicy> {

@@ -5,13 +5,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { ApiErrorService } from '../../services/api-error.service';
-import { TicketCategory, TicketService } from '../../services/ticket.service';
+import { TicketAssigneeOption, TicketCategory, TicketService } from '../../services/ticket.service';
 
 @Component({
   selector: 'app-ticket-categories-settings',
@@ -23,6 +24,7 @@ import { TicketCategory, TicketService } from '../../services/ticket.service';
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatSelectModule,
     MatSlideToggleModule,
     MatSnackBarModule,
     MatDialogModule,
@@ -33,6 +35,7 @@ import { TicketCategory, TicketService } from '../../services/ticket.service';
       @if (loading) {
         <p class="muted">{{ 'settings.ticketCategories.loading' | translate }}</p>
       } @else {
+        <p class="intro">{{ 'settings.ticketCategories.skillsIntro' | translate }}</p>
         <form class="add-row" [formGroup]="form" (ngSubmit)="addCategory()">
           <mat-form-field appearance="outline" class="name-field">
             <mat-label>{{ 'settings.ticketCategories.name' | translate }}</mat-label>
@@ -52,28 +55,45 @@ import { TicketCategory, TicketService } from '../../services/ticket.service';
         <ul class="category-list">
           @for (category of categories; track category.id) {
             <li [class.inactive]="!category.active">
-              <div class="meta">
-                <strong>{{ category.name }}</strong>
-                <code dir="ltr">{{ category.code }}</code>
-                @if (!category.active) {
-                  <span class="badge">{{ 'settings.ticketCategories.inactive' | translate }}</span>
-                }
+              <div class="row-main">
+                <div class="meta">
+                  <strong>{{ category.name }}</strong>
+                  <code dir="ltr">{{ category.code }}</code>
+                  @if (!category.active) {
+                    <span class="badge">{{ 'settings.ticketCategories.inactive' | translate }}</span>
+                  }
+                </div>
+                <div class="actions">
+                  <mat-slide-toggle
+                    color="primary"
+                    [checked]="category.active"
+                    [disabled]="busyId === category.id"
+                    (change)="toggleActive(category, $event.checked)">
+                  </mat-slide-toggle>
+                  <button mat-icon-button
+                          type="button"
+                          [disabled]="busyId === category.id"
+                          [attr.aria-label]="'common.delete' | translate"
+                          (click)="confirmRemove(category)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
               </div>
-              <div class="actions">
-                <mat-slide-toggle
-                  color="primary"
-                  [checked]="category.active"
-                  [disabled]="busyId === category.id"
-                  (change)="toggleActive(category, $event.checked)">
-                </mat-slide-toggle>
-                <button mat-icon-button
-                        type="button"
-                        [disabled]="busyId === category.id"
-                        [attr.aria-label]="'common.delete' | translate"
-                        (click)="confirmRemove(category)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </div>
+              <mat-form-field appearance="outline" class="agents-field" subscriptSizing="dynamic">
+                <mat-label>{{ 'settings.ticketCategories.skilledAgents' | translate }}</mat-label>
+                <mat-select
+                  multiple
+                  [value]="category.agentIds ?? []"
+                  [disabled]="busyId === category.id || agentsLoading"
+                  (selectionChange)="onAgentsChange(category, $event.value)">
+                  @for (agent of agents; track agent.id) {
+                    <mat-option [value]="agent.id">
+                      {{ agent.name || agent.email }}
+                    </mat-option>
+                  }
+                </mat-select>
+                <mat-hint>{{ 'settings.ticketCategories.skilledAgentsHint' | translate }}</mat-hint>
+              </mat-form-field>
             </li>
           } @empty {
             <li class="empty">{{ 'settings.ticketCategories.empty' | translate }}</li>
@@ -87,6 +107,12 @@ import { TicketCategory, TicketService } from '../../services/ticket.service';
       display: flex;
       flex-direction: column;
       gap: 16px;
+    }
+
+    .intro {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
     }
 
     .add-row {
@@ -115,9 +141,8 @@ import { TicketCategory, TicketService } from '../../services/ticket.service';
 
     .category-list li {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+      flex-direction: column;
+      gap: 10px;
       padding: 12px 14px;
       border: 1px solid var(--border-color);
       border-radius: 8px;
@@ -126,6 +151,13 @@ import { TicketCategory, TicketService } from '../../services/ticket.service';
 
     .category-list li.inactive {
       opacity: 0.7;
+    }
+
+    .row-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
     }
 
     .meta {
@@ -157,6 +189,10 @@ import { TicketCategory, TicketService } from '../../services/ticket.service';
       gap: 4px;
     }
 
+    .agents-field {
+      width: 100%;
+    }
+
     .empty,
     .muted {
       color: var(--text-muted);
@@ -172,7 +208,9 @@ export class TicketCategoriesSettingsComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   categories: TicketCategory[] = [];
+  agents: TicketAssigneeOption[] = [];
   loading = true;
+  agentsLoading = true;
   saving = false;
   busyId: number | null = null;
 
@@ -182,6 +220,7 @@ export class TicketCategoriesSettingsComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.loadAgents();
     this.load();
   }
 
@@ -195,6 +234,20 @@ export class TicketCategoriesSettingsComponent implements OnInit {
       error: (error) => {
         this.loading = false;
         this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  loadAgents(): void {
+    this.agentsLoading = true;
+    this.ticketService.listAdminAssignees().subscribe({
+      next: (agents) => {
+        this.agents = agents ?? [];
+        this.agentsLoading = false;
+      },
+      error: () => {
+        this.agents = [];
+        this.agentsLoading = false;
       }
     });
   }
@@ -239,7 +292,27 @@ export class TicketCategoriesSettingsComponent implements OnInit {
       error: (error) => {
         this.busyId = null;
         this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  onAgentsChange(category: TicketCategory, agentIds: number[]): void {
+    const next = [...(agentIds ?? [])].map(Number).filter((id) => !Number.isNaN(id)).sort((a, b) => a - b);
+    const current = [...(category.agentIds ?? [])].sort((a, b) => a - b);
+    if (next.length === current.length && next.every((id, i) => id === current[i])) {
+      return;
+    }
+    this.busyId = category.id;
+    this.ticketService.updateCategoryAgents(category.id, next).subscribe({
+      next: (updated) => {
+        category.agentIds = updated.agentIds ?? next;
+        this.busyId = null;
+        this.snack(this.translate.instant('settings.ticketCategories.skillsSaved'));
+      },
+      error: (error) => {
+        this.busyId = null;
         this.load();
+        this.showError(this.apiError.resolve(error));
       }
     });
   }
@@ -247,7 +320,6 @@ export class TicketCategoriesSettingsComponent implements OnInit {
   confirmRemove(category: TicketCategory): void {
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
-      maxWidth: '95vw',
       data: {
         titleKey: 'settings.ticketCategories.removeTitle',
         messageKey: 'settings.ticketCategories.removeMessage',
@@ -256,25 +328,22 @@ export class TicketCategoriesSettingsComponent implements OnInit {
         confirmColor: 'warn'
       }
     });
-    ref.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        this.remove(category);
+    ref.afterClosed().subscribe((ok) => {
+      if (!ok) {
+        return;
       }
-    });
-  }
-
-  private remove(category: TicketCategory): void {
-    this.busyId = category.id;
-    this.ticketService.deleteCategory(category.id).subscribe({
-      next: () => {
-        this.busyId = null;
-        this.snack(this.translate.instant('settings.ticketCategories.removed'));
-        this.load();
-      },
-      error: (error) => {
-        this.busyId = null;
-        this.showError(this.apiError.resolve(error));
-      }
+      this.busyId = category.id;
+      this.ticketService.deleteCategory(category.id).subscribe({
+        next: () => {
+          this.busyId = null;
+          this.snack(this.translate.instant('settings.ticketCategories.removed'));
+          this.load();
+        },
+        error: (error) => {
+          this.busyId = null;
+          this.showError(this.apiError.resolve(error));
+        }
+      });
     });
   }
 
@@ -283,9 +352,6 @@ export class TicketCategoriesSettingsComponent implements OnInit {
   }
 
   private showError(message: string): void {
-    this.snackBar.open(message, undefined, {
-      duration: 6000,
-      panelClass: ['error-snackbar']
-    });
+    this.snackBar.open(message, undefined, { duration: 6000, panelClass: ['error-snackbar'] });
   }
 }

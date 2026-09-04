@@ -6,10 +6,11 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ApiErrorService } from '../../services/api-error.service';
-import { TicketAttachmentKind, TicketService } from '../../services/ticket.service';
+import { TicketAttachmentKind, TicketAutoAssignMode, TicketService } from '../../services/ticket.service';
 
 @Component({
   selector: 'app-ticket-settings-form',
@@ -22,6 +23,7 @@ import { TicketAttachmentKind, TicketService } from '../../services/ticket.servi
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatSelectModule,
     MatSnackBarModule,
     TranslateModule
   ],
@@ -81,6 +83,28 @@ import { TicketAttachmentKind, TicketService } from '../../services/ticket.servi
               </mat-form-field>
             </div>
             <p class="section-hint">{{ 'settings.ticketSettings.slaHint' | translate }}</p>
+          </section>
+
+          <section class="section">
+            <h3>{{ 'settings.ticketSettings.autoAssignSection' | translate }}</h3>
+            <p class="section-hint">{{ 'settings.ticketSettings.autoAssignIntro' | translate }}</p>
+            <mat-form-field appearance="outline" class="full-field">
+              <mat-label>{{ 'settings.ticketSettings.autoAssignMode' | translate }}</mat-label>
+              <mat-select formControlName="autoAssignMode">
+                @for (mode of autoAssignModes; track mode) {
+                  <mat-option [value]="mode">
+                    {{ ('settings.ticketSettings.autoAssignModes.' + mode) | translate }}
+                  </mat-option>
+                }
+              </mat-select>
+              <mat-hint>{{ 'settings.ticketSettings.autoAssignModeHint' | translate }}</mat-hint>
+            </mat-form-field>
+            @if (form.controls.autoAssignMode.value === 'CATEGORY_SKILL') {
+              <mat-checkbox formControlName="autoAssignFallbackRoundRobin" color="primary">
+                {{ 'settings.ticketSettings.autoAssignFallbackRoundRobin' | translate }}
+              </mat-checkbox>
+              <p class="section-hint">{{ 'settings.ticketSettings.autoAssignFallbackHint' | translate }}</p>
+            }
           </section>
 
           <section class="section">
@@ -176,6 +200,7 @@ export class TicketSettingsFormComponent implements OnInit {
   saving = false;
 
   readonly attachmentKinds: TicketAttachmentKind[] = ['IMAGE', 'PDF', 'LOG', 'DOCUMENT'];
+  readonly autoAssignModes: TicketAutoAssignMode[] = ['OFF', 'ROUND_ROBIN', 'CATEGORY_SKILL'];
 
   readonly form = this.fb.nonNullable.group({
     reopenWindowDays: [14, [Validators.required, Validators.min(1), Validators.max(3650)]],
@@ -184,6 +209,8 @@ export class TicketSettingsFormComponent implements OnInit {
     slaHighHours: [24, [Validators.required, Validators.min(1), Validators.max(8760)]],
     slaMediumHours: [72, [Validators.required, Validators.min(1), Validators.max(8760)]],
     slaLowHours: [168, [Validators.required, Validators.min(1), Validators.max(8760)]],
+    autoAssignMode: this.fb.nonNullable.control<TicketAutoAssignMode>('OFF', [Validators.required]),
+    autoAssignFallbackRoundRobin: [true],
     maxAttachments: [5, [Validators.required, Validators.min(1), Validators.max(20)]],
     maxAttachmentSizeMb: [5, [Validators.required, Validators.min(1), Validators.max(50)]],
     allowedAttachmentKinds: this.fb.nonNullable.control<TicketAttachmentKind[]>(
@@ -228,6 +255,8 @@ export class TicketSettingsFormComponent implements OnInit {
       slaHighHours: Number(value.slaHighHours),
       slaMediumHours: Number(value.slaMediumHours),
       slaLowHours: Number(value.slaLowHours),
+      autoAssignMode: value.autoAssignMode,
+      autoAssignFallbackRoundRobin: !!value.autoAssignFallbackRoundRobin,
       maxAttachments: Number(value.maxAttachments),
       maxAttachmentSizeMb: Number(value.maxAttachmentSizeMb),
       allowedAttachmentKinds: [...value.allowedAttachmentKinds]
@@ -265,6 +294,8 @@ export class TicketSettingsFormComponent implements OnInit {
     slaHighHours?: number;
     slaMediumHours?: number;
     slaLowHours?: number;
+    autoAssignMode?: TicketAutoAssignMode;
+    autoAssignFallbackRoundRobin?: boolean;
     maxAttachments?: number;
     maxAttachmentSizeMb?: number;
     allowedAttachmentKinds?: TicketAttachmentKind[];
@@ -279,6 +310,8 @@ export class TicketSettingsFormComponent implements OnInit {
       slaHighHours: settings.slaHighHours ?? 24,
       slaMediumHours: settings.slaMediumHours ?? 72,
       slaLowHours: settings.slaLowHours ?? 168,
+      autoAssignMode: settings.autoAssignMode ?? 'OFF',
+      autoAssignFallbackRoundRobin: settings.autoAssignFallbackRoundRobin !== false,
       maxAttachments: settings.maxAttachments ?? 5,
       maxAttachmentSizeMb: settings.maxAttachmentSizeMb ?? 5,
       allowedAttachmentKinds: [...kinds]

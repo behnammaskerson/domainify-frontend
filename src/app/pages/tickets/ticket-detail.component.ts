@@ -1,5 +1,5 @@
 import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -27,6 +27,7 @@ import { TicketAttachmentViewerDialogComponent } from '../../components/ticket-a
 import { LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
 import { MarkdownPipe } from '../../pipes/markdown.pipe';
 import { ApiErrorService } from '../../services/api-error.service';
+import { AuthService } from '../../services/auth.service';
 import {
   TicketAttachmentMeta,
   TicketAttachmentPolicy,
@@ -183,6 +184,43 @@ type TicketDetailMode = 'customer' | 'admin';
             <div class="meta-item">
               <span class="meta-label">{{ 'tickets.detail.meta.category' | translate }}</span>
               <span>{{ ticket.category?.name || '—' }}</span>
+            </div>
+            <div class="meta-item meta-assignee">
+              <span class="meta-label">{{ 'tickets.detail.meta.assignee' | translate }}</span>
+              @if (isAdmin && !ticket.deleted) {
+                <div class="assignee-controls">
+                  <mat-form-field appearance="outline" class="assignee-field" subscriptSizing="dynamic">
+                    <mat-select
+                      [value]="ticket.assigneeId ?? unassignedValue"
+                      [disabled]="assigneeUpdating"
+                      (selectionChange)="onAssigneeChange($event.value)">
+                      <mat-option [value]="unassignedValue">
+                        {{ 'tickets.detail.unassigned' | translate }}
+                      </mat-option>
+                      @for (assignee of assignees; track assignee.id) {
+                        <mat-option [value]="assignee.id">
+                          {{ assignee.name || assignee.email }}
+                        </mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  @if (canAssignToMe) {
+                    <button mat-stroked-button
+                            type="button"
+                            class="assign-me-btn"
+                            [disabled]="assigneeUpdating"
+                            [matTooltip]="'tickets.detail.assignToMe' | translate"
+                            (click)="assignToMe()">
+                      <mat-icon>person</mat-icon>
+                      <span class="assign-me-label">{{ 'tickets.detail.assignToMe' | translate }}</span>
+                    </button>
+                  }
+                </div>
+              } @else if (ticket.assigneeName || ticket.assigneeEmail) {
+                <span>{{ ticket.assigneeName || ticket.assigneeEmail }}</span>
+              } @else {
+                <span class="muted-inline">{{ 'tickets.detail.unassigned' | translate }}</span>
+              }
             </div>
             <div class="meta-item meta-created">
               <span class="meta-label">{{ 'tickets.detail.meta.created' | translate }}</span>
@@ -695,11 +733,19 @@ type TicketDetailMode = 'customer' | 'admin';
       padding: 32px 20px; text-align: center; color: var(--text-muted);
     }
     .meta-bar {
-      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 12px; padding: 14px 16px; margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: minmax(140px, 1.1fr) minmax(100px, 0.8fr) minmax(110px, 1fr) minmax(180px, 1.5fr) minmax(120px, 1fr) minmax(120px, 1fr);
+      gap: 12px 16px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      align-items: start;
     }
     .meta-item { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
     .meta-item span[dir='ltr'] { white-space: nowrap; }
+    .meta-assignee {
+      grid-column: span 1;
+      min-width: 0;
+    }
     .meta-created {
       align-items: center;
       text-align: center;
@@ -747,7 +793,85 @@ type TicketDetailMode = 'customer' | 'admin';
     .meta-label {
       font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;
     }
-    .status-field { width: 100%; max-width: 220px; }
+    .status-field,
+    .assignee-field {
+      width: 100%;
+      max-width: none;
+    }
+    .status-field ::ng-deep .mat-mdc-form-field-subscript-wrapper,
+    .assignee-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+    .status-field ::ng-deep .mat-mdc-text-field-wrapper,
+    .assignee-field ::ng-deep .mat-mdc-text-field-wrapper {
+      height: 40px;
+      background: var(--bg-secondary);
+    }
+    .status-field ::ng-deep .mat-mdc-form-field-flex,
+    .assignee-field ::ng-deep .mat-mdc-form-field-flex {
+      height: 40px;
+      align-items: center;
+    }
+    .status-field ::ng-deep .mat-mdc-form-field-infix,
+    .assignee-field ::ng-deep .mat-mdc-form-field-infix {
+      min-height: 40px;
+      padding-top: 0;
+      padding-bottom: 0;
+      display: flex;
+      align-items: center;
+      border-top: none;
+    }
+    .status-field ::ng-deep .mdc-notched-outline__notch,
+    .assignee-field ::ng-deep .mdc-notched-outline__notch {
+      display: none;
+    }
+    .status-field ::ng-deep .mat-mdc-select-trigger,
+    .assignee-field ::ng-deep .mat-mdc-select-trigger {
+      height: 40px;
+      align-items: center;
+    }
+    .status-field ::ng-deep .mat-mdc-select-value,
+    .assignee-field ::ng-deep .mat-mdc-select-value {
+      display: flex;
+      align-items: center;
+      max-width: 100%;
+    }
+    .status-field ::ng-deep .mat-mdc-select-value-text,
+    .assignee-field ::ng-deep .mat-mdc-select-value-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      line-height: 1.25;
+    }
+    .status-field ::ng-deep .mat-mdc-select-arrow-wrapper,
+    .assignee-field ::ng-deep .mat-mdc-select-arrow-wrapper {
+      transform: none;
+      height: 40px;
+      display: flex;
+      align-items: center;
+    }
+    .assignee-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      min-width: 0;
+    }
+    .assignee-controls:not(:has(.assign-me-btn)) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .assign-me-btn {
+      height: 40px !important;
+      min-width: 40px !important;
+      padding: 0 10px !important;
+      line-height: 1 !important;
+      flex-shrink: 0;
+    }
+    .assign-me-btn .assign-me-label {
+      margin-inline-start: 4px;
+    }
+    .muted-inline { color: var(--text-muted); }
     .workflow-hint {
       display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
       padding: 10px 14px; margin-bottom: 16px; color: var(--text-muted); font-size: 0.85rem;
@@ -1016,9 +1140,32 @@ type TicketDetailMode = 'customer' | 'admin';
     .attachments-header h3 { margin: 0 0 4px; font-size: 0.95rem; }
     .attachments-header p { margin: 0; color: var(--text-muted); font-size: 0.82rem; }
     .actions { display: flex; justify-content: flex-end; }
-    @media (max-width: 900px) { .meta-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 1200px) {
+      .meta-bar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .meta-assignee { grid-column: span 1; }
+    }
+    @media (max-width: 900px) {
+      .meta-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .assign-me-label { display: none; }
+      .assign-me-btn {
+        width: 40px !important;
+        padding: 0 !important;
+      }
+    }
     @media (max-width: 600px) {
       .meta-bar { grid-template-columns: 1fr; }
+      .meta-created,
+      .meta-due {
+        align-items: flex-start;
+        text-align: start;
+      }
+      .meta-created-value,
+      .meta-due-value {
+        text-align: start;
+      }
+      .assignee-controls {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
       .attachments-header, .message-header { flex-direction: column; }
     }
   `]
@@ -1033,8 +1180,11 @@ export class TicketDetailComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
   private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
 
   @ViewChild('threadEnd') threadEnd?: ElementRef<HTMLElement>;
+
+  private readonly currentUser = toSignal(this.authService.currentUser$, { initialValue: null });
 
   maxFiles = 5;
   maxFileBytes = 5 * 1024 * 1024;
@@ -1075,6 +1225,7 @@ export class TicketDetailComponent implements OnInit {
   loading = true;
   submitting = false;
   statusUpdating = false;
+  assigneeUpdating = false;
   lifecycleBusy = false;
   tagsSaving = false;
   busyAttachmentId: number | null = null;
@@ -1083,6 +1234,7 @@ export class TicketDetailComponent implements OnInit {
   catalogTags: TicketTag[] = [];
   replyTemplates: TicketReplyTemplate[] = [];
   assignees: TicketAssigneeOption[] = [];
+  readonly unassignedValue = '__unassigned__';
   selectedTemplateId: number | null = null;
   selectedTags: TicketTag[] = [];
   freeformTag = '';
@@ -1104,6 +1256,14 @@ export class TicketDetailComponent implements OnInit {
 
   get isAdmin(): boolean {
     return this.mode === 'admin';
+  }
+
+  get canAssignToMe(): boolean {
+    if (!this.isAdmin || !this.ticket || this.ticket.deleted) {
+      return false;
+    }
+    const myId = this.currentUser()?.id;
+    return myId != null && this.ticket.assigneeId !== myId;
   }
 
   get mentionCandidates(): MentionCandidate[] {
@@ -1912,6 +2072,50 @@ export class TicketDetailComponent implements OnInit {
       },
       error: (error) => {
         this.statusUpdating = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  onAssigneeChange(value: number | string): void {
+    if (!this.isAdmin || !this.ticketId || !this.ticket || this.assigneeUpdating) {
+      return;
+    }
+    const assigneeId = value === this.unassignedValue ? null : Number(value);
+    const currentId = this.ticket.assigneeId ?? null;
+    if (assigneeId === currentId || (assigneeId != null && Number.isNaN(assigneeId))) {
+      return;
+    }
+    this.setAssignee(assigneeId);
+  }
+
+  assignToMe(): void {
+    const myId = this.currentUser()?.id;
+    if (myId == null || !this.canAssignToMe) {
+      return;
+    }
+    this.setAssignee(myId);
+  }
+
+  private setAssignee(assigneeId: number | null): void {
+    if (!this.ticketId || this.assigneeUpdating) {
+      return;
+    }
+    this.assigneeUpdating = true;
+    this.ticketService.assignAdminTicket(this.ticketId, assigneeId).subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.assigneeUpdating = false;
+        this.snackBar.open(
+          this.translate.instant(
+            assigneeId == null ? 'tickets.detail.unassignedSuccess' : 'tickets.detail.assignedSuccess'
+          ),
+          undefined,
+          { duration: 3000 }
+        );
+      },
+      error: (error) => {
+        this.assigneeUpdating = false;
         this.showError(this.apiError.resolve(error));
       }
     });

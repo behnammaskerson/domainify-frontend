@@ -11,6 +11,7 @@ export type NotificationType =
   | 'TICKET_MENTION'
   | 'TICKET_STATUS_CHANGED'
   | 'TICKET_ASSIGNED'
+  | 'TICKET_UNASSIGNED'
   | 'TICKET_CLOSED'
   | 'TICKET_REOPENED';
 
@@ -147,6 +148,8 @@ export class NotificationService {
         return 'sync_alt';
       case 'TICKET_ASSIGNED':
         return 'person_add';
+      case 'TICKET_UNASSIGNED':
+        return 'person_remove';
       case 'TICKET_CLOSED':
         return 'lock';
       case 'TICKET_REOPENED':

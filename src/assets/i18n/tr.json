@@ -322,6 +322,10 @@
       "sending": "Gönderiliyor…",
       "replySent": "Yanıt gönderildi",
       "statusUpdated": "Durum güncellendi",
+      "assignedSuccess": "Bilet atandı",
+      "unassignedSuccess": "Bilet ataması kaldırıldı",
+      "assignToMe": "Bana ata",
+      "unassigned": "Atanmamış",
       "workflowHint": "Durum değişiklikleri yapılandırılmış iş akışını izler.",
       "manageWorkflow": "İş akışını yönet",
       "tagsTitle": "Etiketler",
@@ -413,6 +417,7 @@
         "status": "Durum",
         "priority": "Öncelik",
         "category": "Kategori",
+        "assignee": "Atanan",
         "created": "Oluşturulma",
         "dueAt": "Son tarih",
         "dueTime": "Saat"
@@ -1228,6 +1233,10 @@
       "removed": "Kategori kaldırıldı",
       "inactive": "Pasif",
       "empty": "Henüz kategori yok.",
+      "skillsIntro": "Kategori becerisine göre otomatik atama için her kategoriye ajan seçin.",
+      "skilledAgents": "Yetkin ajanlar",
+      "skilledAgentsHint": "Otomatik atama modu “Kategori becerisine göre” olduğunda kullanılır.",
+      "skillsSaved": "Kategori ajanları güncellendi",
       "removeTitle": "Kategoriyi kaldır",
       "removeMessage": "\"{{name}}\" kategorisi kaldırılsın mı? Mevcut biletlerde kullanılıyorsa silinmez, pasifleştirilir."
     },
@@ -1309,6 +1318,17 @@
         "LOG": "Günlük / metin (.txt, .log)",
         "DOCUMENT": "Belgeler (DOC, DOCX)"
       },
+      "autoAssignSection": "Otomatik atama",
+      "autoAssignIntro": "Yeni biletleri oluşturulduğunda otomatik olarak bir ajana atayın.",
+      "autoAssignMode": "Atama modu",
+      "autoAssignModeHint": "Round-robin tüm etkin adminler arasında döner. Kategori becerisi, bilet kategorisine bağlı ajanları kullanır.",
+      "autoAssignModes": {
+        "OFF": "Kapalı (manuel / yanıtla sahiplen)",
+        "ROUND_ROBIN": "Round-robin",
+        "CATEGORY_SKILL": "Kategori becerisine göre"
+      },
+      "autoAssignFallbackRoundRobin": "Yetkin ajan yoksa round-robin’e düş",
+      "autoAssignFallbackHint": "Yetkin ajanları Bilet Kategorileri’nde ayarlayın. Kategori için kimse yoksa, bilet atamasız kalmak yerine genel round-robin kullanılır.",
       "saving": "Kaydediliyor…",
       "saved": "Bilet ayarları kaydedildi"
     },
@@ -1644,6 +1664,7 @@
       "TICKET_MENTION": "{{actor}} sizi {{ticketNumber}} içinde etiketledi",
       "TICKET_STATUS_CHANGED": "{{ticketNumber}} durumu: {{statusFrom}} → {{statusTo}}",
       "TICKET_ASSIGNED": "{{ticketNumber}} size atandı",
+      "TICKET_UNASSIGNED": "{{ticketNumber}} atamanız kaldırıldı",
       "TICKET_CLOSED": "{{ticketNumber}} kapatıldı",
       "TICKET_REOPENED": "{{ticketNumber}} yeniden açıldı"
     }

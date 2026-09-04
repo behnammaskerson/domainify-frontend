@@ -323,6 +323,10 @@
       "sending": "Sending…",
       "replySent": "Reply sent",
       "statusUpdated": "Status updated",
+      "assignedSuccess": "Ticket assigned",
+      "unassignedSuccess": "Ticket unassigned",
+      "assignToMe": "Assign to me",
+      "unassigned": "Unassigned",
       "workflowHint": "Status changes follow the configured workflow.",
       "manageWorkflow": "Manage workflow",
       "tagsTitle": "Tags",
@@ -414,6 +418,7 @@
         "status": "Status",
         "priority": "Priority",
         "category": "Category",
+        "assignee": "Assignee",
         "created": "Created",
         "dueAt": "Due date",
         "dueTime": "Time"
@@ -1307,6 +1312,10 @@
       "removed": "Category removed",
       "inactive": "Inactive",
       "empty": "No categories yet.",
+      "skillsIntro": "For category-skill auto-assign, select which agents handle each category.",
+      "skilledAgents": "Skilled agents",
+      "skilledAgentsHint": "Used when auto-assign mode is “By category skill”.",
+      "skillsSaved": "Category agents updated",
       "removeTitle": "Remove category",
       "removeMessage": "Remove category \"{{name}}\"? If it is used by existing tickets, it will be deactivated instead of deleted."
     },
@@ -1388,6 +1397,17 @@
         "LOG": "Logs / text (.txt, .log)",
         "DOCUMENT": "Documents (DOC, DOCX)"
       },
+      "autoAssignSection": "Auto-assign",
+      "autoAssignIntro": "Automatically assign new tickets to an agent when they are created.",
+      "autoAssignMode": "Assignment mode",
+      "autoAssignModeHint": "Round-robin rotates among all enabled admins. Category skill uses agents linked to the ticket category.",
+      "autoAssignModes": {
+        "OFF": "Off (manual / claim on reply)",
+        "ROUND_ROBIN": "Round-robin",
+        "CATEGORY_SKILL": "By category skill"
+      },
+      "autoAssignFallbackRoundRobin": "Fall back to round-robin when no skilled agent",
+      "autoAssignFallbackHint": "Configure skilled agents under Ticket Categories. If none are set for a category, use global round-robin instead of leaving the ticket unassigned.",
       "saving": "Saving…",
       "saved": "Ticket settings saved"
     },
@@ -1723,6 +1743,7 @@
       "TICKET_MENTION": "{{actor}} mentioned you on {{ticketNumber}}",
       "TICKET_STATUS_CHANGED": "{{ticketNumber}} status: {{statusFrom}} → {{statusTo}}",
       "TICKET_ASSIGNED": "{{ticketNumber}} assigned to you",
+      "TICKET_UNASSIGNED": "{{ticketNumber}} was unassigned from you",
       "TICKET_CLOSED": "{{ticketNumber}} was closed",
       "TICKET_REOPENED": "{{ticketNumber}} was reopened"
     }
