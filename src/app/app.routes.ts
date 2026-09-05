@@ -43,6 +43,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/domains/domains.component').then(m => m.DomainsComponent)
       },
       {
+        path: 'domains/categories',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/domains/domain-categories-page.component').then(m => m.DomainCategoriesPageComponent)
+      },
+      {
         path: 'analyzer',
         loadComponent: () => import('./pages/domain-analyzer/domain-analyzer.component').then(m => m.DomainAnalyzerComponent)
       },

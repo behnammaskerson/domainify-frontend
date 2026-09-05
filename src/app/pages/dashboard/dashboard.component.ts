@@ -148,7 +148,7 @@ import { LocaleService } from '../../services/locale.service';
             <div class="data-row top-grid">
               <div>
                 <div class="domain-name">{{ domain.name }}</div>
-                <div class="domain-meta">{{ ('dashboard.categories.' + domain.categoryKey) | translate }}</div>
+                <div class="domain-meta">{{ domain.categoryName }}</div>
               </div>
               <span class="status-pill active">{{ 'domains.status.active' | translate }}</span>
               <span class="domain-value">{{ domain.value | localeCurrency }}</span>
@@ -370,10 +370,10 @@ export class DashboardComponent {
   ];
 
   topDomains = [
-    { name: 'crypto.com', categoryKey: 'technology', value: 250000, views: 12500 },
-    { name: 'ai-startup.io', categoryKey: 'ai', value: 45000, views: 8200 },
-    { name: 'cloud-saas.com', categoryKey: 'saas', value: 28000, views: 6700 },
-    { name: 'blockchain.dev', categoryKey: 'blockchain', value: 15500, views: 4300 },
-    { name: 'web3.xyz', categoryKey: 'web3', value: 12000, views: 3800 }
+    { name: 'crypto.com', categoryName: 'Technology', value: 250000, views: 12500 },
+    { name: 'ai-startup.io', categoryName: 'Artificial Intelligence', value: 45000, views: 8200 },
+    { name: 'cloud-saas.com', categoryName: 'SaaS', value: 28000, views: 6700 },
+    { name: 'blockchain.dev', categoryName: 'Blockchain', value: 15500, views: 4300 },
+    { name: 'web3.xyz', categoryName: 'Web3', value: 12000, views: 3800 }
   ];
 }

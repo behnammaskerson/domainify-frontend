@@ -1,0 +1,139 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export type DomainStatus = 'ACTIVE' | 'PENDING' | 'SOLD' | 'EXPIRED';
+
+export interface DomainCategory {
+  id: number;
+  code: string;
+  name: string;
+  parentId?: number | null;
+  parentName?: string | null;
+  active: boolean;
+  sortOrder: number;
+  depth: number;
+  children?: DomainCategory[];
+}
+
+export interface DomainCategoryPayload {
+  name: string;
+  code?: string;
+  parentId?: number | null;
+  active?: boolean;
+  sortOrder?: number;
+}
+
+export interface DomainItem {
+  id: number;
+  name: string;
+  status: DomainStatus;
+  categoryId: number;
+  categoryCode?: string;
+  categoryName?: string;
+  price: number;
+  expiresAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface PagedDomains {
+  content: DomainItem[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface DomainListParams {
+  q?: string;
+  status?: DomainStatus;
+  categoryId?: number;
+  priceMin?: number;
+  priceMax?: number;
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+export interface UpsertDomainPayload {
+  name: string;
+  status: DomainStatus;
+  categoryId: number;
+  price: number;
+  expiresAt?: string | null;
+}
+
+export interface DomainStatusCounts {
+  all: number;
+  byStatus: Record<string, number>;
+}
+
+@Injectable({ providedIn: 'root' })
+export class DomainsService {
+  private readonly http = inject(HttpClient);
+  private readonly API_URL = 'http://localhost:8080/api';
+
+  list(params?: DomainListParams): Observable<PagedDomains> {
+    let httpParams = new HttpParams();
+    if (params?.q) httpParams = httpParams.set('q', params.q);
+    if (params?.status) httpParams = httpParams.set('status', params.status);
+    if (params?.categoryId != null) httpParams = httpParams.set('categoryId', String(params.categoryId));
+    if (params?.priceMin != null) httpParams = httpParams.set('priceMin', String(params.priceMin));
+    if (params?.priceMax != null) httpParams = httpParams.set('priceMax', String(params.priceMax));
+    if (params?.page != null) httpParams = httpParams.set('page', String(params.page));
+    if (params?.size != null) httpParams = httpParams.set('size', String(params.size));
+    if (params?.sort) httpParams = httpParams.set('sort', params.sort);
+    return this.http.get<PagedDomains>(`${this.API_URL}/domains`, { params: httpParams });
+  }
+
+  statusCounts(): Observable<DomainStatusCounts> {
+    return this.http.get<DomainStatusCounts>(`${this.API_URL}/domains/status-counts`);
+  }
+
+  get(id: number): Observable<DomainItem> {
+    return this.http.get<DomainItem>(`${this.API_URL}/domains/${id}`);
+  }
+
+  create(payload: UpsertDomainPayload): Observable<DomainItem> {
+    return this.http.post<DomainItem>(`${this.API_URL}/domains`, payload);
+  }
+
+  update(id: number, payload: UpsertDomainPayload): Observable<DomainItem> {
+    return this.http.put<DomainItem>(`${this.API_URL}/domains/${id}`, payload);
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/domains/${id}`);
+  }
+
+  listActiveCategoriesFlat(): Observable<DomainCategory[]> {
+    return this.http.get<DomainCategory[]>(`${this.API_URL}/domain-categories`);
+  }
+
+  listActiveCategoriesTree(): Observable<DomainCategory[]> {
+    return this.http.get<DomainCategory[]>(`${this.API_URL}/domain-categories/tree`);
+  }
+
+  listAdminCategoriesFlat(activeOnly = false): Observable<DomainCategory[]> {
+    const params = new HttpParams().set('activeOnly', String(activeOnly));
+    return this.http.get<DomainCategory[]>(`${this.API_URL}/admin/domain-categories`, { params });
+  }
+
+  listAdminCategoriesTree(activeOnly = false): Observable<DomainCategory[]> {
+    const params = new HttpParams().set('activeOnly', String(activeOnly));
+    return this.http.get<DomainCategory[]>(`${this.API_URL}/admin/domain-categories/tree`, { params });
+  }
+
+  createCategory(payload: DomainCategoryPayload): Observable<DomainCategory> {
+    return this.http.post<DomainCategory>(`${this.API_URL}/admin/domain-categories`, payload);
+  }
+
+  updateCategory(id: number, payload: DomainCategoryPayload): Observable<DomainCategory> {
+    return this.http.put<DomainCategory>(`${this.API_URL}/admin/domain-categories/${id}`, payload);
+  }
+
+  deleteCategory(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/admin/domain-categories/${id}`);
+  }
+}

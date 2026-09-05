@@ -178,7 +178,8 @@ import { TranslateModule } from '@ngx-translate/core';
       flex-wrap: wrap;
     }
 
-    .hero-actions > * {
+    :host ::ng-deep .hero-actions > *,
+    :host ::ng-deep .hero-actions [heroActions] {
       display: flex;
       align-items: center;
       flex-wrap: wrap;

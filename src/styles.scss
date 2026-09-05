@@ -1486,6 +1486,19 @@ body.dark-theme .panel-surface.table-wrap .users-table .mat-mdc-row:hover .mat-m
 
 /* Page-hero sits on a dark surface — force readable button labels in light theme */
 .hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+
+  > *,
+  [heroActions] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+
   .mat-mdc-outlined-button,
   .mat-mdc-button,
   a.mat-mdc-outlined-button,

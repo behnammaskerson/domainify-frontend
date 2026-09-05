@@ -12,6 +12,7 @@ interface NavItem {
   icon: string;
   labelKey: string;
   route: string;
+  adminOnly?: boolean;
 }
 
 interface NavGroupChild {
@@ -48,7 +49,7 @@ interface NavGroupChild {
       </div>
 
       <nav class="nav">
-        @for (item of navItems; track item.route) {
+        @for (item of visibleNavItems; track item.route) {
           <a class="nav-link"
              [routerLink]="item.route"
              routerLinkActive="active"
@@ -95,6 +96,14 @@ interface NavGroupChild {
                [matTooltip]="'menu.ticketCategories' | translate"
                [matTooltipPosition]="tooltipPosition()">
               <mat-icon>category</mat-icon>
+            </a>
+            <a class="nav-link"
+               routerLink="/domains/categories"
+               routerLinkActive="active"
+               (click)="onNavigate()"
+               [matTooltip]="'menu.domainCategories' | translate"
+               [matTooltipPosition]="tooltipPosition()">
+              <mat-icon>account_tree</mat-icon>
             </a>
             <a class="nav-link"
                routerLink="/tickets/queues"
@@ -436,12 +445,17 @@ export class SidebarComponent implements OnInit {
     { icon: 'dashboard', labelKey: 'menu.dashboard', route: '/dashboard' },
     { icon: 'notifications', labelKey: 'menu.notifications', route: '/notifications' },
     { icon: 'language', labelKey: 'menu.domains', route: '/domains' },
+    { icon: 'account_tree', labelKey: 'menu.domainCategories', route: '/domains/categories', adminOnly: true },
     { icon: 'analytics', labelKey: 'menu.analyzer', route: '/analyzer' },
     { icon: 'storefront', labelKey: 'menu.marketplace', route: '/marketplace' },
     { icon: 'bar_chart', labelKey: 'menu.analytics', route: '/analytics' },
     { icon: 'people', labelKey: 'menu.users', route: '/user' },
     { icon: 'description', labelKey: 'menu.reports', route: '/reports' }
   ];
+
+  get visibleNavItems(): NavItem[] {
+    return this.navItems.filter((item) => !item.adminOnly || this.authService.isAdmin());
+  }
 
   readonly supportNavChildren: NavGroupChild[] = [
     { icon: 'confirmation_number', labelKey: 'menu.myTickets', route: '/tickets/mine' },
