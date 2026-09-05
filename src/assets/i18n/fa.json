@@ -500,6 +500,21 @@
       "noQueue": "بدون صف",
       "queueUpdated": "صف به‌روزرسانی شد"
     },
+    "csat": {
+      "title": "رضایت خود را ثبت کنید",
+      "hint": "از نتیجهٔ این تیکت چقدر راضی هستید؟",
+      "score": "امتیاز رضایت",
+      "comment": "نظر (اختیاری)",
+      "commentPlaceholder": "بیشتر بگویید…",
+      "submit": "ثبت امتیاز",
+      "submitting": "در حال ارسال…",
+      "success": "از بازخورد شما متشکریم",
+      "thankYou": "از امتیازدهی شما سپاسگزاریم",
+      "yourScore": "امتیاز شما: {{score}} از ۵",
+      "staffTitle": "رضایت مشتری",
+      "staffScore": "CSAT: {{score}} از ۵",
+      "ratedAt": "ثبت‌شده در {{date}}"
+    },
     "attachmentViewer": {
       "view": "مشاهده",
       "download": "دانلود",
@@ -1791,6 +1806,10 @@
     "TICKET_ESCALATION_INVALID": "تشدید نیاز به تغییر اولویت، مسئول و/یا صف دارد",
     "TICKET_ESCALATION_NO_CHANGE": "تشدید باید اولویت، مسئول یا صف را تغییر دهد",
     "TICKET_ESCALATION_NOTE_TOO_LONG": "یادداشت تشدید حداکثر ۲۰۰۰ کاراکتر است",
+    "TICKET_CSAT_NOT_ALLOWED": "ثبت رضایت برای این تیکت مجاز نیست",
+    "TICKET_CSAT_ALREADY_RATED": "این تیکت قبلاً امتیازدهی شده است",
+    "TICKET_CSAT_SCORE_INVALID": "امتیاز رضایت باید بین ۱ تا ۵ باشد",
+    "TICKET_CSAT_COMMENT_TOO_LONG": "نظر رضایت حداکثر ۱۰۰۰ کاراکتر است",
     "TICKET_PRIORITY_REQUIRED": "اولویت تیکت الزامی است",
     "TICKET_ATTACHMENTS_LIMIT": "تعداد پیوست‌ها بیش از حد مجاز است",
     "TICKET_ATTACHMENT_INVALID": "پیوست نامعتبر است. انواع و اندازه مجاز را در تنظیمات تیکت بررسی کنید",

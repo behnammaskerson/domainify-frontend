@@ -44,7 +44,8 @@ import {
   TicketReplyDraft,
   RelatedTicket,
   TicketTransfer,
-  TicketEscalation
+  TicketEscalation,
+  TicketCsat
 } from '../../services/ticket.service';
 import { renderReplyTemplate, toMentionHandle } from '../../utils/reply-template.util';
 import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
@@ -817,6 +818,58 @@ type TicketDetailMode = 'customer' | 'admin';
             <div #threadEnd></div>
           </div>
 
+          @if (canRateCsat || csat) {
+            <section class="csat-card panel-surface" aria-labelledby="csat-heading">
+              @if (canRateCsat) {
+                <h3 id="csat-heading">{{ 'tickets.csat.title' | translate }}</h3>
+                <p class="csat-hint">{{ 'tickets.csat.hint' | translate }}</p>
+                <div class="csat-scores" role="group" [attr.aria-label]="'tickets.csat.score' | translate">
+                  @for (n of csatScores; track n) {
+                    <button type="button"
+                            class="csat-score-btn"
+                            [class.selected]="csatScore === n"
+                            [disabled]="csatSubmitting"
+                            (click)="csatScore = n">
+                      {{ n | localeDigits }}
+                    </button>
+                  }
+                </div>
+                <mat-form-field appearance="outline" class="csat-comment-field">
+                  <mat-label>{{ 'tickets.csat.comment' | translate }}</mat-label>
+                  <textarea matInput
+                            rows="3"
+                            maxlength="1000"
+                            [(ngModel)]="csatComment"
+                            [ngModelOptions]="{standalone: true}"
+                            [disabled]="csatSubmitting"
+                            [placeholder]="'tickets.csat.commentPlaceholder' | translate"></textarea>
+                </mat-form-field>
+                <div class="csat-actions">
+                  <button mat-flat-button color="primary" type="button"
+                          [disabled]="csatSubmitting || !csatScore"
+                          (click)="submitCsat()">
+                    {{ (csatSubmitting ? 'tickets.csat.submitting' : 'tickets.csat.submit') | translate }}
+                  </button>
+                </div>
+              } @else if (csat) {
+                <h3 id="csat-heading">
+                  {{ (isAdmin ? 'tickets.csat.staffTitle' : 'tickets.csat.thankYou') | translate }}
+                </h3>
+                <p class="csat-score-line">
+                  {{ (isAdmin ? 'tickets.csat.staffScore' : 'tickets.csat.yourScore') | translate:{ score: csat.score } }}
+                </p>
+                @if (csat.comment) {
+                  <p class="csat-comment-text">{{ csat.comment }}</p>
+                }
+                @if (csat.ratedAt) {
+                  <p class="csat-rated-at muted">
+                    {{ 'tickets.csat.ratedAt' | translate:{ date: (csat.ratedAt | localeDate:dateTimeFormat) } }}
+                  </p>
+                }
+              }
+            </section>
+          }
+
           @if (canReply) {
             <form class="reply-card panel-surface" [formGroup]="replyForm" (ngSubmit)="submitReply()">
               <h2>{{ 'tickets.detail.replyTitle' | translate }}</h2>
@@ -1273,6 +1326,39 @@ type TicketDetailMode = 'customer' | 'admin';
     .priority-pill[data-priority='URGENT'],
     .priority-pill[data-priority='HIGH'] { background: color-mix(in srgb, #dc2626 10%, transparent); }
     .thread, .reply-card { padding: 18px 16px; margin-bottom: 16px; }
+    .csat-card { padding: 18px 16px; margin-bottom: 16px; }
+    .csat-card h3 { margin: 0 0 8px; font-size: 1.05rem; }
+    .csat-hint { margin: 0 0 14px; color: var(--text-muted); font-size: 0.92rem; }
+    .csat-scores {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .csat-score-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--surface-elevated, var(--panel-bg, transparent));
+      color: var(--text-primary);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .csat-score-btn.selected {
+      border-color: var(--primary-color, #1976d2);
+      background: color-mix(in srgb, var(--primary-color, #1976d2) 14%, transparent);
+    }
+    .csat-score-btn:disabled { opacity: 0.6; cursor: default; }
+    .csat-comment-field { width: 100%; }
+    .csat-actions { display: flex; justify-content: flex-end; }
+    .csat-score-line { margin: 0 0 8px; font-weight: 600; }
+    .csat-comment-text {
+      margin: 0 0 8px;
+      white-space: pre-wrap;
+      color: var(--text-primary);
+    }
+    .csat-rated-at { margin: 0; font-size: 0.85rem; }
     .thread-header {
       display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px;
     }
@@ -1520,6 +1606,12 @@ export class TicketDetailComponent implements OnInit {
   watching = false;
   canTransfer = false;
   canEscalate = false;
+  canRateCsat = false;
+  csat: TicketCsat | null = null;
+  csatScores = [1, 2, 3, 4, 5] as const;
+  csatScore: number | null = null;
+  csatComment = '';
+  csatSubmitting = false;
   watchers: TicketAssigneeOption[] = [];
   transfers: TicketTransfer[] = [];
   escalations: TicketEscalation[] = [];
@@ -1713,6 +1805,28 @@ export class TicketDetailComponent implements OnInit {
       },
       error: (error) => {
         this.lifecycleBusy = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  submitCsat(): void {
+    if (!this.ticketId || !this.canRateCsat || this.csatSubmitting || this.csatScore == null) {
+      return;
+    }
+    this.csatSubmitting = true;
+    const comment = this.csatComment.trim();
+    this.ticketService.submitMineCsat(this.ticketId, {
+      score: this.csatScore,
+      comment: comment || null
+    }).subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.csatSubmitting = false;
+        this.snackBar.open(this.translate.instant('tickets.csat.success'), undefined, { duration: 3000 });
+      },
+      error: (error) => {
+        this.csatSubmitting = false;
         this.showError(this.apiError.resolve(error));
       }
     });
@@ -2651,6 +2765,12 @@ export class TicketDetailComponent implements OnInit {
     this.watching = !!detail.watching;
     this.canTransfer = !!detail.canTransfer;
     this.canEscalate = !!detail.canEscalate;
+    this.canRateCsat = !!detail.canRateCsat;
+    this.csat = detail.csat ?? null;
+    if (!this.canRateCsat) {
+      this.csatScore = null;
+      this.csatComment = '';
+    }
     this.watchers = [...(detail.watchers ?? [])];
     this.transfers = [...(detail.transfers ?? [])];
     this.escalations = [...(detail.escalations ?? [])];

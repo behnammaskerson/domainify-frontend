@@ -500,6 +500,21 @@
       "noQueue": "بدون طابور",
       "queueUpdated": "تم تحديث الطابور"
     },
+    "csat": {
+      "title": "قيّم تجربتك",
+      "hint": "ما مدى رضاك عن حل هذه التذكرة؟",
+      "score": "درجة الرضا",
+      "comment": "تعليق (اختياري)",
+      "commentPlaceholder": "أخبرنا بالمزيد…",
+      "submit": "إرسال التقييم",
+      "submitting": "جارٍ الإرسال…",
+      "success": "شكرًا لملاحظاتك",
+      "thankYou": "شكرًا لتقييمك لهذه التذكرة",
+      "yourScore": "تقييمك: {{score}}/5",
+      "staffTitle": "رضا العميل",
+      "staffScore": "CSAT: {{score}}/5",
+      "ratedAt": "تم التقييم في {{date}}"
+    },
     "attachmentViewer": {
       "view": "عرض",
       "download": "تنزيل",
@@ -1713,6 +1728,10 @@
     "TICKET_ESCALATION_INVALID": "يتطلب التصعيد تغيير الأولوية أو المعيَّن و/أو قائمة الانتظار",
     "TICKET_ESCALATION_NO_CHANGE": "يجب أن يغيّر التصعيد الأولوية أو المعيَّن أو قائمة الانتظار",
     "TICKET_ESCALATION_NOTE_TOO_LONG": "ملاحظة التصعيد يجب ألا تتجاوز 2000 حرف",
+    "TICKET_CSAT_NOT_ALLOWED": "تقييم الرضا غير مسموح لهذه التذكرة",
+    "TICKET_CSAT_ALREADY_RATED": "تم تقييم هذه التذكرة مسبقًا",
+    "TICKET_CSAT_SCORE_INVALID": "درجة الرضا يجب أن تكون بين 1 و 5",
+    "TICKET_CSAT_COMMENT_TOO_LONG": "تعليق الرضا يجب ألا يتجاوز 1000 حرف",
     "TICKET_PRIORITY_REQUIRED": "أولوية التذكرة مطلوبة",
     "TICKET_ATTACHMENTS_LIMIT": "عدد المرفقات يتجاوز الحد المسموح",
     "TICKET_ATTACHMENT_INVALID": "مرفق غير صالح. راجع الأنواع وحدود الحجم في إعدادات التذاكر",

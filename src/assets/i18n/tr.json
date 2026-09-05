@@ -500,6 +500,21 @@
       "noQueue": "Kuyruk yok",
       "queueUpdated": "Kuyruk güncellendi"
     },
+    "csat": {
+      "title": "Deneyiminizi puanlayın",
+      "hint": "Bu biletin çözümünden ne kadar memnunsunuz?",
+      "score": "Memnuniyet puanı",
+      "comment": "Yorum (isteğe bağlı)",
+      "commentPlaceholder": "Daha fazla yazın…",
+      "submit": "Puanı gönder",
+      "submitting": "Gönderiliyor…",
+      "success": "Geri bildiriminiz için teşekkürler",
+      "thankYou": "Bu bileti puanladığınız için teşekkürler",
+      "yourScore": "Puanınız: {{score}}/5",
+      "staffTitle": "Müşteri memnuniyeti",
+      "staffScore": "CSAT: {{score}}/5",
+      "ratedAt": "{{date}} tarihinde puanlandı"
+    },
     "attachmentViewer": {
       "view": "Görüntüle",
       "download": "İndir",
@@ -1735,6 +1750,10 @@
     "TICKET_ESCALATION_INVALID": "Yükseltme için öncelik, atanan ve/veya kuyruk değişikliği gerekli",
     "TICKET_ESCALATION_NO_CHANGE": "Yükseltme önceliği, atananı veya kuyruğu değiştirmelidir",
     "TICKET_ESCALATION_NOTE_TOO_LONG": "Yükseltme notu en fazla 2000 karakter olabilir",
+    "TICKET_CSAT_NOT_ALLOWED": "Bu bilet için memnuniyet puanı verilemez",
+    "TICKET_CSAT_ALREADY_RATED": "Bu bilet zaten puanlandı",
+    "TICKET_CSAT_SCORE_INVALID": "Memnuniyet puanı 1 ile 5 arasında olmalıdır",
+    "TICKET_CSAT_COMMENT_TOO_LONG": "Memnuniyet yorumu en fazla 1000 karakter olabilir",
     "TICKET_PRIORITY_REQUIRED": "Bilet önceliği gerekli",
     "TICKET_ATTACHMENTS_LIMIT": "Bu yükleme için çok fazla ek dosya",
     "TICKET_ATTACHMENT_INVALID": "Geçersiz ek. İzin verilen türleri ve boyut sınırlarını Bilet Ayarları'ndan kontrol edin",

@@ -501,6 +501,21 @@
       "noQueue": "No queue",
       "queueUpdated": "Queue updated"
     },
+    "csat": {
+      "title": "Rate your experience",
+      "hint": "How satisfied are you with the resolution of this ticket?",
+      "score": "Satisfaction score",
+      "comment": "Comment (optional)",
+      "commentPlaceholder": "Tell us more…",
+      "submit": "Submit rating",
+      "submitting": "Submitting…",
+      "success": "Thank you for your feedback",
+      "thankYou": "Thanks for rating this ticket",
+      "yourScore": "Your rating: {{score}}/5",
+      "staffTitle": "Customer satisfaction",
+      "staffScore": "CSAT: {{score}}/5",
+      "ratedAt": "Rated {{date}}"
+    },
     "attachmentViewer": {
       "view": "View",
       "download": "Download",
@@ -1814,6 +1829,10 @@
     "TICKET_ESCALATION_INVALID": "Escalation requires a priority, assignee, and/or queue change",
     "TICKET_ESCALATION_NO_CHANGE": "Escalation must change priority, assignee, or queue",
     "TICKET_ESCALATION_NOTE_TOO_LONG": "Escalation note must be at most 2000 characters",
+    "TICKET_CSAT_NOT_ALLOWED": "Satisfaction rating is not allowed for this ticket",
+    "TICKET_CSAT_ALREADY_RATED": "This ticket has already been rated",
+    "TICKET_CSAT_SCORE_INVALID": "Satisfaction score must be between 1 and 5",
+    "TICKET_CSAT_COMMENT_TOO_LONG": "Satisfaction comment must be at most 1000 characters",
     "TICKET_PRIORITY_REQUIRED": "Ticket priority is required",
     "TICKET_ATTACHMENTS_LIMIT": "Too many attachments for this upload",
     "TICKET_ATTACHMENT_INVALID": "Invalid attachment. Check allowed types and size limits in Ticket Settings",

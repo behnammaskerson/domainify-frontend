@@ -166,6 +166,17 @@ export interface SaveTicketReplyDraftPayload {
   internalNote?: boolean;
 }
 
+export interface TicketCsat {
+  score: number;
+  comment?: string | null;
+  ratedAt?: string;
+}
+
+export interface SubmitTicketCsatPayload {
+  score: number;
+  comment?: string | null;
+}
+
 export interface TicketDetail {
   ticket: Ticket;
   messages: TicketMessage[];
@@ -185,6 +196,8 @@ export interface TicketDetail {
   watching?: boolean;
   canTransfer?: boolean;
   canEscalate?: boolean;
+  canRateCsat?: boolean;
+  csat?: TicketCsat | null;
   watchers?: TicketAssigneeOption[];
   transfers?: TicketTransfer[];
   escalations?: TicketEscalation[];
@@ -652,6 +665,10 @@ export class TicketService {
     payload: { dueAt?: string | null; recalculateFromPriority?: boolean }
   ): Observable<TicketDetail> {
     return this.http.patch<TicketDetail>(`${this.API_URL}/admin/tickets/${ticketId}/due-date`, payload);
+  }
+
+  submitMineCsat(id: number, payload: SubmitTicketCsatPayload): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/tickets/mine/${id}/csat`, payload);
   }
 
   closeMineTicket(id: number): Observable<TicketDetail> {
