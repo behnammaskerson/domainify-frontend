@@ -67,7 +67,10 @@ import { Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>{{ 'users.fields.email' | translate }}</mat-label>
-          <input matInput type="email" formControlName="email">
+          <input matInput type="email" formControlName="email" [readonly]="isEdit">
+          @if (isEdit) {
+            <mat-hint>{{ 'users.fields.emailReadonlyHint' | translate }}</mat-hint>
+          }
           @if (form.controls.email.hasError('required')) {
             <mat-error>{{ 'auth.validation.required' | translate }}</mat-error>
           } @else if (form.controls.email.hasError('email')) {
@@ -168,6 +171,7 @@ export class UserFormDialogComponent {
         lastName: data.user.lastName,
         email: data.user.email
       });
+      this.form.controls.email.disable({ emitEvent: false });
       this.form.controls.role.clearValidators();
       this.form.controls.role.updateValueAndValidity();
     } else {

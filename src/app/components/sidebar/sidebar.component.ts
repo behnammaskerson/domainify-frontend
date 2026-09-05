@@ -447,6 +447,7 @@ export class SidebarComponent implements OnInit {
     { icon: 'confirmation_number', labelKey: 'menu.myTickets', route: '/tickets/mine' },
     { icon: 'add_box', labelKey: 'menu.createTicket', route: '/tickets/new' },
     { icon: 'inbox', labelKey: 'menu.ticketInbox', route: '/admin/tickets/inbox' },
+    { icon: 'monitoring', labelKey: 'menu.ticketWorkload', route: '/admin/tickets/workload' },
     { icon: 'category', labelKey: 'menu.ticketCategories', route: '/tickets/categories' },
     { icon: 'groups', labelKey: 'menu.ticketQueues', route: '/tickets/queues' },
     { icon: 'label', labelKey: 'menu.ticketTags', route: '/tickets/tags' },
@@ -475,6 +476,7 @@ export class SidebarComponent implements OnInit {
       && child.route !== '/tickets/reply-templates'
       && child.route !== '/tickets/settings'
       && child.route !== '/admin/tickets/inbox'
+      && child.route !== '/admin/tickets/workload'
       && child.route !== '/tickets/status-workflow');
   }
 

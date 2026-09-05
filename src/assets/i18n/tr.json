@@ -119,6 +119,7 @@
     "ticketSettings": "Bilet Ayarları",
     "ticketStatusWorkflow": "Durum İş Akışı",
     "ticketInbox": "Bilet Gelen Kutusu",
+    "ticketWorkload": "Ajan İş Yükü",
     "support": "Destek",
     "analytics": "Analitik",
     "customers": "Müşteriler",
@@ -138,6 +139,23 @@
   },
   "tickets": {
     "agentUnavailable": "Uzakta",
+    "workloadPage": {
+      "eyebrow": "Destek konsolu",
+      "title": "Ajan İş Yükü",
+      "subtitle": "Ajan başına açık biletler (yeni, açık, beklemede, askıda).",
+      "refresh": "Yenile",
+      "loading": "İş yükü yükleniyor…",
+      "empty": "Ajan bulunamadı.",
+      "unassigned": "Atanmamış",
+      "available": "Müsait",
+      "away": "Uzakta",
+      "openInboxHint": "Bu ajana göre filtrelenmiş gelen kutusunu aç",
+      "columns": {
+        "agent": "Ajan",
+        "availability": "Müsaitlik",
+        "openCount": "Açık biletler"
+      }
+    },
     "categoriesPage": {
       "eyebrow": "Destek",
       "title": "Bilet Kategorileri",
@@ -1139,10 +1157,11 @@
     "subtitle": "Görünüm, dil, bildirim ve güvenlik tercihleri",
     "profile": {
       "title": "Profil",
-      "subtitle": "Adınızı, e-postanızı ve cep telefonunuzu güncelleyin",
+      "subtitle": "Adınızı ve cep telefonunuzu güncelleyin",
       "firstName": "Ad",
       "lastName": "Soyad",
       "email": "E-posta Adresi",
+      "emailReadonlyHint": "E-posta değiştirilemez",
       "countryCode": "Ülke",
       "countryPlaceholder": "Ülke seçin",
       "countrySearch": "Ülke ara...",
@@ -1509,6 +1528,7 @@
       "firstName": "Ad",
       "lastName": "Soyad",
       "email": "E-posta",
+      "emailReadonlyHint": "E-posta değiştirilemez",
       "password": "Şifre",
       "confirmPassword": "Şifreyi Onayla",
       "passwordOptionalHint": "Mevcut şifreyi korumak için boş bırakın",
@@ -1644,6 +1664,7 @@
   "errors": {
     "PASSWORDS_MISMATCH": "Şifreler eşleşmiyor",
     "EMAIL_EXISTS": "E-posta zaten kayıtlı",
+    "EMAIL_CHANGE_NOT_ALLOWED": "E-posta adresi değiştirilemez",
     "INVALID_CREDENTIALS": "Geçersiz e-posta veya şifre",
     "ACCOUNT_DISABLED": "Hesap etkin değil",
     "EMAIL_NOT_FOUND": "E-posta bulunamadı",

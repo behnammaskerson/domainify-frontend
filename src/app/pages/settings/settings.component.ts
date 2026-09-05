@@ -134,7 +134,8 @@ interface SettingsNavItem {
             <mat-form-field appearance="outline" class="full-width">
               <mat-icon matPrefix>mail</mat-icon>
               <mat-label>{{ 'settings.profile.email' | translate }}</mat-label>
-              <input matInput type="email" formControlName="email">
+              <input matInput type="email" formControlName="email" readonly>
+              <mat-hint>{{ 'settings.profile.emailReadonlyHint' | translate }}</mat-hint>
             </mat-form-field>
 
             <div class="email-verification-row">
@@ -1925,6 +1926,7 @@ export class SettingsComponent implements OnInit {
       phoneNumber: digits,
       phoneDisplay: country && digits ? formatPhoneDigits(digits, country.iso) : ''
     }, { emitEvent: false });
+    this.profileForm.controls.email.disable({ emitEvent: false });
     this.profileForm.markAsPristine();
     this.profileForm.markAsUntouched();
     this.avatarSrc = this.usersService.resolveAvatarUrl(user.avatarUrl);

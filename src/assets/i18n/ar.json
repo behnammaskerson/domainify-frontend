@@ -119,6 +119,7 @@
     "ticketSettings": "إعدادات التذاكر",
     "ticketStatusWorkflow": "سير عمل الحالة",
     "ticketInbox": "صندوق التذاكر",
+    "ticketWorkload": "حجم عمل الوكلاء",
     "support": "الدعم",
     "analytics": "التحليلات",
     "customers": "العملاء",
@@ -138,6 +139,23 @@
   },
   "tickets": {
     "agentUnavailable": "غير متاح",
+    "workloadPage": {
+      "eyebrow": "وحدة الدعم",
+      "title": "حجم عمل الوكلاء",
+      "subtitle": "التذاكر المفتوحة لكل وكيل (جديدة، مفتوحة، قيد الانتظار، معلّقة).",
+      "refresh": "تحديث",
+      "loading": "جارٍ تحميل حجم العمل…",
+      "empty": "لا يوجد وكلاء.",
+      "unassigned": "غير مُعيَّنة",
+      "available": "متاح",
+      "away": "غير متاح",
+      "openInboxHint": "فتح الصندوق مفلترًا لهذا الوكيل",
+      "columns": {
+        "agent": "الوكيل",
+        "availability": "التوفر",
+        "openCount": "التذاكر المفتوحة"
+      }
+    },
     "categoriesPage": {
       "eyebrow": "الدعم",
       "title": "فئات التذاكر",
@@ -1117,10 +1135,11 @@
     "subtitle": "المظهر واللغة والإشعارات وتفضيلات الأمان",
     "profile": {
       "title": "الملف الشخصي",
-      "subtitle": "حدّث اسمك وبريدك الإلكتروني ورقم جوالك",
+      "subtitle": "حدّث اسمك ورقم جوالك",
       "firstName": "الاسم الأول",
       "lastName": "اسم العائلة",
       "email": "البريد الإلكتروني",
+      "emailReadonlyHint": "لا يمكن تغيير البريد الإلكتروني",
       "countryCode": "الدولة",
       "countryPlaceholder": "اختر الدولة",
       "countrySearch": "ابحث عن الدولة...",
@@ -1487,6 +1506,7 @@
       "firstName": "الاسم الأول",
       "lastName": "اسم العائلة",
       "email": "البريد",
+      "emailReadonlyHint": "لا يمكن تغيير البريد الإلكتروني",
       "password": "كلمة المرور",
       "confirmPassword": "تأكيد كلمة المرور",
       "passwordOptionalHint": "اتركه فارغاً للإبقاء على كلمة المرور الحالية",
@@ -1622,6 +1642,7 @@
   "errors": {
     "PASSWORDS_MISMATCH": "كلمتا المرور غير متطابقتين",
     "EMAIL_EXISTS": "البريد الإلكتروني مسجل مسبقاً",
+    "EMAIL_CHANGE_NOT_ALLOWED": "لا يمكن تغيير البريد الإلكتروني",
     "INVALID_CREDENTIALS": "البريد أو كلمة المرور غير صحيحة",
     "ACCOUNT_DISABLED": "الحساب غير مفعّل",
     "EMAIL_NOT_FOUND": "البريد الإلكتروني غير موجود",

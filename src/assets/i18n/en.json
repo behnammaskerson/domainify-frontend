@@ -120,6 +120,7 @@
     "ticketSettings": "Ticket Settings",
     "ticketStatusWorkflow": "Status Workflow",
     "ticketInbox": "Ticket Inbox",
+    "ticketWorkload": "Agent Workload",
     "support": "Support",
     "analytics": "Analytics",
     "customers": "Customers",
@@ -139,6 +140,23 @@
   },
   "tickets": {
     "agentUnavailable": "Away",
+    "workloadPage": {
+      "eyebrow": "Support console",
+      "title": "Agent Workload",
+      "subtitle": "Open tickets per agent (new, open, pending, on hold).",
+      "refresh": "Refresh",
+      "loading": "Loading workload…",
+      "empty": "No agents found.",
+      "unassigned": "Unassigned",
+      "available": "Available",
+      "away": "Away",
+      "openInboxHint": "Open inbox filtered to this agent",
+      "columns": {
+        "agent": "Agent",
+        "availability": "Availability",
+        "openCount": "Open tickets"
+      }
+    },
     "categoriesPage": {
       "eyebrow": "Support",
       "title": "Ticket Categories",
@@ -1218,10 +1236,11 @@
     "subtitle": "Appearance, language, notifications, security, and admin password policy",
     "profile": {
       "title": "Profile",
-      "subtitle": "Update your name, email, and mobile number",
+      "subtitle": "Update your name and mobile number",
       "firstName": "First Name",
       "lastName": "Last Name",
       "email": "Email Address",
+      "emailReadonlyHint": "Email cannot be changed",
       "countryCode": "Country",
       "countryPlaceholder": "Select country",
       "countrySearch": "Search country...",
@@ -1588,6 +1607,7 @@
       "firstName": "First Name",
       "lastName": "Last Name",
       "email": "Email",
+      "emailReadonlyHint": "Email cannot be changed",
       "password": "Password",
       "confirmPassword": "Confirm Password",
       "passwordOptionalHint": "Leave blank to keep the current password",
@@ -1723,6 +1743,7 @@
   "errors": {
     "PASSWORDS_MISMATCH": "Passwords do not match",
     "EMAIL_EXISTS": "Email already exists",
+    "EMAIL_CHANGE_NOT_ALLOWED": "Email address cannot be changed",
     "INVALID_CREDENTIALS": "Invalid email or password",
     "ACCOUNT_DISABLED": "Account is not enabled",
     "EMAIL_NOT_FOUND": "Email not found",

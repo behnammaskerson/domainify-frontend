@@ -124,6 +124,14 @@ export interface TicketAssigneeOption {
   available?: boolean;
 }
 
+export interface TicketWorkloadRow {
+  agentId?: number | null;
+  name?: string | null;
+  email?: string | null;
+  available?: boolean;
+  openCount: number;
+}
+
 export interface TicketMessage {
   id?: number | null;
   body?: string;
@@ -440,6 +448,10 @@ export class TicketService {
 
   listAdminAssignees(): Observable<TicketAssigneeOption[]> {
     return this.http.get<TicketAssigneeOption[]>(`${this.API_URL}/admin/tickets/assignees`);
+  }
+
+  listAdminWorkload(): Observable<TicketWorkloadRow[]> {
+    return this.http.get<TicketWorkloadRow[]>(`${this.API_URL}/admin/tickets/workload`);
   }
 
   listAdminTags(): Observable<TicketTag[]> {

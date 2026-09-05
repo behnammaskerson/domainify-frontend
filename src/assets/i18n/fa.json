@@ -119,6 +119,7 @@
     "ticketSettings": "تنظیمات تیکت",
     "ticketStatusWorkflow": "گردش‌کار وضعیت",
     "ticketInbox": "صندوق تیکت",
+    "ticketWorkload": "تیکت‌های باز مسئولان",
     "support": "پشتیبانی",
     "analytics": "تحلیل‌ها",
     "customers": "مشتریان",
@@ -138,6 +139,23 @@
   },
   "tickets": {
     "agentUnavailable": "خارج از دسترس",
+    "workloadPage": {
+      "eyebrow": "کنسول پشتیبانی",
+      "title": "تیکت‌های باز مسئولان",
+      "subtitle": "تعداد تیکت‌های فعال هر مسئول (جدید، باز، در انتظار، معلق).",
+      "refresh": "بازخوانی",
+      "loading": "در حال بارگذاری…",
+      "empty": "مسئولی یافت نشد.",
+      "unassigned": "بدون مسئول",
+      "available": "در دسترس",
+      "away": "خارج از دسترس",
+      "openInboxHint": "باز کردن صندوق با فیلتر این مسئول",
+      "columns": {
+        "agent": "مسئول",
+        "availability": "وضعیت حضور",
+        "openCount": "تیکت‌های باز"
+      }
+    },
     "categoriesPage": {
       "eyebrow": "پشتیبانی",
       "title": "دسته‌بندی تیکت‌ها",
@@ -1195,10 +1213,11 @@
     "subtitle": "ظاهر، زبان، اعلان‌ها و ترجیحات امنیتی",
     "profile": {
       "title": "پروفایل",
-      "subtitle": "نام، ایمیل و شماره موبایل خود را به‌روز کنید",
+      "subtitle": "نام و شماره موبایل خود را به‌روز کنید",
       "firstName": "نام",
       "lastName": "نام خانوادگی",
       "email": "ایمیل",
+      "emailReadonlyHint": "ایمیل قابل تغییر نیست",
       "countryCode": "کشور",
       "countryPlaceholder": "انتخاب کشور",
       "countrySearch": "جستجوی کشور...",
@@ -1565,6 +1584,7 @@
       "firstName": "نام",
       "lastName": "نام خانوادگی",
       "email": "ایمیل",
+      "emailReadonlyHint": "ایمیل قابل تغییر نیست",
       "password": "رمز عبور",
       "confirmPassword": "تأیید رمز عبور",
       "passwordOptionalHint": "برای حفظ رمز فعلی خالی بگذارید",
@@ -1700,6 +1720,7 @@
   "errors": {
     "PASSWORDS_MISMATCH": "رمزهای عبور مطابقت ندارند",
     "EMAIL_EXISTS": "این ایمیل قبلاً ثبت شده است",
+    "EMAIL_CHANGE_NOT_ALLOWED": "ایمیل قابل تغییر نیست",
     "INVALID_CREDENTIALS": "ایمیل یا رمز عبور نامعتبر است",
     "ACCOUNT_DISABLED": "حساب کاربری فعال نیست",
     "EMAIL_NOT_FOUND": "ایمیل یافت نشد",

@@ -811,6 +811,17 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
     this.querySub = this.route.queryParamMap.subscribe((params) => {
       const view = (params.get('view') ?? 'ALL').toUpperCase() as TicketInboxView;
       this.inboxView = this.inboxTabs.some((tab) => tab.id === view) ? view : 'ALL';
+
+      const unassigned = params.get('unassigned');
+      const assigneeIdRaw = params.get('assigneeId');
+      if (unassigned === '1' || unassigned === 'true') {
+        this.filterAssigneeValue = UNASSIGNED_VALUE;
+      } else if (assigneeIdRaw && /^\d+$/.test(assigneeIdRaw)) {
+        this.filterAssigneeValue = Number(assigneeIdRaw);
+      } else if (params.has('assigneeId') || params.has('unassigned')) {
+        this.filterAssigneeValue = '';
+      }
+
       this.pageIndex = 0;
       this.load();
     });

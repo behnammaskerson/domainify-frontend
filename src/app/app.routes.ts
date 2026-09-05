@@ -64,6 +64,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/tickets/admin-tickets-inbox.component').then(m => m.AdminTicketsInboxComponent)
       },
       {
+        path: 'admin/tickets/workload',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/tickets/ticket-workload-page.component').then(m => m.TicketWorkloadPageComponent)
+      },
+      {
         path: 'admin/tickets/:id',
         canActivate: [AdminGuard],
         data: { mode: 'admin' },
