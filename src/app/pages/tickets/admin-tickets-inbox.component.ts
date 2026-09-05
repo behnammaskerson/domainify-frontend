@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -14,12 +16,14 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
+import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { DatetimeFilterFieldComponent } from '../../components/datetime-filter-field/datetime-filter-field.component';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
 import { ApiErrorService } from '../../services/api-error.service';
 import { AuthService } from '../../services/auth.service';
 import {
+  BulkTicketActionPayload,
   Ticket,
   TicketAssigneeOption,
   TicketCategory,
@@ -43,6 +47,8 @@ const UNASSIGNED_VALUE = '__unassigned__';
     FormsModule,
     RouterModule,
     MatButtonModule,
+    MatCheckboxModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -266,6 +272,72 @@ const UNASSIGNED_VALUE = '__unassigned__';
               </div>
             </div>
 
+            @if (selectedCount > 0) {
+              <div class="bulk-bar panel-surface" role="region" [attr.aria-label]="'tickets.adminInbox.bulk.title' | translate">
+                <div class="bulk-summary">
+                  <strong>{{ 'tickets.adminInbox.bulk.selected' | translate:{ count: (selectedCount | localeDigits) } }}</strong>
+                  <button mat-button type="button" (click)="clearSelection()" [disabled]="bulkBusy">
+                    {{ 'tickets.adminInbox.bulk.clear' | translate }}
+                  </button>
+                </div>
+                <div class="bulk-actions">
+                  <mat-form-field appearance="outline" class="bulk-field" subscriptSizing="dynamic">
+                    <mat-label>{{ 'tickets.adminInbox.bulk.assign' | translate }}</mat-label>
+                    <mat-select [(ngModel)]="bulkAssigneeValue" [disabled]="bulkBusy">
+                      <mat-option [value]="unassignedValue">{{ 'tickets.adminInbox.unassigned' | translate }}</mat-option>
+                      @for (agent of assignees; track agent.id) {
+                        <mat-option [value]="agent.id">
+                          {{ agent.name || agent.email }}
+                          @if (agent.available === false) {
+                            ({{ 'tickets.agentUnavailable' | translate }})
+                          }
+                        </mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  <button mat-stroked-button type="button"
+                          [disabled]="bulkBusy || bulkAssigneeValue === ''"
+                          (click)="runBulkAssign()">
+                    {{ 'tickets.adminInbox.bulk.applyAssign' | translate }}
+                  </button>
+
+                  <mat-form-field appearance="outline" class="bulk-field" subscriptSizing="dynamic">
+                    <mat-label>{{ 'tickets.adminInbox.bulk.status' | translate }}</mat-label>
+                    <mat-select [(ngModel)]="bulkStatus" [disabled]="bulkBusy">
+                      @for (status of statuses; track status) {
+                        <mat-option [value]="status">{{ ('tickets.statuses.' + status) | translate }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  <button mat-stroked-button type="button"
+                          [disabled]="bulkBusy || !bulkStatus"
+                          (click)="runBulkStatus()">
+                    {{ 'tickets.adminInbox.bulk.applyStatus' | translate }}
+                  </button>
+
+                  <mat-form-field appearance="outline" class="bulk-field" subscriptSizing="dynamic">
+                    <mat-label>{{ 'tickets.adminInbox.bulk.tag' | translate }}</mat-label>
+                    <mat-select [(ngModel)]="bulkTagId" [disabled]="bulkBusy">
+                      @for (tag of tags; track tag.id) {
+                        <mat-option [value]="tag.id">{{ tag.name }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  <button mat-stroked-button type="button"
+                          [disabled]="bulkBusy || bulkTagId === null"
+                          (click)="runBulkAddTag()">
+                    {{ 'tickets.adminInbox.bulk.applyTag' | translate }}
+                  </button>
+
+                  <button mat-flat-button color="warn" type="button"
+                          [disabled]="bulkBusy"
+                          (click)="runBulkClose()">
+                    {{ 'tickets.adminInbox.bulk.close' | translate }}
+                  </button>
+                </div>
+              </div>
+            }
+
             <div class="panel-surface table-wrap">
               @if (loading && tickets.length === 0) {
                 <p class="muted state-msg">{{ 'tickets.adminInbox.loading' | translate }}</p>
@@ -278,6 +350,27 @@ const UNASSIGNED_VALUE = '__unassigned__';
                 <div class="table-scroll">
                   <table mat-table [dataSource]="tickets" class="mat-mdc-table tickets-table"
                          [attr.aria-label]="'tickets.adminInbox.title' | translate">
+
+                    <ng-container matColumnDef="select">
+                      <th mat-header-cell *matHeaderCellDef class="col-select">
+                        <mat-checkbox
+                          [checked]="allPageSelected"
+                          [indeterminate]="somePageSelected"
+                          [disabled]="loading || bulkBusy || tickets.length === 0"
+                          (change)="toggleSelectAllPage($event.checked)"
+                          [attr.aria-label]="'tickets.adminInbox.bulk.selectAllPage' | translate">
+                        </mat-checkbox>
+                      </th>
+                      <td mat-cell *matCellDef="let ticket" class="col-select">
+                        <mat-checkbox
+                          [checked]="isSelected(ticket.id)"
+                          [disabled]="bulkBusy || !ticket.id"
+                          (click)="$event.stopPropagation()"
+                          (change)="toggleSelect(ticket.id, $event.checked)"
+                          [attr.aria-label]="'tickets.adminInbox.bulk.selectRow' | translate">
+                        </mat-checkbox>
+                      </td>
+                    </ng-container>
 
                     <ng-container matColumnDef="rowNumber">
                       <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
@@ -698,6 +791,32 @@ const UNASSIGNED_VALUE = '__unassigned__';
 
     .muted { color: var(--text-muted); }
     .result-count { margin: 0; font-size: 0.85rem; }
+    .bulk-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+    }
+    .bulk-summary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .bulk-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 10px;
+    }
+    .bulk-field {
+      width: min(200px, 100%);
+    }
+    .col-select {
+      width: 48px;
+      padding-inline-end: 4px;
+    }
     .presence-btn.away {
       border-color: color-mix(in srgb, var(--warning) 55%, var(--border-color));
       color: var(--warning);
@@ -718,6 +837,7 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
   private readonly apiError = inject(ApiErrorService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
 
   readonly unassignedValue = UNASSIGNED_VALUE;
   readonly statuses: TicketStatus[] = ['NEW', 'OPEN', 'PENDING', 'ON_HOLD', 'RESOLVED', 'CLOSED'];
@@ -735,7 +855,7 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
     { id: 'DELETED', labelKey: 'tickets.adminInbox.views.deleted' }
   ];
   readonly displayedColumns = [
-    'rowNumber', 'publicNumber', 'subject', 'requester', 'queue', 'assignee', 'priority', 'status', 'dueAt', 'updatedAt'
+    'select', 'rowNumber', 'publicNumber', 'subject', 'requester', 'queue', 'assignee', 'priority', 'status', 'dueAt', 'updatedAt'
   ];
   readonly dateTimeFormat = SMS_DATETIME_FORMAT;
 
@@ -745,6 +865,11 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
   assignees: TicketAssigneeOption[] = [];
   tags: TicketTag[] = [];
   loading = false;
+  bulkBusy = false;
+  selectedIds = new Set<number>();
+  bulkAssigneeValue: number | typeof UNASSIGNED_VALUE | '' = '';
+  bulkStatus: TicketStatus | '' = '';
+  bulkTagId: number | null = null;
   ticketAvailable = true;
   ticketAvailabilitySaving = false;
   inboxView: TicketInboxView = 'ALL';
@@ -786,6 +911,159 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
     return count;
   }
 
+  get selectedCount(): number {
+    return this.selectedIds.size;
+  }
+
+  get allPageSelected(): boolean {
+    const ids = this.pageTicketIds();
+    return ids.length > 0 && ids.every((id) => this.selectedIds.has(id));
+  }
+
+  get somePageSelected(): boolean {
+    const ids = this.pageTicketIds();
+    const selectedOnPage = ids.filter((id) => this.selectedIds.has(id)).length;
+    return selectedOnPage > 0 && selectedOnPage < ids.length;
+  }
+
+  isSelected(id: number | null | undefined): boolean {
+    return id != null && this.selectedIds.has(id);
+  }
+
+  toggleSelect(id: number | null | undefined, checked: boolean): void {
+    if (id == null) {
+      return;
+    }
+    if (checked) {
+      this.selectedIds.add(id);
+    } else {
+      this.selectedIds.delete(id);
+    }
+    this.selectedIds = new Set(this.selectedIds);
+  }
+
+  toggleSelectAllPage(checked: boolean): void {
+    for (const id of this.pageTicketIds()) {
+      if (checked) {
+        this.selectedIds.add(id);
+      } else {
+        this.selectedIds.delete(id);
+      }
+    }
+    this.selectedIds = new Set(this.selectedIds);
+  }
+
+  clearSelection(): void {
+    this.selectedIds = new Set();
+  }
+
+  runBulkAssign(): void {
+    if (this.bulkAssigneeValue === '') {
+      return;
+    }
+    const assigneeId = this.bulkAssigneeValue === UNASSIGNED_VALUE ? null : Number(this.bulkAssigneeValue);
+    this.runBulk({
+      ticketIds: [...this.selectedIds],
+      action: 'ASSIGN',
+      assigneeId
+    });
+  }
+
+  runBulkStatus(): void {
+    if (!this.bulkStatus) {
+      return;
+    }
+    this.runBulk({
+      ticketIds: [...this.selectedIds],
+      action: 'CHANGE_STATUS',
+      status: this.bulkStatus
+    });
+  }
+
+  runBulkAddTag(): void {
+    if (this.bulkTagId == null) {
+      return;
+    }
+    this.runBulk({
+      ticketIds: [...this.selectedIds],
+      action: 'ADD_TAG',
+      tagIds: [this.bulkTagId]
+    });
+  }
+
+  runBulkClose(): void {
+    if (this.selectedCount === 0 || this.bulkBusy) {
+      return;
+    }
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        titleKey: 'tickets.adminInbox.bulk.closeTitle',
+        messageKey: 'tickets.adminInbox.bulk.closeMessage',
+        messageParams: { count: this.selectedCount },
+        confirmKey: 'tickets.adminInbox.bulk.close',
+        confirmColor: 'warn' as const
+      }
+    });
+    ref.afterClosed().subscribe((confirmed) => {
+      if (!confirmed) {
+        return;
+      }
+      this.runBulk({
+        ticketIds: [...this.selectedIds],
+        action: 'CLOSE'
+      });
+    });
+  }
+
+  private runBulk(payload: BulkTicketActionPayload): void {
+    if (this.bulkBusy || !payload.ticketIds.length) {
+      return;
+    }
+    this.bulkBusy = true;
+    this.ticketService.bulkAdminTickets(payload).subscribe({
+      next: (result) => {
+        this.bulkBusy = false;
+        const ok = result.succeeded?.length ?? 0;
+        const fail = result.failed?.length ?? 0;
+        for (const id of result.succeeded ?? []) {
+          this.selectedIds.delete(id);
+        }
+        this.selectedIds = new Set(this.selectedIds);
+        if (fail === 0) {
+          this.snackBar.open(
+            this.translate.instant('tickets.adminInbox.bulk.success', { count: ok }),
+            undefined,
+            { duration: 3500 }
+          );
+        } else {
+          const first = result.failed?.[0]?.message;
+          this.snackBar.open(
+            this.translate.instant('tickets.adminInbox.bulk.partial', {
+              ok,
+              fail,
+              detail: first || ''
+            }),
+            undefined,
+            { duration: 7000, panelClass: ['error-snackbar'] }
+          );
+        }
+        this.load();
+      },
+      error: (error) => {
+        this.bulkBusy = false;
+        this.snackBar.open(this.apiError.resolve(error), undefined, {
+          duration: 6000,
+          panelClass: ['error-snackbar']
+        });
+      }
+    });
+  }
+
+  private pageTicketIds(): number[] {
+    return this.tickets.map((t) => t.id).filter((id): id is number => id != null);
+  }
+
   ngOnInit(): void {
     this.authService.refreshCurrentUser().subscribe({
       next: (user) => { this.ticketAvailable = user.ticketAvailable !== false; },
@@ -810,7 +1088,11 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
 
     this.querySub = this.route.queryParamMap.subscribe((params) => {
       const view = (params.get('view') ?? 'ALL').toUpperCase() as TicketInboxView;
-      this.inboxView = this.inboxTabs.some((tab) => tab.id === view) ? view : 'ALL';
+      const nextView = this.inboxTabs.some((tab) => tab.id === view) ? view : 'ALL';
+      if (nextView !== this.inboxView) {
+        this.clearSelection();
+      }
+      this.inboxView = nextView;
 
       const unassigned = params.get('unassigned');
       const assigneeIdRaw = params.get('assigneeId');
@@ -869,6 +1151,7 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
 
   onFiltersChanged(): void {
     this.pageIndex = 0;
+    this.clearSelection();
     this.load();
   }
 

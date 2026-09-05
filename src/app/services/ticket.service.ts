@@ -246,6 +246,28 @@ export interface SplitTicketResult {
   newTicket: Ticket;
 }
 
+export type BulkTicketAction = 'ASSIGN' | 'CHANGE_STATUS' | 'ADD_TAG' | 'CLOSE';
+
+export interface BulkTicketActionPayload {
+  ticketIds: number[];
+  action: BulkTicketAction;
+  assigneeId?: number | null;
+  status?: TicketStatus;
+  tagIds?: number[];
+  names?: string[];
+}
+
+export interface BulkTicketFailure {
+  ticketId: number;
+  code?: string;
+  message?: string;
+}
+
+export interface BulkTicketActionResult {
+  succeeded: number[];
+  failed: BulkTicketFailure[];
+}
+
 export type TicketAttachmentKind = 'IMAGE' | 'PDF' | 'LOG' | 'DOCUMENT';
 export type TicketAutoAssignMode = 'OFF' | 'ROUND_ROBIN' | 'CATEGORY_SKILL' | 'QUEUE_MEMBERSHIP';
 
@@ -560,6 +582,10 @@ export class TicketService {
 
   assignAdminTicket(id: number, assigneeId: number | null): Observable<TicketDetail> {
     return this.http.patch<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/assignee`, { assigneeId });
+  }
+
+  bulkAdminTickets(payload: BulkTicketActionPayload): Observable<BulkTicketActionResult> {
+    return this.http.post<BulkTicketActionResult>(`${this.API_URL}/admin/tickets/bulk`, payload);
   }
 
   updateAdminTicketQueue(id: number, queueId: number | null): Observable<TicketDetail> {
