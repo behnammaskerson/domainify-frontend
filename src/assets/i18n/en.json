@@ -1114,7 +1114,7 @@
     "categoriesPage": {
       "eyebrow": "Portfolio",
       "title": "Domain Categories",
-      "subtitle": "Organize niches in a tree (e.g. Technology → AI → Generative)."
+      "subtitle": "Organize categories in a tree (e.g. Technology → AI → Generative)."
     },
     "form": {
       "createTitle": "Add domain",
@@ -1124,6 +1124,7 @@
       "nameRequired": "Domain name is required",
       "nameInvalid": "Enter a valid domain name (e.g. example.com)",
       "priceInvalid": "Price must be zero or greater",
+      "priceHint": "Stored in IRT (toman). Toolbar sets display currency.",
       "saving": "Saving…"
     },
     "filters": {
@@ -1136,6 +1137,7 @@
     "table": {
       "name": "Domain Name",
       "status": "Status",
+      "ownership": "Ownership",
       "price": "Price",
       "expires": "Expires",
       "actions": "Actions"
@@ -1145,6 +1147,37 @@
       "pending": "Pending",
       "sold": "Sold",
       "expired": "Expired"
+    },
+    "ownershipStatus": {
+      "unverified": "Unverified",
+      "pending": "Pending",
+      "verified": "Verified"
+    },
+    "ownership": {
+      "title": "Prove domain ownership",
+      "intro": "Verify that you control {{domain}} using DNS or a file on your website.",
+      "chooseMethod": "Verification method",
+      "methods": {
+        "DNS_TXT": "DNS TXT record",
+        "HTTP_FILE": "HTTP file"
+      },
+      "start": "Start verification",
+      "starting": "Starting…",
+      "check": "Check now",
+      "checking": "Checking…",
+      "cancel": "Cancel challenge",
+      "continue": "Continue verification",
+      "verify": "Verify ownership",
+      "reverify": "Re-verify ownership",
+      "verified": "Domain ownership verified",
+      "cancelled": "Ownership challenge cancelled",
+      "dnsHint": "Create this TXT record at your DNS provider, then wait for propagation and click Check.",
+      "dnsHost": "Host / name",
+      "dnsType": "Type",
+      "dnsValue": "Value",
+      "httpHint": "Create this file with the exact token as its body, then click Check.",
+      "httpUrl": "File URL",
+      "httpBody": "File contents"
     }
   },
   "analyzer": {
@@ -1471,10 +1504,10 @@
     },
     "domainCategories": {
       "loading": "Loading domain categories…",
-      "intro": "Build a niche tree. Child categories nest under a parent (e.g. Technology → AI).",
+      "intro": "Build a category tree. Child categories nest under a parent (e.g. Technology → AI).",
       "name": "Category name",
       "code": "Code",
-      "codeHint": "Optional. Auto-generated from name if empty.",
+      "codeHint": "Optional. Use Latin letters/numbers, or leave empty to auto-generate.",
       "parent": "Parent category",
       "root": "Root (no parent)",
       "add": "Add category",
@@ -1771,6 +1804,7 @@
     "turkish": "Turkish",
     "close": "Close",
     "copy": "Copy",
+    "copied": "Copied",
     "backToTop": "Back to top",
     "rowNumber": "#"
   },
@@ -1788,6 +1822,8 @@
     "menu": "Menu",
     "switchLanguage": "Switch language",
     "language": "Language",
+    "switchCurrency": "Switch currency",
+    "currency": "Currency",
     "toggleTheme": "Toggle theme",
     "theme": "Theme",
     "notifications": "Notifications",
@@ -1800,6 +1836,19 @@
     "domainActions": "Actions for {{domain}}",
     "actions": "Actions",
     "backToTop": "Back to top"
+  },
+  "currency": {
+    "codes": {
+      "IRT": "Iran Rial",
+      "USD": "US Dollar",
+      "USDT": "Tether (USDT)",
+      "EUR": "Euro",
+      "CAD": "Canadian Dollar",
+      "AUD": "Australian Dollar",
+      "TRY": "Turkish Lira",
+      "AED": "UAE Dirham",
+      "CNY": "Chinese Yuan"
+    }
   },
   "errors": {
     "PASSWORDS_MISMATCH": "Passwords do not match",
@@ -1899,6 +1948,12 @@
     "DOMAIN_CATEGORY_IN_USE": "Domain category is in use by domains and cannot be deleted",
     "DOMAIN_CATEGORY_PARENT_INVALID": "Invalid parent category (cycle not allowed)",
     "DOMAIN_PRICE_INVALID": "Domain price must be zero or greater",
+    "DOMAIN_OWNERSHIP_METHOD_INVALID": "Invalid ownership verification method",
+    "DOMAIN_OWNERSHIP_NOT_PENDING": "No pending ownership verification challenge",
+    "DOMAIN_OWNERSHIP_TOKEN_EXPIRED": "Ownership verification challenge expired. Start again",
+    "DOMAIN_OWNERSHIP_CHECK_TOO_SOON": "Please wait a few seconds before checking again",
+    "DOMAIN_OWNERSHIP_CHECK_LIMIT": "Too many ownership check attempts. Start a new challenge",
+    "DOMAIN_OWNERSHIP_NOT_FOUND": "Ownership proof not found. Add the DNS TXT or HTTP file and try again",
     "TICKET_PRIORITY_REQUIRED": "Ticket priority is required",
     "TICKET_ATTACHMENTS_LIMIT": "Too many attachments for this upload",
     "TICKET_ATTACHMENT_INVALID": "Invalid attachment. Check allowed types and size limits in Ticket Settings",

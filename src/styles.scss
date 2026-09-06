@@ -533,6 +533,32 @@ body.dark-theme {
     overflow-x: hidden;
   }
 
+  .domain-ownership-dialog-panel .mat-mdc-dialog-content,
+  .domain-ownership-dialog-panel .mdc-dialog__content {
+    max-height: none !important;
+    overflow: visible !important;
+    overflow-y: visible !important;
+  }
+
+  .domain-ownership-dialog-panel .mat-mdc-dialog-surface {
+    overflow: visible !important;
+  }
+
+  .domain-form-dialog-panel .mat-mdc-dialog-surface {
+    min-width: min(560px, 95vw);
+    padding-inline: 8px;
+  }
+
+  .domain-form-dialog-panel .mat-mdc-dialog-content,
+  .domain-form-dialog-panel .mdc-dialog__content {
+    overflow-x: hidden;
+  }
+
+  .domain-form-dialog-panel .mat-mdc-dialog-actions {
+    padding-top: 12px;
+    padding-bottom: 8px;
+  }
+
   .ticket-attachment-viewer-panel .mat-mdc-dialog-container,
   .ticket-attachment-viewer-panel .mat-mdc-dialog-surface {
     padding: 0;

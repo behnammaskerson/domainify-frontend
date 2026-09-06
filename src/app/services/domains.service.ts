@@ -3,6 +3,39 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export type DomainStatus = 'ACTIVE' | 'PENDING' | 'SOLD' | 'EXPIRED';
+export type DomainOwnershipStatus = 'UNVERIFIED' | 'PENDING' | 'VERIFIED';
+export type DomainOwnershipMethod = 'DNS_TXT' | 'HTTP_FILE';
+
+export interface DomainItem {
+  id: number;
+  name: string;
+  status: DomainStatus;
+  categoryId: number;
+  categoryCode?: string;
+  categoryName?: string;
+  price: number;
+  expiresAt?: string | null;
+  ownershipStatus?: DomainOwnershipStatus;
+  ownershipMethod?: DomainOwnershipMethod | null;
+  ownershipVerifiedAt?: string | null;
+  ownershipTokenExpiresAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface DomainOwnershipChallenge {
+  domainId: number;
+  domainName: string;
+  ownershipStatus: DomainOwnershipStatus;
+  method: DomainOwnershipMethod;
+  token: string;
+  tokenExpiresAt?: string | null;
+  dnsHost?: string | null;
+  dnsType?: string | null;
+  dnsValue?: string | null;
+  httpUrl?: string | null;
+  httpBody?: string | null;
+}
 
 export interface DomainCategory {
   id: number;
@@ -22,19 +55,6 @@ export interface DomainCategoryPayload {
   parentId?: number | null;
   active?: boolean;
   sortOrder?: number;
-}
-
-export interface DomainItem {
-  id: number;
-  name: string;
-  status: DomainStatus;
-  categoryId: number;
-  categoryCode?: string;
-  categoryName?: string;
-  price: number;
-  expiresAt?: string | null;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 export interface PagedDomains {
@@ -105,6 +125,22 @@ export class DomainsService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/domains/${id}`);
+  }
+
+  startOwnership(id: number, method: DomainOwnershipMethod): Observable<DomainOwnershipChallenge> {
+    return this.http.post<DomainOwnershipChallenge>(`${this.API_URL}/domains/${id}/ownership/start`, { method });
+  }
+
+  getOwnershipChallenge(id: number): Observable<DomainOwnershipChallenge> {
+    return this.http.get<DomainOwnershipChallenge>(`${this.API_URL}/domains/${id}/ownership`);
+  }
+
+  checkOwnership(id: number): Observable<DomainItem> {
+    return this.http.post<DomainItem>(`${this.API_URL}/domains/${id}/ownership/check`, {});
+  }
+
+  cancelOwnership(id: number): Observable<DomainItem> {
+    return this.http.post<DomainItem>(`${this.API_URL}/domains/${id}/ownership/cancel`, {});
   }
 
   listActiveCategoriesFlat(): Observable<DomainCategory[]> {

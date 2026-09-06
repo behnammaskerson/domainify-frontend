@@ -41,9 +41,9 @@ export interface DomainDialogData {
             ? 'domains.form.viewTitle'
             : 'domains.form.editTitle') | translate }}
     </h2>
-    <mat-dialog-content>
+    <mat-dialog-content class="dialog-body">
       <form class="form" [formGroup]="form" (ngSubmit)="submit()">
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" class="full" subscriptSizing="dynamic">
           <mat-label>{{ 'domains.table.name' | translate }}</mat-label>
           <input matInput formControlName="name" autocomplete="off" [readonly]="readOnly">
           @if (form.controls.name.touched && form.controls.name.hasError('required')) {
@@ -54,35 +54,40 @@ export interface DomainDialogData {
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ 'domains.table.status' | translate }}</mat-label>
-          <mat-select formControlName="status" [disabled]="readOnly">
-            @for (status of statuses; track status) {
-              <mat-option [value]="status">{{ ('domains.status.' + status.toLowerCase()) | translate }}</mat-option>
+        <div class="row">
+          <mat-form-field appearance="outline" class="half" subscriptSizing="dynamic">
+            <mat-label>{{ 'domains.table.status' | translate }}</mat-label>
+            <mat-select formControlName="status" [disabled]="readOnly">
+              @for (status of statuses; track status) {
+                <mat-option [value]="status">{{ ('domains.status.' + status.toLowerCase()) | translate }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half" subscriptSizing="dynamic">
+            <mat-label>{{ 'domains.form.category' | translate }}</mat-label>
+            <mat-select formControlName="categoryId" [disabled]="readOnly">
+              @for (cat of categories; track cat.id) {
+                <mat-option [value]="cat.id">
+                  <span [style.paddingInlineStart.px]="(cat.depth || 0) * 14">{{ cat.name }}</span>
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="price-block">
+          <mat-form-field appearance="outline" class="full" subscriptSizing="dynamic">
+            <mat-label>{{ 'domains.table.price' | translate }} (IRT)</mat-label>
+            <input matInput type="number" min="0" step="1" formControlName="price" [readonly]="readOnly">
+            @if (form.controls.price.touched && form.controls.price.invalid) {
+              <mat-error>{{ 'domains.form.priceInvalid' | translate }}</mat-error>
             }
-          </mat-select>
-        </mat-form-field>
+          </mat-form-field>
+          <p class="field-hint">{{ 'domains.form.priceHint' | translate }}</p>
+        </div>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ 'domains.form.category' | translate }}</mat-label>
-          <mat-select formControlName="categoryId" [disabled]="readOnly">
-            @for (cat of categories; track cat.id) {
-              <mat-option [value]="cat.id">
-                <span [style.paddingInlineStart.px]="(cat.depth || 0) * 14">{{ cat.name }}</span>
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>{{ 'domains.table.price' | translate }}</mat-label>
-          <input matInput type="number" min="0" step="0.01" formControlName="price" [readonly]="readOnly">
-          @if (form.controls.price.touched && form.controls.price.invalid) {
-            <mat-error>{{ 'domains.form.priceInvalid' | translate }}</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" class="full" subscriptSizing="dynamic">
           <mat-label>{{ 'domains.table.expires' | translate }}</mat-label>
           <input matInput type="date" formControlName="expiresAt" [readonly]="readOnly">
         </mat-form-field>
@@ -98,12 +103,57 @@ export interface DomainDialogData {
     </mat-dialog-actions>
   `,
   styles: [`
+    .dialog-body {
+      display: block;
+      min-width: min(100%, 480px);
+      max-height: min(72vh, 720px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding-top: 8px !important;
+      padding-bottom: 8px !important;
+    }
+
     .form {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      min-width: min(100%, 360px);
-      padding-top: 8px;
+      gap: 14px;
+      width: 100%;
+      box-sizing: border-box;
+      padding-inline: 2px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .full,
+    .half {
+      width: 100%;
+    }
+
+    .price-block {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-hint {
+      margin: 0;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 560px) {
+      .row {
+        grid-template-columns: 1fr;
+      }
+
+      .dialog-body {
+        min-width: 0;
+      }
     }
   `]
 })

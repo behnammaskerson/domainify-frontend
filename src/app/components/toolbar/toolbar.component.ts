@@ -12,6 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslateModule } from '@ngx-translate/core';
 import { ThemeService } from '../../services/theme.service';
 import { TranslationService } from '../../services/translation.service';
+import { CurrencyService } from '../../services/currency.service';
 import { AuthService } from '../../services/auth.service';
 import { UsersService } from '../../services/users.service';
 import { AppNotification, NotificationService } from '../../services/notification.service';
@@ -60,6 +61,25 @@ import { AppNotification, NotificationService } from '../../services/notificatio
                     [class.active-lang]="translationService.currentLang() === lang.code">
               <span class="lang-code">{{ lang.code | uppercase }}</span>
               <span>{{ lang.nativeLabel }}</span>
+            </button>
+          }
+        </mat-menu>
+
+        <button mat-icon-button
+                type="button"
+                class="control-btn"
+                [matMenuTriggerFor]="currencyMenu"
+                [attr.aria-label]="'a11y.switchCurrency' | translate"
+                [matTooltip]="'a11y.currency' | translate">
+          <mat-icon>payments</mat-icon>
+        </button>
+        <mat-menu #currencyMenu="matMenu">
+          @for (cur of currencyService.currencies; track cur.code) {
+            <button mat-menu-item type="button"
+                    (click)="currencyService.setCurrency(cur.code)"
+                    [class.active-lang]="currencyService.currency() === cur.code">
+              <span class="lang-code">{{ cur.code }}</span>
+              <span>{{ cur.labelKey | translate }}</span>
             </button>
           }
         </mat-menu>
@@ -470,6 +490,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   themeService = inject(ThemeService);
   translationService = inject(TranslationService);
+  currencyService = inject(CurrencyService);
   notificationService = inject(NotificationService);
   private authService = inject(AuthService);
   private usersService = inject(UsersService);

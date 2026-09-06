@@ -13,12 +13,15 @@ interface NavItem {
   labelKey: string;
   route: string;
   adminOnly?: boolean;
+  /** When true, only highlight on an exact URL match (avoids /domains lighting up on /domains/categories). */
+  exact?: boolean;
 }
 
 interface NavGroupChild {
   icon: string;
   labelKey: string;
   route: string;
+  exact?: boolean;
 }
 
 @Component({
@@ -53,6 +56,9 @@ interface NavGroupChild {
           <a class="nav-link"
              [routerLink]="item.route"
              routerLinkActive="active"
+             [routerLinkActiveOptions]="item.exact
+               ? { paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }
+               : { paths: 'subset', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }"
              (click)="onNavigate()"
              [matTooltip]="collapsed ? (item.labelKey | translate) : ''"
              [matTooltipPosition]="tooltipPosition()">
@@ -129,6 +135,9 @@ interface NavGroupChild {
                 <a class="nav-link nav-child"
                    [routerLink]="child.route"
                    routerLinkActive="active"
+                   [routerLinkActiveOptions]="child.exact
+                     ? { paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }
+                     : { paths: 'subset', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }"
                    (click)="onNavigate()">
                   <mat-icon>{{ child.icon }}</mat-icon>
                   <span>{{ child.labelKey | translate }}</span>
@@ -444,7 +453,7 @@ export class SidebarComponent implements OnInit {
   navItems: NavItem[] = [
     { icon: 'dashboard', labelKey: 'menu.dashboard', route: '/dashboard' },
     { icon: 'notifications', labelKey: 'menu.notifications', route: '/notifications' },
-    { icon: 'language', labelKey: 'menu.domains', route: '/domains' },
+    { icon: 'language', labelKey: 'menu.domains', route: '/domains', exact: true },
     { icon: 'account_tree', labelKey: 'menu.domainCategories', route: '/domains/categories', adminOnly: true },
     { icon: 'analytics', labelKey: 'menu.analyzer', route: '/analyzer' },
     { icon: 'storefront', labelKey: 'menu.marketplace', route: '/marketplace' },

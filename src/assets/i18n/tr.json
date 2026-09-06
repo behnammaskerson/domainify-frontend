@@ -1021,7 +1021,7 @@
     "categoriesPage": {
       "eyebrow": "Portföy",
       "title": "Alan Adı Kategorileri",
-      "subtitle": "Nişleri ağaç olarak düzenleyin (ör. Teknoloji → Yapay Zeka)."
+      "subtitle": "Kategorileri ağaç olarak düzenleyin (ör. Teknoloji → Yapay Zeka)."
     },
     "addNew": "Yeni Alan Adı Ekle",
     "refresh": "Yenile",
@@ -1045,6 +1045,7 @@
       "nameRequired": "Alan adı gerekli",
       "nameInvalid": "Geçerli bir alan adı girin (örn. example.com)",
       "priceInvalid": "Fiyat sıfır veya daha büyük olmalı",
+      "priceHint": "IRT (toman) olarak saklanır. Görüntüleme para birimi araç çubuğundan.",
       "saving": "Kaydediliyor…"
     },
     "filters": {
@@ -1057,6 +1058,7 @@
     "table": {
       "name": "Alan Adı",
       "status": "Durum",
+      "ownership": "Sahiplik",
       "price": "Fiyat",
       "expires": "Bitiş",
       "actions": "İşlemler"
@@ -1066,6 +1068,37 @@
       "pending": "Beklemede",
       "sold": "Satıldı",
       "expired": "Süresi Doldu"
+    },
+    "ownershipStatus": {
+      "unverified": "Doğrulanmadı",
+      "pending": "Beklemede",
+      "verified": "Doğrulandı"
+    },
+    "ownership": {
+      "title": "Alan adı sahipliğini kanıtla",
+      "intro": "{{domain}} üzerinde kontrolünüzü DNS veya web sitesindeki bir dosya ile doğrulayın.",
+      "chooseMethod": "Doğrulama yöntemi",
+      "methods": {
+        "DNS_TXT": "DNS TXT kaydı",
+        "HTTP_FILE": "HTTP dosyası"
+      },
+      "start": "Doğrulamayı başlat",
+      "starting": "Başlatılıyor…",
+      "check": "Şimdi kontrol et",
+      "checking": "Kontrol ediliyor…",
+      "cancel": "İptal et",
+      "continue": "Doğrulamaya devam",
+      "verify": "Sahipliği doğrula",
+      "reverify": "Yeniden doğrula",
+      "verified": "Alan adı sahipliği doğrulandı",
+      "cancelled": "Sahiplik doğrulaması iptal edildi",
+      "dnsHint": "DNS sağlayıcınızda bu TXT kaydını oluşturun, yayılmasını bekleyin ve Kontrol et’e tıklayın.",
+      "dnsHost": "Host / ad",
+      "dnsType": "Tür",
+      "dnsValue": "Değer",
+      "httpHint": "Bu dosyayı tam token içeriğiyle oluşturun, sonra Kontrol et’e tıklayın.",
+      "httpUrl": "Dosya URL’si",
+      "httpBody": "Dosya içeriği"
     }
   },
   "analyzer": {
@@ -1392,10 +1425,10 @@
     },
     "domainCategories": {
       "loading": "Alan adı kategorileri yükleniyor…",
-      "intro": "Niş ağacı oluşturun. Alt kategoriler bir üstün altına girer (ör. Teknoloji → Yapay Zeka).",
+      "intro": "Kategori ağacı oluşturun. Alt kategoriler bir üstün altına girer (ör. Teknoloji → Yapay Zeka).",
       "name": "Kategori adı",
       "code": "Kod",
-      "codeHint": "İsteğe bağlı. Boşsa addan üretilir.",
+      "codeHint": "İsteğe bağlı. Latin harf/rakam kullanın veya boş bırakıp otomatik ürettirin.",
       "parent": "Üst kategori",
       "root": "Kök (üst yok)",
       "add": "Kategori ekle",
@@ -1691,6 +1724,7 @@
     "arabic": "Arapça",
     "turkish": "Türkçe",
     "copy": "Kopyala",
+    "copied": "Kopyalandı",
     "close": "Kapat",
     "backToTop": "Yukarı çık",
     "rowNumber": "#"
@@ -1709,6 +1743,8 @@
     "menu": "Menü",
     "switchLanguage": "Dili değiştir",
     "language": "Dil",
+    "switchCurrency": "Para birimini değiştir",
+    "currency": "Para birimi",
     "toggleTheme": "Temayı değiştir",
     "theme": "Tema",
     "notifications": "Bildirimler",
@@ -1721,6 +1757,19 @@
     "domainActions": "{{domain}} için işlemler",
     "actions": "İşlemler",
     "backToTop": "Yukarı çık"
+  },
+  "currency": {
+    "codes": {
+      "IRT": "İran Riyali",
+      "USD": "ABD Doları",
+      "USDT": "Tether (USDT)",
+      "EUR": "Euro",
+      "CAD": "Kanada Doları",
+      "AUD": "Avustralya Doları",
+      "TRY": "Türk Lirası",
+      "AED": "BAE Dirhemi",
+      "CNY": "Çin Yuanı"
+    }
   },
   "errors": {
     "PASSWORDS_MISMATCH": "Şifreler eşleşmiyor",
@@ -1820,6 +1869,12 @@
     "DOMAIN_CATEGORY_IN_USE": "Kategori kullanımda ve silinemez",
     "DOMAIN_CATEGORY_PARENT_INVALID": "Geçersiz üst kategori (döngüye izin yok)",
     "DOMAIN_PRICE_INVALID": "Alan adı fiyatı sıfır veya daha büyük olmalıdır",
+    "DOMAIN_OWNERSHIP_METHOD_INVALID": "Geçersiz sahiplik doğrulama yöntemi",
+    "DOMAIN_OWNERSHIP_NOT_PENDING": "Bekleyen sahiplik doğrulama yok",
+    "DOMAIN_OWNERSHIP_TOKEN_EXPIRED": "Sahiplik doğrulama süresi doldu. Yeniden başlatın",
+    "DOMAIN_OWNERSHIP_CHECK_TOO_SOON": "Tekrar kontrol etmeden önce birkaç saniye bekleyin",
+    "DOMAIN_OWNERSHIP_CHECK_LIMIT": "Çok fazla kontrol denemesi. Yeni bir doğrulama başlatın",
+    "DOMAIN_OWNERSHIP_NOT_FOUND": "Sahiplik kanıtı bulunamadı. DNS TXT veya HTTP dosyasını ekleyin",
     "TICKET_PRIORITY_REQUIRED": "Bilet önceliği gerekli",
     "TICKET_ATTACHMENTS_LIMIT": "Bu yükleme için çok fazla ek dosya",
     "TICKET_ATTACHMENT_INVALID": "Geçersiz ek. İzin verilen türleri ve boyut sınırlarını Bilet Ayarları'ndan kontrol edin",

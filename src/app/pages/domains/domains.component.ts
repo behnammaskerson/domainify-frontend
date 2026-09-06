@@ -17,6 +17,7 @@ import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs'
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { DomainDialogComponent } from '../../components/domain-dialog/domain-dialog.component';
+import { DomainOwnershipDialogComponent } from '../../components/domain-ownership-dialog/domain-ownership-dialog.component';
 import { LocaleCurrencyPipe, LocaleDatePipe, LocaleDigitsPipe, LocaleNumberPipe } from '../../pipes/locale-format.pipe';
 import { ApiErrorService } from '../../services/api-error.service';
 import {
@@ -148,6 +149,15 @@ type StatusFilter = 'all' | 'active' | 'pending' | 'sold' | 'expired';
                   </td>
                 </ng-container>
 
+                <ng-container matColumnDef="ownership">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header="ownershipStatus">{{ 'domains.table.ownership' | translate }}</th>
+                  <td mat-cell *matCellDef="let domain">
+                    <span class="ownership-pill" [class]="(domain.ownershipStatus || 'UNVERIFIED').toLowerCase()">
+                      {{ 'domains.ownershipStatus.' + (domain.ownershipStatus || 'UNVERIFIED').toLowerCase() | translate }}
+                    </span>
+                  </td>
+                </ng-container>
+
                 <ng-container matColumnDef="price">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header="price">{{ 'domains.table.price' | translate }}</th>
                   <td mat-cell *matCellDef="let domain">
@@ -184,6 +194,14 @@ type StatusFilter = 'all' | 'active' | 'pending' | 'sold' | 'expired';
                       <button mat-menu-item type="button" (click)="openEdit(domain)">
                         <mat-icon>edit</mat-icon>
                         {{ 'common.edit' | translate }}
+                      </button>
+                      <button mat-menu-item type="button" (click)="openOwnership(domain)">
+                        <mat-icon>{{ domain.ownershipStatus === 'VERIFIED' ? 'verified' : 'verified_user' }}</mat-icon>
+                        {{ (domain.ownershipStatus === 'VERIFIED'
+                            ? 'domains.ownership.reverify'
+                            : domain.ownershipStatus === 'PENDING'
+                              ? 'domains.ownership.continue'
+                              : 'domains.ownership.verify') | translate }}
                       </button>
                       <button mat-menu-item type="button" class="delete-item" (click)="onDelete(domain)">
                         <mat-icon>delete</mat-icon>
@@ -355,6 +373,18 @@ type StatusFilter = 'all' | 'active' | 'pending' | 'sold' | 'expired';
     .status-pill.pending { background: color-mix(in srgb, #d97706 14%, transparent); }
     .status-pill.sold { background: color-mix(in srgb, #2563eb 14%, transparent); }
     .status-pill.expired { background: color-mix(in srgb, #dc2626 12%, transparent); }
+    .ownership-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: color-mix(in srgb, #64748b 12%, transparent);
+    }
+    .ownership-pill.verified { background: color-mix(in srgb, #16a34a 14%, transparent); }
+    .ownership-pill.pending { background: color-mix(in srgb, #d97706 14%, transparent); }
+    .ownership-pill.unverified { background: color-mix(in srgb, #64748b 12%, transparent); }
   `]
 })
 export class DomainsComponent implements OnInit, OnDestroy {
@@ -364,7 +394,7 @@ export class DomainsComponent implements OnInit, OnDestroy {
   private readonly snackBar = inject(MatSnackBar);
   private readonly apiError = inject(ApiErrorService);
 
-  displayedColumns = ['rowNumber', 'name', 'status', 'price', 'expires', 'actions'];
+  displayedColumns = ['rowNumber', 'name', 'status', 'ownership', 'price', 'expires', 'actions'];
   activeFilter: StatusFilter = 'all';
   domains: DomainItem[] = [];
   loading = false;
@@ -444,8 +474,10 @@ export class DomainsComponent implements OnInit, OnDestroy {
 
   openCreate(): void {
     const ref = this.dialog.open(DomainDialogComponent, {
-      width: '440px',
+      width: '560px',
       maxWidth: '95vw',
+      autoFocus: 'dialog',
+      panelClass: 'domain-form-dialog-panel',
       data: { mode: 'create' }
     });
     ref.afterClosed().subscribe((payload) => {
@@ -464,8 +496,10 @@ export class DomainsComponent implements OnInit, OnDestroy {
 
   openEdit(domain: DomainItem): void {
     const ref = this.dialog.open(DomainDialogComponent, {
-      width: '440px',
+      width: '560px',
       maxWidth: '95vw',
+      autoFocus: 'dialog',
+      panelClass: 'domain-form-dialog-panel',
       data: { mode: 'edit', domain }
     });
     ref.afterClosed().subscribe((payload) => {
@@ -484,9 +518,25 @@ export class DomainsComponent implements OnInit, OnDestroy {
 
   openView(domain: DomainItem): void {
     this.dialog.open(DomainDialogComponent, {
-      width: '440px',
+      width: '560px',
       maxWidth: '95vw',
+      autoFocus: 'dialog',
+      panelClass: 'domain-form-dialog-panel',
       data: { mode: 'view', domain }
+    });
+  }
+
+  openOwnership(domain: DomainItem): void {
+    const ref = this.dialog.open(DomainOwnershipDialogComponent, {
+      width: '520px',
+      maxWidth: '95vw',
+      panelClass: 'domain-ownership-dialog-panel',
+      data: { domain }
+    });
+    ref.afterClosed().subscribe((updated) => {
+      if (updated) {
+        this.reload();
+      }
     });
   }
 

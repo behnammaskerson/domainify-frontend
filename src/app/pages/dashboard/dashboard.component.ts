@@ -8,6 +8,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { LocaleCurrencyPipe, LocaleCompactPipe, LocaleMonthPipe, LocaleNumberPipe, LocalePercentPipe } from '../../pipes/locale-format.pipe';
 import { LocaleService } from '../../services/locale.service';
+import { CurrencyService } from '../../services/currency.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -89,7 +90,7 @@ import { LocaleService } from '../../services/locale.service';
                   <div class="chart-bar"
                        [style.height.%]="bar.height"
                        [class.highlight]="bar.highlight"
-                       [attr.title]="locale.formatCurrency(bar.value * 1000)"></div>
+                       [attr.title]="formatMoney(bar.value * 1000)"></div>
                   <span class="chart-label">{{ bar.month | localeMonth }}</span>
                 </div>
               }
@@ -328,6 +329,17 @@ import { LocaleService } from '../../services/locale.service';
 })
 export class DashboardComponent {
   readonly locale = inject(LocaleService);
+  private readonly currencyService = inject(CurrencyService);
+
+  formatMoney(amountIrt: number): string {
+    void this.currencyService.displayRevision();
+    const code = this.currencyService.currency();
+    const converted = this.currencyService.convertFromIrt(amountIrt, code);
+    const display = converted == null ? 'IRT' as const : code;
+    const amount = converted ?? amountIrt;
+    const intl = display === 'IRT' ? 'IRT' : display === 'USDT' ? 'USDT' : this.currencyService.intlCurrencyCode(display);
+    return this.locale.formatCurrency(amount, intl, this.currencyService.fractionDigits(display));
+  }
 
   selectedPeriod = '1Y';
   periods = ['1W', '1M', '3M', '1Y'];

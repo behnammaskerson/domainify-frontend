@@ -27,12 +27,37 @@ export class LocaleService {
     return new Intl.NumberFormat(this.locale(), this.withNumbering(options)).format(value);
   }
 
-  formatCurrency(value: number, currency = 'USD'): string {
-    return new Intl.NumberFormat(this.locale(), this.withNumbering({
-      style: 'currency',
-      currency,
-      maximumFractionDigits: 0
-    })).format(value);
+  formatCurrency(value: number, currency = 'USD', fractionDigits?: number): string {
+    const max = fractionDigits ?? (currency === 'IRR' || currency === 'IRT' ? 0 : 2);
+    const min = Math.min(max, currency === 'IRR' || currency === 'IRT' ? 0 : 2);
+    // USDT is not an ISO 4217 code — format as amount + suffix.
+    if (currency === 'USDT') {
+      const amount = new Intl.NumberFormat(this.locale(), this.withNumbering({
+        maximumFractionDigits: max,
+        minimumFractionDigits: Math.min(min, 2)
+      })).format(value);
+      return `${amount} USDT`;
+    }
+    if (currency === 'IRT') {
+      const amount = new Intl.NumberFormat(this.locale(), this.withNumbering({
+        maximumFractionDigits: 0,
+        minimumFractionDigits: 0
+      })).format(value);
+      return `${amount} IRT`;
+    }
+    try {
+      return new Intl.NumberFormat(this.locale(), this.withNumbering({
+        style: 'currency',
+        currency,
+        maximumFractionDigits: max,
+        minimumFractionDigits: min
+      })).format(value);
+    } catch {
+      const amount = new Intl.NumberFormat(this.locale(), this.withNumbering({
+        maximumFractionDigits: max
+      })).format(value);
+      return `${amount} ${currency}`;
+    }
   }
 
   formatCompact(value: number): string {
