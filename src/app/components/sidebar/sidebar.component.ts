@@ -456,7 +456,9 @@ export class SidebarComponent implements OnInit {
     { icon: 'language', labelKey: 'menu.domains', route: '/domains', exact: true },
     { icon: 'account_tree', labelKey: 'menu.domainCategories', route: '/domains/categories', adminOnly: true },
     { icon: 'analytics', labelKey: 'menu.analyzer', route: '/analyzer' },
-    { icon: 'storefront', labelKey: 'menu.marketplace', route: '/marketplace' },
+    { icon: 'storefront', labelKey: 'menu.marketplace', route: '/marketplace', exact: true },
+    { icon: 'sell', labelKey: 'menu.myListings', route: '/marketplace/my-listings' },
+    { icon: 'handshake', labelKey: 'menu.myOffers', route: '/marketplace/my-offers' },
     { icon: 'bar_chart', labelKey: 'menu.analytics', route: '/analytics' },
     { icon: 'people', labelKey: 'menu.users', route: '/user' },
     { icon: 'description', labelKey: 'menu.reports', route: '/reports' }

@@ -111,6 +111,8 @@
     "domainCategories": "Domain Categories",
     "analyzer": "Domain Analyzer",
     "marketplace": "Marketplace",
+    "myListings": "My Listings",
+    "myOffers": "My Offers",
     "settings": "Settings",
     "createTicket": "Create Ticket",
     "myTickets": "My Tickets",
@@ -1142,7 +1144,9 @@
     },
     "actions": {
       "refreshExpiry": "Refresh expiry from registrar",
-      "whois": "Registration details (WHOIS)"
+      "whois": "Registration details (WHOIS)",
+      "listForSale": "List for sale",
+      "listForSaleNeedVerify": "Verify domain ownership before listing for sale"
     },
     "whois": {
       "title": "Domain registration details",
@@ -1288,10 +1292,14 @@
     "title": "Marketplace",
     "subtitle": "Buy and sell premium domains",
     "eyebrow": "Market",
+    "myListings": "My listings",
+    "myOffers": "My offers",
+    "search": "Search listings...",
+    "empty": "No active listings yet. List a verified domain from My Domains.",
     "featured": "Featured Domains",
-    "featuredSubtitle": "Hand-picked premium inventory",
+    "featuredSubtitle": "Highlighted seller listings",
     "recentlyAdded": "Recently Added",
-    "recentSubtitle": "Fresh listings this week",
+    "recentSubtitle": "Fresh listings on the market",
     "topSelling": "Top Selling",
     "topSellingSubtitle": "Highest interest right now",
     "makeOffer": "Make Offer",
@@ -1299,7 +1307,7 @@
     "buyNow": "Buy Now",
     "offers": "{{count}} offers",
     "tags": {
-      "premium": "Premium",
+      "premium": "Featured",
       "crypto": "Crypto",
       "finance": "Finance",
       "ai": "AI",
@@ -1324,6 +1332,123 @@
       "cryptoCom": "Premium one-word .com domain in the cryptocurrency space. Perfect for exchanges, wallets, or news platforms.",
       "aiStartup": "Short and memorable domain ideal for AI startups and machine learning companies.",
       "cloudSaas": "Industry-defining domain for cloud-based SaaS platforms and services."
+    }
+  },
+  "listings": {
+    "eyebrow": "Sell",
+    "title": "My Listings",
+    "subtitle": "Create, edit, and deactivate your marketplace listings",
+    "browseMarketplace": "Browse marketplace",
+    "listFromDomains": "List from domains",
+    "search": "Search my listings...",
+    "statusFilter": "Status",
+    "empty": "You have no listings yet. Open a verified domain and choose List for sale.",
+    "featured": "Featured",
+    "table": {
+      "domain": "Domain",
+      "price": "Asking price",
+      "status": "Status",
+      "updated": "Updated"
+    },
+    "status": {
+      "all": "All",
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "SOLD": "Sold"
+    },
+    "actions": {
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "offers": "Offers"
+    },
+    "confirm": {
+      "deactivateTitle": "Deactivate listing?",
+      "deactivateMessage": "Remove {{domain}} from the marketplace. You can activate it again later."
+    },
+    "toast": {
+      "deactivated": "Listing deactivated",
+      "activated": "Listing activated"
+    },
+    "form": {
+      "createTitle": "List domain for sale",
+      "editTitle": "Edit listing",
+      "askingPrice": "Asking price",
+      "priceInvalid": "Price must be zero or greater",
+      "description": "Description",
+      "featured": "Featured listing",
+      "featuredHint": "Featured listings appear in the marketplace highlight section",
+      "saving": "Saving…",
+      "created": "Listing published",
+      "updated": "Listing updated"
+    }
+  },
+  "offers": {
+    "eyebrow": "Negotiate",
+    "title": "My Offers",
+    "subtitle": "Track offers you made and respond to seller counters",
+    "browseMarketplace": "Browse marketplace",
+    "sellerTitle": "Offers on listing",
+    "buyer": "Buyer",
+    "empty": "You have not made any offers yet.",
+    "emptyForListing": "No offers on this listing yet.",
+    "statusFilter": "Status",
+    "timeline": "Timeline",
+    "table": {
+      "domain": "Domain",
+      "amount": "Offer",
+      "asking": "Asking",
+      "status": "Status",
+      "updated": "Updated"
+    },
+    "status": {
+      "all": "All",
+      "PENDING": "Awaiting seller",
+      "COUNTERED": "Counter received",
+      "ACCEPTED": "Accepted",
+      "REJECTED": "Rejected",
+      "WITHDRAWN": "Withdrawn",
+      "EXPIRED": "Expired"
+    },
+    "actions": {
+      "accept": "Accept",
+      "reject": "Reject",
+      "counter": "Counter",
+      "withdraw": "Withdraw"
+    },
+    "events": {
+      "OFFER": "Offer",
+      "COUNTER": "Counter",
+      "ACCEPT": "Accepted",
+      "REJECT": "Rejected",
+      "WITHDRAW": "Withdrawn",
+      "SYSTEM_REJECT": "Auto-rejected",
+      "EXPIRE": "Expired"
+    },
+    "confirm": {
+      "acceptTitle": "Accept offer?",
+      "acceptMessage": "Accept the current price for {{domain}}. The listing will be marked sold.",
+      "rejectTitle": "Reject offer?",
+      "rejectMessage": "Reject the current negotiation for {{domain}}.",
+      "withdrawTitle": "Withdraw offer?",
+      "withdrawMessage": "Withdraw your pending offer on {{domain}}."
+    },
+    "toast": {
+      "created": "Offer submitted",
+      "countered": "Counter-offer sent",
+      "accepted": "Offer accepted",
+      "rejected": "Offer rejected",
+      "withdrawn": "Offer withdrawn"
+    },
+    "form": {
+      "createTitle": "Make an offer",
+      "counterTitle": "Counter-offer",
+      "askingPrice": "Asking price",
+      "amount": "Your offer",
+      "amountInvalid": "Amount must be zero or greater",
+      "message": "Message (optional)",
+      "saving": "Sending…",
+      "submit": "Submit offer",
+      "counter": "Send counter"
     }
   },
   "settings": {
@@ -2047,6 +2172,23 @@
     "DOMAIN_EXPIRY_LOOKUP_FAILED": "Could not look up registrar expiry. Try again or set the date manually",
     "DOMAIN_WHOIS_NOT_FOUND": "Domain was not found in the registry (RDAP / WHOIS)",
     "DOMAIN_WHOIS_LOOKUP_FAILED": "Could not load registration details. Try again later",
+    "LISTING_NOT_FOUND": "Listing was not found",
+    "LISTING_DOMAIN_REQUIRED": "Select a domain to list",
+    "LISTING_ALREADY_EXISTS": "This domain already has a listing",
+    "LISTING_PRICE_INVALID": "Enter a valid asking price",
+    "LISTING_DESCRIPTION_TOO_LONG": "Description is too long",
+    "LISTING_DOMAIN_NOT_VERIFIED": "Verify domain ownership before listing",
+    "LISTING_DOMAIN_NOT_LISTABLE": "Only active or pending domains can be listed",
+    "LISTING_SOLD": "Sold listings cannot be changed",
+    "OFFER_NOT_FOUND": "Offer was not found",
+    "OFFER_LISTING_NOT_ACTIVE": "Offers can only be made on active listings",
+    "OFFER_SELF": "You cannot offer on your own listing",
+    "OFFER_ALREADY_OPEN": "You already have an open offer on this listing",
+    "OFFER_AMOUNT_INVALID": "Enter a valid offer amount",
+    "OFFER_MESSAGE_TOO_LONG": "Offer message is too long",
+    "OFFER_NOT_PENDING": "Only pending offers can be withdrawn",
+    "OFFER_WRONG_PARTY": "You are not allowed to act on this offer",
+    "OFFER_INVALID_STATE": "This offer cannot be updated in its current state",
     "TICKET_PRIORITY_REQUIRED": "Ticket priority is required",
     "TICKET_ATTACHMENTS_LIMIT": "Too many attachments for this upload",
     "TICKET_ATTACHMENT_INVALID": "Invalid attachment. Check allowed types and size limits in Ticket Settings",
@@ -2154,7 +2296,13 @@
       "TICKET_TRANSFERRED": "{{ticketNumber}} was transferred to you",
       "TICKET_ESCALATED": "{{ticketNumber}} was escalated",
       "TICKET_ESCALATED_AUTO": "{{ticketNumber}} was auto-escalated (SLA breach)",
-      "DOMAIN_RENEWAL": "{{domain}} expires in {{days}} days ({{expiresAt}})"
+      "DOMAIN_RENEWAL": "{{domain}} expires in {{days}} days ({{expiresAt}})",
+      "OFFER_RECEIVED": "{{actor}} offered {{amount}} on {{domain}}",
+      "OFFER_COUNTERED": "{{actor}} countered with {{amount}} on {{domain}}",
+      "OFFER_ACCEPTED": "{{actor}} accepted the offer on {{domain}} ({{amount}})",
+      "OFFER_REJECTED": "{{actor}} rejected the offer on {{domain}}",
+      "OFFER_WITHDRAWN": "{{actor}} withdrew an offer on {{domain}}",
+      "OFFER_EXPIRED": "Offer of {{amount}} on {{domain}} expired"
     }
   },
   "toolbar": {

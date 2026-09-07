@@ -17,7 +17,13 @@ export type NotificationType =
   | 'TICKET_WATCHER_ADDED'
   | 'TICKET_TRANSFERRED'
   | 'TICKET_ESCALATED'
-  | 'DOMAIN_RENEWAL';
+  | 'DOMAIN_RENEWAL'
+  | 'OFFER_RECEIVED'
+  | 'OFFER_COUNTERED'
+  | 'OFFER_ACCEPTED'
+  | 'OFFER_REJECTED'
+  | 'OFFER_WITHDRAWN'
+  | 'OFFER_EXPIRED';
 
 export type TicketStatus = 'NEW' | 'OPEN' | 'PENDING' | 'ON_HOLD' | 'RESOLVED' | 'CLOSED';
 
@@ -139,6 +145,20 @@ export class NotificationService {
         days
       });
     }
+    if (
+      notif.type === 'OFFER_RECEIVED'
+      || notif.type === 'OFFER_COUNTERED'
+      || notif.type === 'OFFER_ACCEPTED'
+      || notif.type === 'OFFER_REJECTED'
+      || notif.type === 'OFFER_WITHDRAWN'
+      || notif.type === 'OFFER_EXPIRED'
+    ) {
+      return this.translate.instant(`notifications.types.${notif.type}`, {
+        actor: notif.actorName || this.translate.instant('notifications.someone'),
+        domain: notif.ticketSubject || '',
+        amount: notif.ticketPublicNumber || ''
+      });
+    }
     const autoEscalated = notif.type === 'TICKET_ESCALATED' && !notif.actorName;
     const key = autoEscalated
       ? 'notifications.types.TICKET_ESCALATED_AUTO'
@@ -187,6 +207,15 @@ export class NotificationService {
         return 'lock_open';
       case 'DOMAIN_RENEWAL':
         return 'event_upcoming';
+      case 'OFFER_RECEIVED':
+      case 'OFFER_COUNTERED':
+        return 'handshake';
+      case 'OFFER_ACCEPTED':
+        return 'check_circle';
+      case 'OFFER_REJECTED':
+      case 'OFFER_WITHDRAWN':
+      case 'OFFER_EXPIRED':
+        return 'cancel';
       default:
         return 'notifications';
     }
@@ -207,6 +236,15 @@ export class NotificationService {
         return 'var(--success)';
       case 'DOMAIN_RENEWAL':
         return 'var(--warning)';
+      case 'OFFER_ACCEPTED':
+        return 'var(--success)';
+      case 'OFFER_REJECTED':
+      case 'OFFER_WITHDRAWN':
+      case 'OFFER_EXPIRED':
+        return 'var(--danger)';
+      case 'OFFER_RECEIVED':
+      case 'OFFER_COUNTERED':
+        return 'var(--info)';
       default:
         return 'var(--warning)';
     }
@@ -236,6 +274,20 @@ export class NotificationService {
   notificationRoute(notif: AppNotification): string[] | null {
     if (notif.type === 'DOMAIN_RENEWAL') {
       return ['/domains'];
+    }
+    if (
+      notif.type === 'OFFER_RECEIVED'
+      || notif.type === 'OFFER_COUNTERED'
+      || notif.type === 'OFFER_ACCEPTED'
+      || notif.type === 'OFFER_REJECTED'
+      || notif.type === 'OFFER_WITHDRAWN'
+      || notif.type === 'OFFER_EXPIRED'
+    ) {
+      // Seller receives OFFER_RECEIVED / OFFER_WITHDRAWN; buyer receives counters/accept/reject from seller.
+      if (notif.type === 'OFFER_RECEIVED' || notif.type === 'OFFER_WITHDRAWN') {
+        return ['/marketplace/my-listings'];
+      }
+      return ['/marketplace/my-offers'];
     }
     return this.ticketRoute(notif);
   }

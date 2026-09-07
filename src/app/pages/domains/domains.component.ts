@@ -19,6 +19,7 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-
 import { DomainDialogComponent } from '../../components/domain-dialog/domain-dialog.component';
 import { DomainOwnershipDialogComponent } from '../../components/domain-ownership-dialog/domain-ownership-dialog.component';
 import { DomainWhoisDialogComponent } from '../../components/domain-whois-dialog/domain-whois-dialog.component';
+import { ListingDialogComponent } from '../../components/listing-dialog/listing-dialog.component';
 import { LocaleCurrencyPipe, LocaleDatePipe, LocaleDigitsPipe, LocaleNumberPipe } from '../../pipes/locale-format.pipe';
 import { ApiErrorService } from '../../services/api-error.service';
 import {
@@ -26,6 +27,7 @@ import {
   DomainStatus,
   DomainsService
 } from '../../services/domains.service';
+import { ListingsService } from '../../services/listings.service';
 
 type StatusFilter = 'all' | 'active' | 'pending' | 'sold' | 'expired';
 
@@ -197,6 +199,10 @@ type StatusFilter = 'all' | 'active' | 'pending' | 'sold' | 'expired';
                               ? 'domains.ownership.continue'
                               : 'domains.ownership.verify') | translate }}
                       </button>
+                      <button mat-menu-item type="button" (click)="openListForSale(domain)">
+                        <mat-icon>sell</mat-icon>
+                        {{ 'domains.actions.listForSale' | translate }}
+                      </button>
                       <button mat-menu-item type="button" (click)="openWhois(domain)">
                         <mat-icon>travel_explore</mat-icon>
                         {{ 'domains.actions.whois' | translate }}
@@ -303,6 +309,7 @@ type StatusFilter = 'all' | 'active' | 'pending' | 'sold' | 'expired';
 })
 export class DomainsComponent implements OnInit, OnDestroy {
   private readonly domainsService = inject(DomainsService);
+  private readonly listingsService = inject(ListingsService);
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
@@ -465,6 +472,36 @@ export class DomainsComponent implements OnInit, OnDestroy {
     ref.afterClosed().subscribe((result) => {
       if (result?.appliedExpiry) {
         this.reload();
+      }
+    });
+  }
+
+  openListForSale(domain: DomainItem): void {
+    if (domain.ownershipStatus !== 'VERIFIED') {
+      this.snackBar.open(this.translate.instant('domains.actions.listForSaleNeedVerify'), undefined, {
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+    this.listingsService.getByDomain(domain.id).subscribe({
+      next: (listing) => {
+        const ref = this.dialog.open(ListingDialogComponent, {
+          width: '480px',
+          maxWidth: '95vw',
+          panelClass: 'app-dialog',
+          data: { mode: 'edit', domain, listing }
+        });
+        ref.afterClosed().subscribe();
+      },
+      error: () => {
+        const ref = this.dialog.open(ListingDialogComponent, {
+          width: '480px',
+          maxWidth: '95vw',
+          panelClass: 'app-dialog',
+          data: { mode: 'create', domain }
+        });
+        ref.afterClosed().subscribe();
       }
     });
   }

@@ -68,69 +68,71 @@ export interface TicketLinkDialogResult {
       </div>
 
       @if (loading) {
-        <p class="muted">{{ 'tickets.detail.linkLoading' | translate }}</p>
+        <p class="table-empty">{{ 'tickets.detail.linkLoading' | translate }}</p>
       } @else if (tickets.length === 0) {
-        <p class="muted">{{ 'tickets.detail.linkEmpty' | translate }}</p>
+        <p class="table-empty">{{ 'tickets.detail.linkEmpty' | translate }}</p>
       } @else {
-        <div class="table-wrap">
-          <table mat-table [dataSource]="tickets" class="link-table">
-            <ng-container matColumnDef="select">
-              <th mat-header-cell *matHeaderCellDef></th>
-              <td mat-cell *matCellDef="let row">
-                <mat-checkbox
-                  [checked]="selectedIds.has(row.id!)"
-                  (change)="toggleTicket(row.id!, $event.checked)"
-                  (click)="$event.stopPropagation()">
-                </mat-checkbox>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="rowNumber">
-              <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
-              <td mat-cell *matCellDef="let row; let i = index" class="col-row-num">
-                {{ pageIndex * pageSize + i + 1 }}
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="publicNumber">
-              <th mat-header-cell *matHeaderCellDef>{{ 'tickets.detail.linkColNumber' | translate }}</th>
-              <td mat-cell *matCellDef="let row" dir="ltr">{{ row.publicNumber }}</td>
-            </ng-container>
-            <ng-container matColumnDef="subject">
-              <th mat-header-cell *matHeaderCellDef>{{ 'tickets.detail.linkColSubject' | translate }}</th>
-              <td mat-cell *matCellDef="let row" class="subject-cell">{{ row.subject }}</td>
-            </ng-container>
-            <ng-container matColumnDef="requester">
-              <th mat-header-cell *matHeaderCellDef>{{ 'tickets.detail.linkColRequester' | translate }}</th>
-              <td mat-cell *matCellDef="let row">{{ row.requesterName || row.requesterEmail || '—' }}</td>
-            </ng-container>
-            <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef>{{ 'tickets.detail.linkColStatus' | translate }}</th>
-              <td mat-cell *matCellDef="let row">
-                <span class="status-pill" [attr.data-status]="row.status">
-                  {{ ('tickets.statuses.' + row.status) | translate }}
-                </span>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="updatedAt">
-              <th mat-header-cell *matHeaderCellDef>{{ 'tickets.detail.linkColUpdated' | translate }}</th>
-              <td mat-cell *matCellDef="let row" dir="ltr">{{ row.updatedAt | localeDate:dateTimeFormat }}</td>
-            </ng-container>
+        <div class="panel-surface table-wrap table-wrap--compact">
+          <div class="table-scroll">
+            <table mat-table [dataSource]="tickets" class="mat-mdc-table link-table">
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let row">
+                  <mat-checkbox
+                    [checked]="selectedIds.has(row.id!)"
+                    (change)="toggleTicket(row.id!, $event.checked)"
+                    (click)="$event.stopPropagation()">
+                  </mat-checkbox>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="rowNumber">
+                <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
+                <td mat-cell *matCellDef="let row; let i = index" class="col-row-num cell-muted">
+                  {{ pageIndex * pageSize + i + 1 }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="publicNumber">
+                <th mat-header-cell *matHeaderCellDef>{{ 'tickets.detail.linkColNumber' | translate }}</th>
+                <td mat-cell *matCellDef="let row" class="cell-strong" dir="ltr">{{ row.publicNumber }}</td>
+              </ng-container>
+              <ng-container matColumnDef="subject">
+                <th mat-header-cell *matHeaderCellDef>{{ 'tickets.detail.linkColSubject' | translate }}</th>
+                <td mat-cell *matCellDef="let row" class="subject-cell">{{ row.subject }}</td>
+              </ng-container>
+              <ng-container matColumnDef="requester">
+                <th mat-header-cell *matHeaderCellDef>{{ 'tickets.detail.linkColRequester' | translate }}</th>
+                <td mat-cell *matCellDef="let row">{{ row.requesterName || row.requesterEmail || '—' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>{{ 'tickets.detail.linkColStatus' | translate }}</th>
+                <td mat-cell *matCellDef="let row">
+                  <span class="status-pill" [attr.data-status]="row.status">
+                    {{ ('tickets.statuses.' + row.status) | translate }}
+                  </span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="updatedAt">
+                <th mat-header-cell *matHeaderCellDef>{{ 'tickets.detail.linkColUpdated' | translate }}</th>
+                <td mat-cell *matCellDef="let row" class="cell-datetime" dir="ltr">{{ row.updatedAt | localeDate:dateTimeFormat }}</td>
+              </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row
-                *matRowDef="let row; columns: displayedColumns;"
-                [class.selected-row]="selectedIds.has(row.id!)"
-                (click)="toggleTicket(row.id!, !selectedIds.has(row.id!))"></tr>
-          </table>
+              <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+              <tr mat-row
+                  *matRowDef="let row; columns: displayedColumns;"
+                  [class.selected-row]="selectedIds.has(row.id!)"
+                  (click)="toggleTicket(row.id!, !selectedIds.has(row.id!))"></tr>
+            </table>
+          </div>
+
+          <mat-paginator
+            [length]="totalElements"
+            [pageIndex]="pageIndex"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="[5, 10]"
+            (page)="onPage($event)"
+            [attr.aria-label]="'tickets.detail.linkPagination' | translate">
+          </mat-paginator>
         </div>
-
-        <mat-paginator
-          [length]="totalElements"
-          [pageIndex]="pageIndex"
-          [pageSize]="pageSize"
-          [pageSizeOptions]="[5, 10]"
-          (page)="onPage($event)"
-          [attr.aria-label]="'tickets.detail.linkPagination' | translate">
-        </mat-paginator>
       }
     </mat-dialog-content>
     <mat-dialog-actions align="end">
@@ -170,37 +172,26 @@ export interface TicketLinkDialogResult {
       font-size: 0.82rem;
     }
 
-    .muted {
+    .table-empty {
       color: var(--text-muted);
       font-size: 0.9rem;
       text-align: center;
       padding: 24px 0;
+      margin: 0;
     }
-
-    .table-wrap {
-      overflow-x: auto;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-    }
-
-    .link-table { width: 100%; }
 
     .col-row-num {
       width: 48px;
       max-width: 48px;
       text-align: center;
-      color: var(--text-muted);
       font-variant-numeric: tabular-nums;
     }
 
     .link-table tr.mat-mdc-row { cursor: pointer; }
 
-    .link-table tr.mat-mdc-row:hover {
-      background: color-mix(in srgb, var(--primary) 6%, transparent);
-    }
-
-    .link-table tr.selected-row {
-      background: color-mix(in srgb, var(--primary) 12%, transparent);
+    .link-table tr.selected-row,
+    .link-table tr.selected-row .mat-mdc-cell {
+      background: color-mix(in srgb, var(--primary) 12%, transparent) !important;
     }
 
     .subject-cell {
@@ -208,16 +199,6 @@ export interface TicketLinkDialogResult {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-    }
-
-    .status-pill {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
     }
   `]
 })

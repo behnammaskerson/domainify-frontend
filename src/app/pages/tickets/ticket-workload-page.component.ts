@@ -42,84 +42,76 @@ import { TicketService, TicketWorkloadRow } from '../../services/ticket.service'
       </app-page-hero>
 
       <div class="page-body">
-        <div class="panel-surface workload-card">
+        <div class="panel-surface table-wrap">
           @if (loading) {
-            <p class="muted">{{ 'tickets.workloadPage.loading' | translate }}</p>
+            <p class="table-empty">{{ 'tickets.workloadPage.loading' | translate }}</p>
           } @else if (!rows.length) {
-            <p class="muted">{{ 'tickets.workloadPage.empty' | translate }}</p>
+            <p class="table-empty">{{ 'tickets.workloadPage.empty' | translate }}</p>
           } @else {
-            <table mat-table [dataSource]="rows" class="workload-table">
-              <ng-container matColumnDef="rowNumber">
-                <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
-                <td mat-cell *matCellDef="let row; let i = index" class="col-row-num" dir="ltr">
-                  {{ (i + 1) | localeDigits }}
-                </td>
-              </ng-container>
+            <div class="table-scroll">
+              <table mat-table
+                     [dataSource]="rows"
+                     class="mat-mdc-table workload-table"
+                     [attr.aria-label]="'tickets.workloadPage.title' | translate">
+                <ng-container matColumnDef="rowNumber">
+                  <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
+                  <td mat-cell *matCellDef="let row; let i = index" class="col-row-num cell-muted" dir="ltr">
+                    {{ (i + 1) | localeDigits }}
+                  </td>
+                </ng-container>
 
-              <ng-container matColumnDef="agent">
-                <th mat-header-cell *matHeaderCellDef>{{ 'tickets.workloadPage.columns.agent' | translate }}</th>
-                <td mat-cell *matCellDef="let row">
-                  @if (row.agentId == null) {
-                    <span class="agent-name">{{ 'tickets.workloadPage.unassigned' | translate }}</span>
-                  } @else {
-                    <div class="agent-cell">
-                      <span class="agent-name">{{ row.name || row.email || '—' }}</span>
-                      @if (row.email) {
-                        <span class="agent-email" dir="ltr">{{ row.email }}</span>
-                      }
-                    </div>
-                  }
-                </td>
-              </ng-container>
+                <ng-container matColumnDef="agent">
+                  <th mat-header-cell *matHeaderCellDef>{{ 'tickets.workloadPage.columns.agent' | translate }}</th>
+                  <td mat-cell *matCellDef="let row">
+                    @if (row.agentId == null) {
+                      <span class="cell-strong">{{ 'tickets.workloadPage.unassigned' | translate }}</span>
+                    } @else {
+                      <div class="agent-cell">
+                        <span class="cell-strong">{{ row.name || row.email || '—' }}</span>
+                        @if (row.email) {
+                          <span class="cell-muted" dir="ltr">{{ row.email }}</span>
+                        }
+                      </div>
+                    }
+                  </td>
+                </ng-container>
 
-              <ng-container matColumnDef="availability">
-                <th mat-header-cell *matHeaderCellDef>{{ 'tickets.workloadPage.columns.availability' | translate }}</th>
-                <td mat-cell *matCellDef="let row">
-                  @if (row.agentId == null) {
-                    <span class="muted-inline">—</span>
-                  } @else if (row.available === false) {
-                    <span class="presence away">{{ 'tickets.workloadPage.away' | translate }}</span>
-                  } @else {
-                    <span class="presence available">{{ 'tickets.workloadPage.available' | translate }}</span>
-                  }
-                </td>
-              </ng-container>
+                <ng-container matColumnDef="availability">
+                  <th mat-header-cell *matHeaderCellDef>{{ 'tickets.workloadPage.columns.availability' | translate }}</th>
+                  <td mat-cell *matCellDef="let row">
+                    @if (row.agentId == null) {
+                      <span class="cell-muted">—</span>
+                    } @else if (row.available === false) {
+                      <span class="status-pill pending">{{ 'tickets.workloadPage.away' | translate }}</span>
+                    } @else {
+                      <span class="status-pill active">{{ 'tickets.workloadPage.available' | translate }}</span>
+                    }
+                  </td>
+                </ng-container>
 
-              <ng-container matColumnDef="openCount">
-                <th mat-header-cell *matHeaderCellDef>{{ 'tickets.workloadPage.columns.openCount' | translate }}</th>
-                <td mat-cell *matCellDef="let row">
-                  <span class="open-count" dir="ltr">{{ row.openCount | localeDigits }}</span>
-                </td>
-              </ng-container>
+                <ng-container matColumnDef="openCount">
+                  <th mat-header-cell *matHeaderCellDef>{{ 'tickets.workloadPage.columns.openCount' | translate }}</th>
+                  <td mat-cell *matCellDef="let row">
+                    <span class="cell-strong" dir="ltr">{{ row.openCount | localeDigits }}</span>
+                  </td>
+                </ng-container>
 
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row
-                  *matRowDef="let row; columns: displayedColumns"
-                  class="clickable-row"
-                  (click)="openInbox(row)"
-                  [matTooltip]="'tickets.workloadPage.openInboxHint' | translate"></tr>
-            </table>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                <tr mat-row
+                    *matRowDef="let row; columns: displayedColumns"
+                    class="clickable-row"
+                    (click)="openInbox(row)"
+                    [matTooltip]="'tickets.workloadPage.openInboxHint' | translate"></tr>
+              </table>
+            </div>
           }
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .workload-card {
-      padding: 20px 24px;
-      width: 100%;
-      max-width: 100%;
-      min-width: 0;
-      box-sizing: border-box;
-    }
-    .muted { color: var(--text-muted); margin: 0; }
-    .muted-inline { color: var(--text-muted); }
-    .workload-table {
-      width: 100%;
-    }
     .col-row-num {
       width: 3.5rem;
-      color: var(--text-muted);
       font-variant-numeric: tabular-nums;
     }
     .agent-cell {
@@ -128,28 +120,8 @@ import { TicketService, TicketWorkloadRow } from '../../services/ticket.service'
       gap: 2px;
       min-width: 0;
     }
-    .agent-name {
-      font-weight: 600;
-    }
-    .agent-email {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-    .presence.available {
-      color: var(--success);
-    }
-    .presence.away {
-      color: var(--warning);
-    }
-    .open-count {
-      font-variant-numeric: tabular-nums;
-      font-weight: 600;
-    }
     .clickable-row {
       cursor: pointer;
-    }
-    .clickable-row:hover {
-      background: color-mix(in srgb, var(--accent) 8%, transparent);
     }
   `]
 })

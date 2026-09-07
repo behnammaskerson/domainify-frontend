@@ -110,6 +110,8 @@
     "domainCategories": "دسته‌بندی دامنه‌ها",
     "analyzer": "تحلیلگر دامنه",
     "marketplace": "بازار",
+    "myListings": "لیست‌های من",
+    "myOffers": "پیشنهادهای من",
     "settings": "تنظیمات",
     "createTicket": "ایجاد تیکت",
     "myTickets": "تیکت‌های من",
@@ -1136,7 +1138,9 @@
     },
     "actions": {
       "refreshExpiry": "به‌روزرسانی انقضا از رجیسترار",
-      "whois": "جزئیات ثبت دامنه (WHOIS)"
+      "whois": "جزئیات ثبت دامنه (WHOIS)",
+      "listForSale": "درج برای فروش",
+      "listForSaleNeedVerify": "قبل از فروش، مالکیت دامنه را تأیید کنید"
     },
     "whois": {
       "title": "جزئیات ثبت دامنه",
@@ -1280,10 +1284,14 @@
     "title": "بازار",
     "subtitle": "خرید و فروش دامنه‌های پریمیوم",
     "eyebrow": "بازار",
+    "myListings": "لیست‌های من",
+    "myOffers": "پیشنهادهای من",
+    "search": "جستجوی لیست‌ها...",
+    "empty": "هنوز لیست فعالی نیست. دامنه تأییدشده را از دامنه‌های من درج کنید.",
     "featured": "دامنه‌های ویژه",
-    "featuredSubtitle": "گزیده‌ای از دامنه‌های پریمیوم",
+    "featuredSubtitle": "لیست‌های برجسته فروشندگان",
     "recentlyAdded": "اخیراً اضافه شده",
-    "recentSubtitle": "لیست‌های تازه این هفته",
+    "recentSubtitle": "تازه‌ترین لیست‌های بازار",
     "topSelling": "پرفروش‌ها",
     "topSellingSubtitle": "بیشترین علاقه در حال حاضر",
     "makeOffer": "ثبت پیشنهاد",
@@ -1291,7 +1299,7 @@
     "buyNow": "خرید",
     "offers": "{{count}} پیشنهاد",
     "tags": {
-      "premium": "پریمیوم", "crypto": "رمزارز", "finance": "مالی", "ai": "هوش مصنوعی",
+      "premium": "ویژه", "crypto": "رمزارز", "finance": "مالی", "ai": "هوش مصنوعی",
       "startup": "استارتاپ", "tech": "فناوری", "saas": "SaaS", "cloud": "ابر",
       "business": "کسب‌وکار", "nft": "NFT", "marketplace": "بازار", "green": "سبز",
       "energy": "انرژی", "fintech": "فین‌تک", "hub": "هاب", "remote": "دورکار",
@@ -1301,6 +1309,123 @@
       "cryptoCom": "دامنه پریمیوم یک کلمه‌ای .com در حوزه رمزارز. مناسب صرافی، کیف پول یا رسانه.",
       "aiStartup": "دامنه کوتاه و به‌یادماندنی برای استارتاپ‌های هوش مصنوعی.",
       "cloudSaas": "دامنه تعریف‌کننده صنعت برای پلتفرم‌های SaaS ابری."
+    }
+  },
+  "listings": {
+    "eyebrow": "فروش",
+    "title": "لیست‌های من",
+    "subtitle": "ایجاد، ویرایش و غیرفعال‌سازی لیست‌های بازار",
+    "browseMarketplace": "مشاهده بازار",
+    "listFromDomains": "درج از دامنه‌ها",
+    "search": "جستجوی لیست‌های من...",
+    "statusFilter": "وضعیت",
+    "empty": "هنوز لیستی ندارید. دامنه تأییدشده را باز کنید و «درج برای فروش» را بزنید.",
+    "featured": "ویژه",
+    "table": {
+      "domain": "دامنه",
+      "price": "قیمت پیشنهادی",
+      "status": "وضعیت",
+      "updated": "به‌روزرسانی"
+    },
+    "status": {
+      "all": "همه",
+      "ACTIVE": "فعال",
+      "INACTIVE": "غیرفعال",
+      "SOLD": "فروخته‌شده"
+    },
+    "actions": {
+      "deactivate": "غیرفعال کردن",
+      "activate": "فعال کردن",
+      "offers": "پیشنهادها"
+    },
+    "confirm": {
+      "deactivateTitle": "غیرفعال کردن لیست؟",
+      "deactivateMessage": "{{domain}} از بازار حذف می‌شود. بعداً می‌توانید دوباره فعال کنید."
+    },
+    "toast": {
+      "deactivated": "لیست غیرفعال شد",
+      "activated": "لیست فعال شد"
+    },
+    "form": {
+      "createTitle": "درج دامنه برای فروش",
+      "editTitle": "ویرایش لیست",
+      "askingPrice": "قیمت پیشنهادی",
+      "priceInvalid": "قیمت باید صفر یا بیشتر باشد",
+      "description": "توضیحات",
+      "featured": "لیست ویژه",
+      "featuredHint": "لیست‌های ویژه در بخش برجسته بازار نمایش داده می‌شوند",
+      "saving": "در حال ذخیره…",
+      "created": "لیست منتشر شد",
+      "updated": "لیست به‌روز شد"
+    }
+  },
+  "offers": {
+    "eyebrow": "مذاکره",
+    "title": "پیشنهادهای من",
+    "subtitle": "پیشنهادهای خود را پیگیری کنید و به پیشنهاد متقابل فروشنده پاسخ دهید",
+    "browseMarketplace": "مشاهده بازار",
+    "sellerTitle": "پیشنهادهای این لیست",
+    "buyer": "خریدار",
+    "empty": "هنوز پیشنهادی ثبت نکرده‌اید.",
+    "emptyForListing": "هنوز پیشنهادی برای این لیست نیست.",
+    "statusFilter": "وضعیت",
+    "timeline": "جدول زمانی",
+    "table": {
+      "domain": "دامنه",
+      "amount": "پیشنهاد",
+      "asking": "قیمت فروشنده",
+      "status": "وضعیت",
+      "updated": "به‌روزرسانی"
+    },
+    "status": {
+      "all": "همه",
+      "PENDING": "در انتظار فروشنده",
+      "COUNTERED": "پیشنهاد متقابل",
+      "ACCEPTED": "پذیرفته‌شده",
+      "REJECTED": "ردشده",
+      "WITHDRAWN": "پس‌گرفته",
+      "EXPIRED": "منقضی"
+    },
+    "actions": {
+      "accept": "پذیرش",
+      "reject": "رد",
+      "counter": "پیشنهاد متقابل",
+      "withdraw": "پس‌گرفتن"
+    },
+    "events": {
+      "OFFER": "پیشنهاد",
+      "COUNTER": "متقابل",
+      "ACCEPT": "پذیرش",
+      "REJECT": "رد",
+      "WITHDRAW": "پس‌گرفتن",
+      "SYSTEM_REJECT": "رد خودکار",
+      "EXPIRE": "انقضا"
+    },
+    "confirm": {
+      "acceptTitle": "پذیرش پیشنهاد؟",
+      "acceptMessage": "قیمت فعلی برای {{domain}} پذیرفته می‌شود و لیست فروخته‌شده علامت می‌خورد.",
+      "rejectTitle": "رد پیشنهاد؟",
+      "rejectMessage": "مذاکره فعلی برای {{domain}} رد شود.",
+      "withdrawTitle": "پس‌گرفتن پیشنهاد؟",
+      "withdrawMessage": "پیشنهاد در انتظار شما روی {{domain}} پس گرفته شود."
+    },
+    "toast": {
+      "created": "پیشنهاد ارسال شد",
+      "countered": "پیشنهاد متقابل ارسال شد",
+      "accepted": "پیشنهاد پذیرفته شد",
+      "rejected": "پیشنهاد رد شد",
+      "withdrawn": "پیشنهاد پس گرفته شد"
+    },
+    "form": {
+      "createTitle": "ثبت پیشنهاد",
+      "counterTitle": "پیشنهاد متقابل",
+      "askingPrice": "قیمت فروشنده",
+      "amount": "پیشنهاد شما",
+      "amountInvalid": "مبلغ باید صفر یا بیشتر باشد",
+      "message": "پیام (اختیاری)",
+      "saving": "در حال ارسال…",
+      "submit": "ارسال پیشنهاد",
+      "counter": "ارسال متقابل"
     }
   },
   "settings": {
@@ -2024,6 +2149,23 @@
     "DOMAIN_EXPIRY_LOOKUP_FAILED": "خواندن انقضای رجیسترار ممکن نشد. دوباره تلاش کنید یا تاریخ را دستی وارد کنید",
     "DOMAIN_WHOIS_NOT_FOUND": "دامنه در رجیستری (RDAP / WHOIS) پیدا نشد",
     "DOMAIN_WHOIS_LOOKUP_FAILED": "بارگذاری جزئیات ثبت ممکن نشد. بعداً دوباره تلاش کنید",
+    "LISTING_NOT_FOUND": "لیست یافت نشد",
+    "LISTING_DOMAIN_REQUIRED": "دامنه را برای درج انتخاب کنید",
+    "LISTING_ALREADY_EXISTS": "این دامنه از قبل لیست دارد",
+    "LISTING_PRICE_INVALID": "قیمت پیشنهادی معتبر وارد کنید",
+    "LISTING_DESCRIPTION_TOO_LONG": "توضیحات خیلی طولانی است",
+    "LISTING_DOMAIN_NOT_VERIFIED": "قبل از درج، مالکیت دامنه را تأیید کنید",
+    "LISTING_DOMAIN_NOT_LISTABLE": "فقط دامنه‌های فعال یا در انتظار قابل درج هستند",
+    "LISTING_SOLD": "لیست فروخته‌شده قابل تغییر نیست",
+    "OFFER_NOT_FOUND": "پیشنهاد یافت نشد",
+    "OFFER_LISTING_NOT_ACTIVE": "فقط روی لیست‌های فعال می‌توان پیشنهاد داد",
+    "OFFER_SELF": "نمی‌توانید روی لیست خودتان پیشنهاد بدهید",
+    "OFFER_ALREADY_OPEN": "برای این لیست پیشنهاد باز دارید",
+    "OFFER_AMOUNT_INVALID": "مبلغ پیشنهاد معتبر وارد کنید",
+    "OFFER_MESSAGE_TOO_LONG": "پیام پیشنهاد خیلی طولانی است",
+    "OFFER_NOT_PENDING": "فقط پیشنهادهای در انتظار قابل پس‌گرفتن هستند",
+    "OFFER_WRONG_PARTY": "اجازه اقدام روی این پیشنهاد را ندارید",
+    "OFFER_INVALID_STATE": "این پیشنهاد در وضعیت فعلی قابل تغییر نیست",
     "TICKET_PRIORITY_REQUIRED": "اولویت تیکت الزامی است",
     "TICKET_ATTACHMENTS_LIMIT": "تعداد پیوست‌ها بیش از حد مجاز است",
     "TICKET_ATTACHMENT_INVALID": "پیوست نامعتبر است. انواع و اندازه مجاز را در تنظیمات تیکت بررسی کنید",
@@ -2131,7 +2273,13 @@
       "TICKET_TRANSFERRED": "{{ticketNumber}} به شما منتقل شد",
       "TICKET_ESCALATED": "{{ticketNumber}} تشدید شد",
       "TICKET_ESCALATED_AUTO": "{{ticketNumber}} به‌صورت خودکار تشدید شد (نقض SLA)",
-      "DOMAIN_RENEWAL": "{{domain}} تا {{days}} روز دیگر منقضی می‌شود ({{expiresAt}})"
+      "DOMAIN_RENEWAL": "{{domain}} تا {{days}} روز دیگر منقضی می‌شود ({{expiresAt}})",
+      "OFFER_RECEIVED": "{{actor}} مبلغ {{amount}} برای {{domain}} پیشنهاد داد",
+      "OFFER_COUNTERED": "{{actor}} پیشنهاد متقابل {{amount}} برای {{domain}} داد",
+      "OFFER_ACCEPTED": "{{actor}} پیشنهاد {{domain}} را پذیرفت ({{amount}})",
+      "OFFER_REJECTED": "{{actor}} پیشنهاد {{domain}} را رد کرد",
+      "OFFER_WITHDRAWN": "{{actor}} پیشنهاد {{domain}} را پس گرفت",
+      "OFFER_EXPIRED": "پیشنهاد {{amount}} برای {{domain}} منقضی شد"
     }
   },
   "toolbar": {

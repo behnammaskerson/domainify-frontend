@@ -89,7 +89,7 @@ type ReadFilter = 'ALL' | 'UNREAD';
                     </span>
                     <span class="copy">
                       <span class="message">{{ notificationService.messageText(notif) }}</span>
-                      @if (notif.ticketSubject && notif.type !== 'DOMAIN_RENEWAL') {
+                      @if (notif.ticketSubject && notif.type !== 'DOMAIN_RENEWAL' && !notif.type.startsWith('OFFER_')) {
                         <span class="subject">{{ notif.ticketSubject }}</span>
                       }
                       <span class="meta">

@@ -110,6 +110,8 @@
     "domainCategories": "Alan Adı Kategorileri",
     "analyzer": "Alan Adı Analizörü",
     "marketplace": "Pazar Yeri",
+    "myListings": "İlanlarım",
+    "myOffers": "Tekliflerim",
     "settings": "Ayarlar",
     "createTicket": "Bilet Oluştur",
     "myTickets": "Biletlerim",
@@ -1063,7 +1065,9 @@
     },
     "actions": {
       "refreshExpiry": "Bitişi kayıt kuruluşundan yenile",
-      "whois": "Kayıt ayrıntıları (WHOIS)"
+      "whois": "Kayıt ayrıntıları (WHOIS)",
+      "listForSale": "Satışa listele",
+      "listForSaleNeedVerify": "Satışa listeden önce alan adı sahipliğini doğrulayın"
     },
     "whois": {
       "title": "Alan adı kayıt ayrıntıları",
@@ -1209,10 +1213,14 @@
     "title": "Pazar Yeri",
     "subtitle": "Premium alan adları alın ve satın",
     "eyebrow": "Pazar",
+    "myListings": "İlanlarım",
+    "myOffers": "Tekliflerim",
+    "search": "İlanlarda ara...",
+    "empty": "Henüz aktif ilan yok. Alan Adlarım üzerinden doğrulanmış bir alan adı listeleyin.",
     "featured": "Öne Çıkan Alan Adları",
-    "featuredSubtitle": "Özenle seçilmiş premium envanter",
+    "featuredSubtitle": "Öne çıkan satıcı ilanları",
     "recentlyAdded": "Yeni Eklenenler",
-    "recentSubtitle": "Bu haftanın yeni ilanları",
+    "recentSubtitle": "Pazardaki taze ilanlar",
     "topSelling": "En Çok Satanlar",
     "topSellingSubtitle": "Şu anda en yüksek ilgi",
     "makeOffer": "Teklif Ver",
@@ -1220,7 +1228,7 @@
     "buyNow": "Hemen Satın Al",
     "offers": "{{count}} teklif",
     "tags": {
-      "premium": "Premium",
+      "premium": "Öne çıkan",
       "crypto": "Kripto",
       "finance": "Finans",
       "ai": "YZ",
@@ -1245,6 +1253,123 @@
       "cryptoCom": "Kripto para alanında premium tek kelimelik .com alan adı. Borsa, cüzdan veya haber platformları için ideal.",
       "aiStartup": "YZ startup'ları ve makine öğrenimi şirketleri için kısa ve akılda kalıcı alan adı.",
       "cloudSaas": "Bulut tabanlı SaaS platformları için sektör tanımlayıcı alan adı."
+    }
+  },
+  "listings": {
+    "eyebrow": "Satış",
+    "title": "İlanlarım",
+    "subtitle": "Pazar yeri ilanlarınızı oluşturun, düzenleyin ve pasifleştirin",
+    "browseMarketplace": "Pazar yerini gez",
+    "listFromDomains": "Alan adlarından listele",
+    "search": "İlanlarımda ara...",
+    "statusFilter": "Durum",
+    "empty": "Henüz ilanınız yok. Doğrulanmış bir alan adı açıp Satışa listele'yi seçin.",
+    "featured": "Öne çıkan",
+    "table": {
+      "domain": "Alan adı",
+      "price": "İstenen fiyat",
+      "status": "Durum",
+      "updated": "Güncellendi"
+    },
+    "status": {
+      "all": "Tümü",
+      "ACTIVE": "Aktif",
+      "INACTIVE": "Pasif",
+      "SOLD": "Satıldı"
+    },
+    "actions": {
+      "deactivate": "Pasifleştir",
+      "activate": "Etkinleştir",
+      "offers": "Teklifler"
+    },
+    "confirm": {
+      "deactivateTitle": "İlan pasifleştirilsin mi?",
+      "deactivateMessage": "{{domain}} pazar yerinden kaldırılacak. Daha sonra yeniden etkinleştirebilirsiniz."
+    },
+    "toast": {
+      "deactivated": "İlan pasifleştirildi",
+      "activated": "İlan etkinleştirildi"
+    },
+    "form": {
+      "createTitle": "Alan adını satışa listele",
+      "editTitle": "İlanı düzenle",
+      "askingPrice": "İstenen fiyat",
+      "priceInvalid": "Fiyat sıfır veya daha büyük olmalı",
+      "description": "Açıklama",
+      "featured": "Öne çıkan ilan",
+      "featuredHint": "Öne çıkan ilanlar pazar yerinin vurgulanan bölümünde görünür",
+      "saving": "Kaydediliyor…",
+      "created": "İlan yayınlandı",
+      "updated": "İlan güncellendi"
+    }
+  },
+  "offers": {
+    "eyebrow": "Pazarlık",
+    "title": "Tekliflerim",
+    "subtitle": "Verdiğiniz teklifleri takip edin ve satıcı karşı tekliflerine yanıt verin",
+    "browseMarketplace": "Pazar yerini gez",
+    "sellerTitle": "İlan teklifleri",
+    "buyer": "Alıcı",
+    "empty": "Henüz teklif vermediniz.",
+    "emptyForListing": "Bu ilanda henüz teklif yok.",
+    "statusFilter": "Durum",
+    "timeline": "Zaman çizelgesi",
+    "table": {
+      "domain": "Alan adı",
+      "amount": "Teklif",
+      "asking": "İstenen",
+      "status": "Durum",
+      "updated": "Güncellendi"
+    },
+    "status": {
+      "all": "Tümü",
+      "PENDING": "Satıcı bekleniyor",
+      "COUNTERED": "Karşı teklif",
+      "ACCEPTED": "Kabul edildi",
+      "REJECTED": "Reddedildi",
+      "WITHDRAWN": "Geri çekildi",
+      "EXPIRED": "Süresi doldu"
+    },
+    "actions": {
+      "accept": "Kabul et",
+      "reject": "Reddet",
+      "counter": "Karşı teklif",
+      "withdraw": "Geri çek"
+    },
+    "events": {
+      "OFFER": "Teklif",
+      "COUNTER": "Karşı",
+      "ACCEPT": "Kabul",
+      "REJECT": "Red",
+      "WITHDRAW": "Geri çekme",
+      "SYSTEM_REJECT": "Otomatik red",
+      "EXPIRE": "Süre doldu"
+    },
+    "confirm": {
+      "acceptTitle": "Teklif kabul edilsin mi?",
+      "acceptMessage": "{{domain}} için mevcut fiyat kabul edilecek. İlan satıldı olarak işaretlenecek.",
+      "rejectTitle": "Teklif reddedilsin mi?",
+      "rejectMessage": "{{domain}} için mevcut müzakere reddedilecek.",
+      "withdrawTitle": "Teklif geri çekilsin mi?",
+      "withdrawMessage": "{{domain}} üzerindeki bekleyen teklifiniz geri çekilecek."
+    },
+    "toast": {
+      "created": "Teklif gönderildi",
+      "countered": "Karşı teklif gönderildi",
+      "accepted": "Teklif kabul edildi",
+      "rejected": "Teklif reddedildi",
+      "withdrawn": "Teklif geri çekildi"
+    },
+    "form": {
+      "createTitle": "Teklif ver",
+      "counterTitle": "Karşı teklif",
+      "askingPrice": "İstenen fiyat",
+      "amount": "Teklifiniz",
+      "amountInvalid": "Tutar sıfır veya daha büyük olmalı",
+      "message": "Mesaj (isteğe bağlı)",
+      "saving": "Gönderiliyor…",
+      "submit": "Teklif gönder",
+      "counter": "Karşı teklif gönder"
     }
   },
   "settings": {
@@ -1968,6 +2093,23 @@
     "DOMAIN_EXPIRY_LOOKUP_FAILED": "Kayıt kuruluşu bitişi alınamadı. Tekrar deneyin veya tarihi elle girin",
     "DOMAIN_WHOIS_NOT_FOUND": "Alan adı kayıt defterinde (RDAP / WHOIS) bulunamadı",
     "DOMAIN_WHOIS_LOOKUP_FAILED": "Kayıt ayrıntıları yüklenemedi. Daha sonra tekrar deneyin",
+    "LISTING_NOT_FOUND": "İlan bulunamadı",
+    "LISTING_DOMAIN_REQUIRED": "Listelenecek alan adını seçin",
+    "LISTING_ALREADY_EXISTS": "Bu alan adının zaten bir ilanı var",
+    "LISTING_PRICE_INVALID": "Geçerli bir istenen fiyat girin",
+    "LISTING_DESCRIPTION_TOO_LONG": "Açıklama çok uzun",
+    "LISTING_DOMAIN_NOT_VERIFIED": "Listelemeden önce alan adı sahipliğini doğrulayın",
+    "LISTING_DOMAIN_NOT_LISTABLE": "Yalnızca aktif veya bekleyen alan adları listelenebilir",
+    "LISTING_SOLD": "Satılmış ilanlar değiştirilemez",
+    "OFFER_NOT_FOUND": "Teklif bulunamadı",
+    "OFFER_LISTING_NOT_ACTIVE": "Teklif yalnızca aktif ilanlara verilebilir",
+    "OFFER_SELF": "Kendi ilanınıza teklif veremezsiniz",
+    "OFFER_ALREADY_OPEN": "Bu ilanda zaten açık bir teklifiniz var",
+    "OFFER_AMOUNT_INVALID": "Geçerli bir teklif tutarı girin",
+    "OFFER_MESSAGE_TOO_LONG": "Teklif mesajı çok uzun",
+    "OFFER_NOT_PENDING": "Yalnızca bekleyen teklifler geri çekilebilir",
+    "OFFER_WRONG_PARTY": "Bu teklifte işlem yapma yetkiniz yok",
+    "OFFER_INVALID_STATE": "Bu teklif mevcut durumunda güncellenemez",
     "TICKET_PRIORITY_REQUIRED": "Bilet önceliği gerekli",
     "TICKET_ATTACHMENTS_LIMIT": "Bu yükleme için çok fazla ek dosya",
     "TICKET_ATTACHMENT_INVALID": "Geçersiz ek. İzin verilen türleri ve boyut sınırlarını Bilet Ayarları'ndan kontrol edin",
@@ -2075,7 +2217,13 @@
       "TICKET_TRANSFERRED": "{{ticketNumber}} size aktarıldı",
       "TICKET_ESCALATED": "{{ticketNumber}} yükseltildi",
       "TICKET_ESCALATED_AUTO": "{{ticketNumber}} otomatik yükseltildi (SLA ihlali)",
-      "DOMAIN_RENEWAL": "{{domain}} {{days}} gün içinde sona eriyor ({{expiresAt}})"
+      "DOMAIN_RENEWAL": "{{domain}} {{days}} gün içinde sona eriyor ({{expiresAt}})",
+      "OFFER_RECEIVED": "{{actor}}, {{domain}} için {{amount}} teklif etti",
+      "OFFER_COUNTERED": "{{actor}}, {{domain}} için {{amount}} karşı teklif verdi",
+      "OFFER_ACCEPTED": "{{actor}}, {{domain}} teklifini kabul etti ({{amount}})",
+      "OFFER_REJECTED": "{{actor}}, {{domain}} teklifini reddetti",
+      "OFFER_WITHDRAWN": "{{actor}}, {{domain}} teklifini geri çekti",
+      "OFFER_EXPIRED": "{{domain}} üzerindeki {{amount}} teklifinin süresi doldu"
     }
   },
   "toolbar": {

@@ -110,6 +110,8 @@
     "domainCategories": "فئات النطاقات",
     "analyzer": "محلل النطاقات",
     "marketplace": "السوق",
+    "myListings": "قوائمي",
+    "myOffers": "عروضي",
     "settings": "الإعدادات",
     "createTicket": "إنشاء تذكرة",
     "myTickets": "تذاكري",
@@ -1058,7 +1060,9 @@
     },
     "actions": {
       "refreshExpiry": "تحديث الانتهاء من المسجّل",
-      "whois": "تفاصيل التسجيل (WHOIS)"
+      "whois": "تفاصيل التسجيل (WHOIS)",
+      "listForSale": "عرض للبيع",
+      "listForSaleNeedVerify": "تحقق من ملكية النطاق قبل العرض للبيع"
     },
     "whois": {
       "title": "تفاصيل تسجيل النطاق",
@@ -1202,10 +1206,14 @@
     "title": "السوق",
     "subtitle": "اشترِ وبِع النطاقات المميزة",
     "eyebrow": "السوق",
+    "myListings": "قوائمي",
+    "myOffers": "عروضي",
+    "search": "ابحث في القوائم...",
+    "empty": "لا توجد قوائم نشطة بعد. أدرج نطاقاً موثّقاً من نطاقاتي.",
     "featured": "نطاقات مميزة",
-    "featuredSubtitle": "مخزون مميز مختار",
+    "featuredSubtitle": "قوائم بارزة من البائعين",
     "recentlyAdded": "أُضيفت مؤخراً",
-    "recentSubtitle": "قوائم جديدة هذا الأسبوع",
+    "recentSubtitle": "أحدث القوائم في السوق",
     "topSelling": "الأكثر مبيعاً",
     "topSellingSubtitle": "الأعلى اهتماماً الآن",
     "makeOffer": "قدّم عرضاً",
@@ -1223,6 +1231,123 @@
       "cryptoCom": "نطاق .com مميز من كلمة واحدة في مجال العملات الرقمية.",
       "aiStartup": "نطاق قصير ومميز لشركات الذكاء الاصطناعي الناشئة.",
       "cloudSaas": "نطاق يحدّد صناعة منصات SaaS السحابية."
+    }
+  },
+  "listings": {
+    "eyebrow": "بيع",
+    "title": "قوائمي",
+    "subtitle": "إنشاء وتعديل وإلغاء تفعيل قوائم السوق",
+    "browseMarketplace": "تصفح السوق",
+    "listFromDomains": "إدراج من النطاقات",
+    "search": "ابحث في قوائمي...",
+    "statusFilter": "الحالة",
+    "empty": "لا توجد قوائم بعد. افتح نطاقاً موثّقاً واختر عرض للبيع.",
+    "featured": "مميز",
+    "table": {
+      "domain": "النطاق",
+      "price": "السعر المطلوب",
+      "status": "الحالة",
+      "updated": "آخر تحديث"
+    },
+    "status": {
+      "all": "الكل",
+      "ACTIVE": "نشط",
+      "INACTIVE": "غير نشط",
+      "SOLD": "مباع"
+    },
+    "actions": {
+      "deactivate": "إلغاء التفعيل",
+      "activate": "تفعيل",
+      "offers": "العروض"
+    },
+    "confirm": {
+      "deactivateTitle": "إلغاء تفعيل القائمة؟",
+      "deactivateMessage": "إزالة {{domain}} من السوق. يمكنك تفعيله لاحقاً."
+    },
+    "toast": {
+      "deactivated": "تم إلغاء تفعيل القائمة",
+      "activated": "تم تفعيل القائمة"
+    },
+    "form": {
+      "createTitle": "عرض النطاق للبيع",
+      "editTitle": "تعديل القائمة",
+      "askingPrice": "السعر المطلوب",
+      "priceInvalid": "يجب أن يكون السعر صفراً أو أكبر",
+      "description": "الوصف",
+      "featured": "قائمة مميزة",
+      "featuredHint": "تظهر القوائم المميزة في قسم التمييز بالسوق",
+      "saving": "جارٍ الحفظ…",
+      "created": "تم نشر القائمة",
+      "updated": "تم تحديث القائمة"
+    }
+  },
+  "offers": {
+    "eyebrow": "تفاوض",
+    "title": "عروضي",
+    "subtitle": "تتبّع عروضك والرد على عروض البائع المضادة",
+    "browseMarketplace": "تصفح السوق",
+    "sellerTitle": "عروض القائمة",
+    "buyer": "المشتري",
+    "empty": "لم تقدّم أي عروض بعد.",
+    "emptyForListing": "لا توجد عروض على هذه القائمة بعد.",
+    "statusFilter": "الحالة",
+    "timeline": "الجدول الزمني",
+    "table": {
+      "domain": "النطاق",
+      "amount": "العرض",
+      "asking": "السعر المطلوب",
+      "status": "الحالة",
+      "updated": "آخر تحديث"
+    },
+    "status": {
+      "all": "الكل",
+      "PENDING": "بانتظار البائع",
+      "COUNTERED": "عرض مضاد",
+      "ACCEPTED": "مقبول",
+      "REJECTED": "مرفوض",
+      "WITHDRAWN": "مسحوب",
+      "EXPIRED": "منتهية"
+    },
+    "actions": {
+      "accept": "قبول",
+      "reject": "رفض",
+      "counter": "عرض مضاد",
+      "withdraw": "سحب"
+    },
+    "events": {
+      "OFFER": "عرض",
+      "COUNTER": "مضاد",
+      "ACCEPT": "قبول",
+      "REJECT": "رفض",
+      "WITHDRAW": "سحب",
+      "SYSTEM_REJECT": "رفض تلقائي",
+      "EXPIRE": "انتهاء"
+    },
+    "confirm": {
+      "acceptTitle": "قبول العرض؟",
+      "acceptMessage": "قبول السعر الحالي لـ {{domain}}. سيتم تعليم القائمة كمباعة.",
+      "rejectTitle": "رفض العرض؟",
+      "rejectMessage": "رفض التفاوض الحالي لـ {{domain}}.",
+      "withdrawTitle": "سحب العرض؟",
+      "withdrawMessage": "سحب عرضك المعلق على {{domain}}."
+    },
+    "toast": {
+      "created": "تم إرسال العرض",
+      "countered": "تم إرسال العرض المضاد",
+      "accepted": "تم قبول العرض",
+      "rejected": "تم رفض العرض",
+      "withdrawn": "تم سحب العرض"
+    },
+    "form": {
+      "createTitle": "قدّم عرضاً",
+      "counterTitle": "عرض مضاد",
+      "askingPrice": "السعر المطلوب",
+      "amount": "عرضك",
+      "amountInvalid": "يجب أن يكون المبلغ صفراً أو أكبر",
+      "message": "رسالة (اختياري)",
+      "saving": "جارٍ الإرسال…",
+      "submit": "إرسال العرض",
+      "counter": "إرسال المضاد"
     }
   },
   "settings": {
@@ -1946,8 +2071,23 @@
     "DOMAIN_EXPIRY_LOOKUP_FAILED": "تعذّر جلب انتهاء المسجّل. أعد المحاولة أو عيّن التاريخ يدوياً",
     "DOMAIN_WHOIS_NOT_FOUND": "لم يُعثر على النطاق في السجل (RDAP / WHOIS)",
     "DOMAIN_WHOIS_LOOKUP_FAILED": "تعذّر تحميل تفاصيل التسجيل. حاول لاحقاً",
-    "DOMAIN_WHOIS_NOT_FOUND": "لم يُعثر على النطاق في السجل (RDAP / WHOIS)",
-    "DOMAIN_WHOIS_LOOKUP_FAILED": "تعذّر تحميل تفاصيل التسجيل. حاول لاحقاً",
+    "LISTING_NOT_FOUND": "لم يتم العثور على القائمة",
+    "LISTING_DOMAIN_REQUIRED": "اختر نطاقاً للإدراج",
+    "LISTING_ALREADY_EXISTS": "هذا النطاق لديه قائمة بالفعل",
+    "LISTING_PRICE_INVALID": "أدخل سعراً مطلوباً صالحاً",
+    "LISTING_DESCRIPTION_TOO_LONG": "الوصف طويل جداً",
+    "LISTING_DOMAIN_NOT_VERIFIED": "تحقق من ملكية النطاق قبل الإدراج",
+    "LISTING_DOMAIN_NOT_LISTABLE": "يمكن إدراج النطاقات النشطة أو المعلقة فقط",
+    "LISTING_SOLD": "لا يمكن تعديل القوائم المباعة",
+    "OFFER_NOT_FOUND": "لم يتم العثور على العرض",
+    "OFFER_LISTING_NOT_ACTIVE": "يمكن تقديم العروض على القوائم النشطة فقط",
+    "OFFER_SELF": "لا يمكنك تقديم عرض على قائمتك",
+    "OFFER_ALREADY_OPEN": "لديك عرض مفتوح على هذه القائمة",
+    "OFFER_AMOUNT_INVALID": "أدخل مبلغ عرض صالح",
+    "OFFER_MESSAGE_TOO_LONG": "رسالة العرض طويلة جداً",
+    "OFFER_NOT_PENDING": "يمكن سحب العروض المعلقة فقط",
+    "OFFER_WRONG_PARTY": "غير مسموح لك بالتصرف على هذا العرض",
+    "OFFER_INVALID_STATE": "لا يمكن تحديث هذا العرض في حالته الحالية",
     "TICKET_PRIORITY_REQUIRED": "أولوية التذكرة مطلوبة",
     "TICKET_ATTACHMENTS_LIMIT": "عدد المرفقات يتجاوز الحد المسموح",
     "TICKET_ATTACHMENT_INVALID": "مرفق غير صالح. راجع الأنواع وحدود الحجم في إعدادات التذاكر",
@@ -2055,7 +2195,13 @@
       "TICKET_TRANSFERRED": "تم نقل {{ticketNumber}} إليك",
       "TICKET_ESCALATED": "تم تصعيد {{ticketNumber}}",
       "TICKET_ESCALATED_AUTO": "تم تصعيد {{ticketNumber}} تلقائيًا (خرق SLA)",
-      "DOMAIN_RENEWAL": "ينتهي {{domain}} خلال {{days}} يومًا ({{expiresAt}})"
+      "DOMAIN_RENEWAL": "ينتهي {{domain}} خلال {{days}} يومًا ({{expiresAt}})",
+      "OFFER_RECEIVED": "قدّم {{actor}} عرضاً بمبلغ {{amount}} على {{domain}}",
+      "OFFER_COUNTERED": "قدّم {{actor}} عرضاً مضاداً بمبلغ {{amount}} على {{domain}}",
+      "OFFER_ACCEPTED": "قبل {{actor}} العرض على {{domain}} ({{amount}})",
+      "OFFER_REJECTED": "رفض {{actor}} العرض على {{domain}}",
+      "OFFER_WITHDRAWN": "سحب {{actor}} عرضاً على {{domain}}",
+      "OFFER_EXPIRED": "انتهت صلاحية عرض {{amount}} على {{domain}}"
     }
   },
   "toolbar": {
