@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 export type DomainStatus = 'ACTIVE' | 'PENDING' | 'SOLD' | 'EXPIRED';
 export type DomainOwnershipStatus = 'UNVERIFIED' | 'PENDING' | 'VERIFIED';
 export type DomainOwnershipMethod = 'DNS_TXT' | 'HTTP_FILE';
+export type DomainExpirySource = 'MANUAL' | 'REGISTRAR';
 
 export interface DomainItem {
   id: number;
@@ -15,12 +16,49 @@ export interface DomainItem {
   categoryName?: string;
   price: number;
   expiresAt?: string | null;
+  expiresSource?: DomainExpirySource | null;
+  expiresCheckedAt?: string | null;
+  expiresRegistrar?: string | null;
+  customRenewalWindows?: boolean;
+  renewalWindows?: string | null;
+  renewalWindowsParsed?: number[];
   ownershipStatus?: DomainOwnershipStatus;
   ownershipMethod?: DomainOwnershipMethod | null;
   ownershipVerifiedAt?: string | null;
   ownershipTokenExpiresAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface DomainRegistrarExpiry {
+  domainName: string;
+  expiresAt: string;
+  registrar?: string | null;
+  rdapUrl?: string | null;
+  checkedAt?: string | null;
+}
+
+export interface DomainWhois {
+  domainName: string;
+  ldhName?: string | null;
+  unicodeName?: string | null;
+  statuses?: string[];
+  registeredAt?: string | null;
+  updatedAt?: string | null;
+  expiresAt?: string | null;
+  registrar?: string | null;
+  registrarIanaId?: string | null;
+  registrarUrl?: string | null;
+  registrarEmail?: string | null;
+  registrantName?: string | null;
+  registrantOrganization?: string | null;
+  registrantCountry?: string | null;
+  registrantEmail?: string | null;
+  nameServers?: string[];
+  dnssecSigned?: boolean;
+  rdapUrl?: string | null;
+  checkedAt?: string | null;
+  available?: boolean;
 }
 
 export interface DomainOwnershipChallenge {
@@ -82,6 +120,10 @@ export interface UpsertDomainPayload {
   categoryId: number;
   price: number;
   expiresAt?: string | null;
+  expiresSource?: DomainExpirySource | null;
+  expiresRegistrar?: string | null;
+  /** null = use global admin windows; non-empty = custom */
+  renewalWindows?: number[] | null;
 }
 
 export interface DomainStatusCounts {
@@ -125,6 +167,24 @@ export class DomainsService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/domains/${id}`);
+  }
+
+  lookupRegistrarExpiry(name: string): Observable<DomainRegistrarExpiry> {
+    const params = new HttpParams().set('name', name.trim().toLowerCase());
+    return this.http.get<DomainRegistrarExpiry>(`${this.API_URL}/domains/registrar-expiry`, { params });
+  }
+
+  lookupWhois(name: string): Observable<DomainWhois> {
+    const params = new HttpParams().set('name', name.trim().toLowerCase());
+    return this.http.get<DomainWhois>(`${this.API_URL}/domains/whois`, { params });
+  }
+
+  lookupWhoisForDomain(id: number): Observable<DomainWhois> {
+    return this.http.get<DomainWhois>(`${this.API_URL}/domains/${id}/whois`);
+  }
+
+  refreshExpiryFromRegistrar(id: number): Observable<DomainItem> {
+    return this.http.post<DomainItem>(`${this.API_URL}/domains/${id}/expiry/refresh`, {});
   }
 
   startOwnership(id: number, method: DomainOwnershipMethod): Observable<DomainOwnershipChallenge> {

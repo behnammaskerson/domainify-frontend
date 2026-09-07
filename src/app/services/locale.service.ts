@@ -24,7 +24,10 @@ export class LocaleService {
   }
 
   formatNumber(value: number, options?: Intl.NumberFormatOptions): string {
-    return new Intl.NumberFormat(this.locale(), this.withNumbering(options)).format(value);
+    return new Intl.NumberFormat(this.locale(), this.withNumbering({
+      useGrouping: true,
+      ...options
+    })).format(value);
   }
 
   formatCurrency(value: number, currency = 'USD', fractionDigits?: number): string {
@@ -33,6 +36,7 @@ export class LocaleService {
     // USDT is not an ISO 4217 code — format as amount + suffix.
     if (currency === 'USDT') {
       const amount = new Intl.NumberFormat(this.locale(), this.withNumbering({
+        useGrouping: true,
         maximumFractionDigits: max,
         minimumFractionDigits: Math.min(min, 2)
       })).format(value);
@@ -40,6 +44,7 @@ export class LocaleService {
     }
     if (currency === 'IRT') {
       const amount = new Intl.NumberFormat(this.locale(), this.withNumbering({
+        useGrouping: true,
         maximumFractionDigits: 0,
         minimumFractionDigits: 0
       })).format(value);
@@ -49,11 +54,13 @@ export class LocaleService {
       return new Intl.NumberFormat(this.locale(), this.withNumbering({
         style: 'currency',
         currency,
+        useGrouping: true,
         maximumFractionDigits: max,
         minimumFractionDigits: min
       })).format(value);
     } catch {
       const amount = new Intl.NumberFormat(this.locale(), this.withNumbering({
+        useGrouping: true,
         maximumFractionDigits: max
       })).format(value);
       return `${amount} ${currency}`;

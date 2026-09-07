@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule, MatSelect } from '@angular/material/select';
+import { MatChipsModule } from '@angular/material/chips';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ThemeService } from '../../services/theme.service';
 import { TranslationService } from '../../services/translation.service';
@@ -19,6 +20,7 @@ import { ApiErrorService } from '../../services/api-error.service';
 import { PasswordPolicyService, PasswordPolicy } from '../../services/password-policy.service';
 import { SmsConfigService, SmsCreditResult, SmsLinesResult, SmsProviderResult } from '../../services/sms-config.service';
 import { EmailConfigService } from '../../services/email-config.service';
+import { DomainSettingsService } from '../../services/domain-settings.service';
 import {
   buildPasswordValidators,
   buildPasswordPolicyChecks,
@@ -65,6 +67,7 @@ interface SettingsNavItem {
     MatSnackBarModule,
     MatDialogModule,
     MatSelectModule,
+    MatChipsModule,
     TranslateModule,
     PageHeroComponent,
     LtrHostComponent,
@@ -768,6 +771,168 @@ interface SettingsNavItem {
               </form>
             }
           </section>
+
+          <section class="settings-group settings-anchor" id="domain-renewal">
+            <h2 class="settings-group-title">{{ 'settings.domainRenewal.title' | translate }}</h2>
+            <p class="settings-group-desc">{{ 'settings.domainRenewal.subtitle' | translate }}</p>
+
+            @if (domainRenewalLoading) {
+              <p class="settings-group-desc">{{ 'settings.domainRenewal.loading' | translate }}</p>
+            } @else {
+              <form [formGroup]="domainRenewalForm" class="policy-form" (ngSubmit)="saveDomainRenewalSettings()">
+                <div class="email-config-toggles">
+                  <mat-slide-toggle formControlName="renewalRemindersEnabled" color="primary">
+                    {{ 'settings.domainRenewal.enabled' | translate }}
+                  </mat-slide-toggle>
+                </div>
+
+                <div class="domain-renewal-channels" [class.disabled-block]="!domainRenewalForm.controls.renewalRemindersEnabled.value">
+                  <p class="settings-group-desc channel-label">{{ 'settings.domainRenewal.channels' | translate }}</p>
+                  <div class="email-config-toggles">
+                    <mat-slide-toggle formControlName="renewalInAppEnabled" color="primary"
+                                      [disabled]="!domainRenewalForm.controls.renewalRemindersEnabled.value">
+                      {{ 'settings.domainRenewal.channelInApp' | translate }}
+                    </mat-slide-toggle>
+                    <mat-slide-toggle formControlName="renewalEmailEnabled" color="primary"
+                                      [disabled]="!domainRenewalForm.controls.renewalRemindersEnabled.value">
+                      {{ 'settings.domainRenewal.channelEmail' | translate }}
+                    </mat-slide-toggle>
+                    <mat-slide-toggle formControlName="renewalSmsEnabled" color="primary"
+                                      [disabled]="!domainRenewalForm.controls.renewalRemindersEnabled.value">
+                      {{ 'settings.domainRenewal.channelSms' | translate }}
+                    </mat-slide-toggle>
+                  </div>
+                  @if (domainRenewalChannelError) {
+                    <p class="sms-credit-error">{{ 'settings.domainRenewal.channelsRequired' | translate }}</p>
+                  }
+                </div>
+
+                <div class="domain-renewal-windows">
+                  <p class="field-label">{{ 'settings.domainRenewal.windows' | translate }}</p>
+                  <p class="settings-group-desc">{{ 'settings.domainRenewal.windowsHint' | translate }}</p>
+
+                  <div class="window-presets" role="group" [attr.aria-label]="'settings.domainRenewal.presets' | translate">
+                    @for (days of renewalWindowPresets; track days) {
+                      <button type="button"
+                              class="window-preset"
+                              [class.selected]="isRenewalWindowSelected(days)"
+                              (click)="toggleRenewalWindow(days)">
+                        {{ 'settings.domainRenewal.daysShort' | translate:{ days: days } }}
+                      </button>
+                    }
+                  </div>
+
+                  @if (renewalWindowsSelected.length) {
+                    <mat-chip-set class="window-chip-set" aria-orientation="horizontal">
+                      @for (days of renewalWindowsSelected; track days) {
+                        <mat-chip [removable]="true" (removed)="removeRenewalWindow(days)">
+                          {{ 'settings.domainRenewal.daysChip' | translate:{ days: days } }}
+                          <button matChipRemove type="button" [attr.aria-label]="'settings.domainRenewal.removeWindow' | translate">
+                            <mat-icon>cancel</mat-icon>
+                          </button>
+                        </mat-chip>
+                      }
+                    </mat-chip-set>
+                  } @else {
+                    <p class="sms-credit-error">{{ 'settings.domainRenewal.windowsRequired' | translate }}</p>
+                  }
+
+                  <div class="window-custom-row">
+                    <mat-form-field appearance="outline" class="window-custom-field">
+                      <mat-icon matPrefix>add</mat-icon>
+                      <mat-label>{{ 'settings.domainRenewal.customDays' | translate }}</mat-label>
+                      <input matInput type="number" min="1" max="3650" dir="ltr"
+                             [(ngModel)]="renewalCustomDays"
+                             [ngModelOptions]="{standalone: true}"
+                             (keydown.enter)="$event.preventDefault(); addCustomRenewalWindow()">
+                    </mat-form-field>
+                    <button mat-stroked-button type="button" color="primary"
+                            (click)="addCustomRenewalWindow()"
+                            [disabled]="!canAddCustomRenewalWindow()">
+                      {{ 'settings.domainRenewal.addWindow' | translate }}
+                    </button>
+                  </div>
+                </div>
+
+                <div class="sms-config-fields">
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-icon matPrefix>schedule</mat-icon>
+                    <mat-label>{{ 'settings.domainRenewal.sendTime' | translate }}</mat-label>
+                    <input matInput type="time" formControlName="renewalSendTime" dir="ltr">
+                    <mat-hint>{{ 'settings.domainRenewal.sendTimeHint' | translate }}</mat-hint>
+                    @if (domainRenewalForm.controls.renewalSendTime.hasError('required') && domainRenewalForm.controls.renewalSendTime.touched) {
+                      <mat-error>{{ 'auth.validation.required' | translate }}</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+
+                @if (domainRenewalLastRunDate) {
+                  <p class="settings-group-desc">
+                    {{ 'settings.domainRenewal.lastRun' | translate:{ date: domainRenewalLastRunDate } }}
+                  </p>
+                }
+
+                <div class="form-actions">
+                  <button mat-flat-button color="primary" type="submit"
+                          [disabled]="domainRenewalForm.invalid || domainRenewalSaving || !renewalWindowsSelected.length || domainRenewalChannelError">
+                    {{ 'settings.domainRenewal.save' | translate }}
+                  </button>
+                </div>
+              </form>
+
+              <div class="email-test-card domain-renewal-test-card">
+                <h3>{{ 'settings.domainRenewal.testTitle' | translate }}</h3>
+                <p class="settings-group-desc">{{ 'settings.domainRenewal.testHint' | translate }}</p>
+
+                <div class="sms-config-fields">
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-icon matPrefix>language</mat-icon>
+                    <mat-label>{{ 'settings.domainRenewal.testDomain' | translate }}</mat-label>
+                    <input matInput type="text" dir="ltr" [(ngModel)]="renewalTestDomain" autocomplete="off">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-icon matPrefix>timelapse</mat-icon>
+                    <mat-label>{{ 'settings.domainRenewal.testWindowDays' | translate }}</mat-label>
+                    <input matInput type="number" min="1" max="3650" dir="ltr" [(ngModel)]="renewalTestWindowDays">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-icon matPrefix>email</mat-icon>
+                    <mat-label>{{ 'settings.domainRenewal.testTo' | translate }}</mat-label>
+                    <input matInput type="email" dir="ltr" [(ngModel)]="renewalTestTo" autocomplete="email">
+                  </mat-form-field>
+                </div>
+
+                <div class="email-config-toggles">
+                  <mat-slide-toggle [(ngModel)]="renewalTestInApp" color="primary">
+                    {{ 'settings.domainRenewal.channelInApp' | translate }}
+                  </mat-slide-toggle>
+                  <mat-slide-toggle [(ngModel)]="renewalTestEmail" color="primary">
+                    {{ 'settings.domainRenewal.channelEmail' | translate }}
+                  </mat-slide-toggle>
+                  <mat-slide-toggle [(ngModel)]="renewalTestSms" color="primary">
+                    {{ 'settings.domainRenewal.channelSms' | translate }}
+                  </mat-slide-toggle>
+                </div>
+
+                @if (renewalTestError) {
+                  <p class="sms-credit-error">{{ renewalTestError }}</p>
+                }
+                @if (renewalTestSuccess) {
+                  <p class="settings-group-desc">{{ renewalTestSuccess }}</p>
+                }
+
+                <div class="form-actions">
+                  <button mat-stroked-button type="button" color="primary"
+                          [disabled]="renewalTestSending || (!renewalTestInApp && !renewalTestEmail && !renewalTestSms)"
+                          (click)="sendTestRenewal()">
+                    {{ (renewalTestSending ? 'settings.domainRenewal.testSending' : 'settings.domainRenewal.testSend') | translate }}
+                  </button>
+                </div>
+              </div>
+            }
+          </section>
         }
       </div>
     </div>
@@ -1127,6 +1292,81 @@ interface SettingsNavItem {
       margin-bottom: 16px;
     }
 
+    .domain-renewal-channels {
+      margin-bottom: 8px;
+    }
+
+    .domain-renewal-channels .channel-label {
+      margin-bottom: 4px;
+    }
+
+    .domain-renewal-windows {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .field-label {
+      margin: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .window-presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .window-preset {
+      min-height: 36px;
+      padding: 6px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+    }
+
+    .window-preset:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .window-preset.selected {
+      border-color: var(--accent);
+      background: var(--accent-light);
+      color: var(--accent-dark);
+    }
+
+    :host-context(body.dark-theme) .window-preset.selected {
+      color: var(--accent);
+    }
+
+    .window-chip-set {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .window-custom-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .window-custom-field {
+      flex: 1 1 180px;
+      min-width: 160px;
+    }
+
     .email-test-card {
       margin-top: 20px;
       padding: 14px 16px;
@@ -1174,6 +1414,7 @@ export class SettingsComponent implements OnInit {
   private readonly passwordPolicyService = inject(PasswordPolicyService);
   private readonly smsConfigService = inject(SmsConfigService);
   private readonly emailConfigService = inject(EmailConfigService);
+  private readonly domainSettingsService = inject(DomainSettingsService);
   private readonly apiError = inject(ApiErrorService);
   private readonly translate = inject(TranslateService);
   private readonly snackBar = inject(MatSnackBar);
@@ -1194,7 +1435,8 @@ export class SettingsComponent implements OnInit {
     { id: 'security', titleKey: 'settings.security', icon: 'shield' },
     { id: 'password-policy', titleKey: 'settings.passwordPolicy.title', icon: 'policy', adminOnly: true },
     { id: 'email-config', titleKey: 'settings.emailConfig.title', icon: 'email', adminOnly: true },
-    { id: 'sms-config', titleKey: 'settings.smsConfig.title', icon: 'sms', adminOnly: true }
+    { id: 'sms-config', titleKey: 'settings.smsConfig.title', icon: 'sms', adminOnly: true },
+    { id: 'domain-renewal', titleKey: 'settings.domainRenewal.title', icon: 'event_upcoming', adminOnly: true }
   ];
 
   get visibleNavItems(): SettingsNavItem[] {
@@ -1234,6 +1476,21 @@ export class SettingsComponent implements OnInit {
   smsApiKeyConfigured = false;
   emailConfigLoading = false;
   emailConfigSaving = false;
+  domainRenewalLoading = false;
+  domainRenewalSaving = false;
+  domainRenewalLastRunDate: string | null = null;
+  renewalWindowsSelected: number[] = [90, 60, 30];
+  renewalWindowPresets = [90, 60, 30, 14, 7];
+  renewalCustomDays: number | null = null;
+  renewalTestDomain = 'example.com';
+  renewalTestWindowDays = 30;
+  renewalTestTo = '';
+  renewalTestInApp = true;
+  renewalTestEmail = true;
+  renewalTestSms = false;
+  renewalTestSending = false;
+  renewalTestError = '';
+  renewalTestSuccess = '';
   emailPasswordConfigured = false;
   emailTestTo = '';
   emailTestSending = false;
@@ -1308,6 +1565,22 @@ export class SettingsComponent implements OnInit {
     useTls: [true]
   });
 
+  domainRenewalForm = this.fb.nonNullable.group({
+    renewalRemindersEnabled: [true],
+    renewalInAppEnabled: [true],
+    renewalEmailEnabled: [true],
+    renewalSmsEnabled: [true],
+    renewalSendTime: ['09:00', [Validators.required, Validators.pattern(/^\d{2}:\d{2}$/)]]
+  });
+
+  get domainRenewalChannelError(): boolean {
+    const raw = this.domainRenewalForm.getRawValue();
+    return !!raw.renewalRemindersEnabled
+      && !raw.renewalInAppEnabled
+      && !raw.renewalEmailEnabled
+      && !raw.renewalSmsEnabled;
+  }
+
   ngOnInit(): void {
     this.usersService.getMe().subscribe({
       next: (user) => this.applyUser(user),
@@ -1318,6 +1591,7 @@ export class SettingsComponent implements OnInit {
       this.loadAdminPasswordPolicy();
       this.loadAdminEmailConfig();
       this.loadAdminSmsConfig();
+      this.loadAdminDomainRenewalSettings();
     }
     this.passwordForm.controls.newPassword.valueChanges.subscribe((value) => {
       this.refreshPasswordFeedback(String(value ?? ''));
@@ -1724,6 +1998,159 @@ export class SettingsComponent implements OnInit {
     });
   }
 
+  private loadAdminDomainRenewalSettings(): void {
+    this.domainRenewalLoading = true;
+    this.domainSettingsService.getSettings().subscribe({
+      next: (settings) => {
+        this.domainRenewalLoading = false;
+        this.applyDomainRenewalSettings(settings);
+      },
+      error: (error) => {
+        this.domainRenewalLoading = false;
+        this.showError(error);
+      }
+    });
+  }
+
+  private applyDomainRenewalSettings(settings: {
+    renewalRemindersEnabled: boolean;
+    renewalInAppEnabled: boolean;
+    renewalEmailEnabled: boolean;
+    renewalSmsEnabled: boolean;
+    renewalWindowsParsed?: number[];
+    renewalWindows?: string;
+    renewalSendHour: number;
+    renewalSendMinute: number;
+    renewalLastRunDate?: string | null;
+  }): void {
+    this.domainRenewalLastRunDate = settings.renewalLastRunDate || null;
+    const windows = (settings.renewalWindowsParsed?.length
+      ? settings.renewalWindowsParsed
+      : String(settings.renewalWindows || '90,60,30')
+          .split(',')
+          .map((v) => Number(v.trim()))
+          .filter((n) => Number.isFinite(n) && n > 0))
+      .slice()
+      .sort((a, b) => b - a);
+    this.renewalWindowsSelected = windows.length ? windows : [90, 60, 30];
+    const hour = Number.isFinite(settings.renewalSendHour) ? settings.renewalSendHour : 9;
+    const minute = Number.isFinite(settings.renewalSendMinute) ? settings.renewalSendMinute : 0;
+    this.domainRenewalForm.patchValue({
+      renewalRemindersEnabled: settings.renewalRemindersEnabled !== false,
+      renewalInAppEnabled: settings.renewalInAppEnabled !== false,
+      renewalEmailEnabled: settings.renewalEmailEnabled !== false,
+      renewalSmsEnabled: settings.renewalSmsEnabled !== false,
+      renewalSendTime: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+    });
+  }
+
+  isRenewalWindowSelected(days: number): boolean {
+    return this.renewalWindowsSelected.includes(days);
+  }
+
+  toggleRenewalWindow(days: number): void {
+    if (this.isRenewalWindowSelected(days)) {
+      this.removeRenewalWindow(days);
+      return;
+    }
+    this.renewalWindowsSelected = [...this.renewalWindowsSelected, days].sort((a, b) => b - a);
+  }
+
+  removeRenewalWindow(days: number): void {
+    this.renewalWindowsSelected = this.renewalWindowsSelected.filter((d) => d !== days);
+  }
+
+  canAddCustomRenewalWindow(): boolean {
+    const days = Number(this.renewalCustomDays);
+    return Number.isFinite(days) && days >= 1 && days <= 3650 && !this.isRenewalWindowSelected(days);
+  }
+
+  addCustomRenewalWindow(): void {
+    if (!this.canAddCustomRenewalWindow()) {
+      return;
+    }
+    const days = Math.floor(Number(this.renewalCustomDays));
+    this.renewalWindowsSelected = [...this.renewalWindowsSelected, days].sort((a, b) => b - a);
+    this.renewalCustomDays = null;
+  }
+
+  saveDomainRenewalSettings(): void {
+    if (this.domainRenewalForm.invalid || !this.authService.isAdmin()) {
+      this.domainRenewalForm.markAllAsTouched();
+      return;
+    }
+    if (!this.renewalWindowsSelected.length || this.domainRenewalChannelError) {
+      return;
+    }
+    const raw = this.domainRenewalForm.getRawValue();
+    const [hourPart, minutePart] = String(raw.renewalSendTime || '09:00').split(':');
+    const hour = Number(hourPart);
+    const minute = Number(minutePart);
+    this.domainRenewalSaving = true;
+    this.domainSettingsService.updateSettings({
+      renewalRemindersEnabled: !!raw.renewalRemindersEnabled,
+      renewalInAppEnabled: !!raw.renewalInAppEnabled,
+      renewalEmailEnabled: !!raw.renewalEmailEnabled,
+      renewalSmsEnabled: !!raw.renewalSmsEnabled,
+      renewalWindows: this.renewalWindowsSelected.slice().sort((a, b) => b - a),
+      renewalSendHour: hour,
+      renewalSendMinute: minute
+    }).subscribe({
+      next: (settings) => {
+        this.domainRenewalSaving = false;
+        this.applyDomainRenewalSettings(settings);
+        this.snack(this.translate.instant('settings.domainRenewal.saved'));
+      },
+      error: (error) => {
+        this.domainRenewalSaving = false;
+        this.showError(error);
+      }
+    });
+  }
+
+  sendTestRenewal(): void {
+    if (!this.authService.isAdmin() || this.renewalTestSending) {
+      return;
+    }
+    if (!this.renewalTestInApp && !this.renewalTestEmail && !this.renewalTestSms) {
+      return;
+    }
+    const windowDays = Math.floor(Number(this.renewalTestWindowDays));
+    if (!Number.isFinite(windowDays) || windowDays < 1 || windowDays > 3650) {
+      this.renewalTestError = this.translate.instant('settings.domainRenewal.testWindowInvalid');
+      return;
+    }
+    this.renewalTestSending = true;
+    this.renewalTestError = '';
+    this.renewalTestSuccess = '';
+    this.domainSettingsService.sendTestRenewal({
+      domainName: (this.renewalTestDomain || 'example.com').trim().toLowerCase(),
+      windowDays,
+      toEmail: this.renewalTestTo.trim() || undefined,
+      sendInApp: this.renewalTestInApp,
+      sendEmail: this.renewalTestEmail,
+      sendSms: this.renewalTestSms
+    }).subscribe({
+      next: (result) => {
+        this.renewalTestSending = false;
+        if (result.success) {
+          const channels = (result.channelsSent || []).join(', ') || '—';
+          this.renewalTestSuccess = this.translate.instant('settings.domainRenewal.testSuccess', { channels });
+          if (result.errorMessage) {
+            this.renewalTestError = result.errorMessage;
+          }
+        } else {
+          this.renewalTestError = result.errorMessage
+            || this.translate.instant('settings.domainRenewal.testFailed');
+        }
+      },
+      error: (error) => {
+        this.renewalTestSending = false;
+        this.renewalTestError = this.apiError.resolve(error);
+      }
+    });
+  }
+
   countryLabel = countryOptionLabel;
 
   get phoneCountries() {
@@ -1942,6 +2369,9 @@ export class SettingsComponent implements OnInit {
     this.phoneOtpCode = '';
     if (!this.emailTestTo && user.email) {
       this.emailTestTo = user.email;
+    }
+    if (!this.renewalTestTo && user.email) {
+      this.renewalTestTo = user.email;
     }
   }
 

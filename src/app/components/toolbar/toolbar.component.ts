@@ -548,7 +548,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   openNotification(notif: AppNotification): void {
     const navigate = () => {
-      const route = this.notificationService.ticketRoute(notif);
+      const route = this.notificationService.notificationRoute(notif);
       if (route) {
         this.router.navigate(route);
       }

@@ -544,6 +544,11 @@ body.dark-theme {
     overflow: visible !important;
   }
 
+  .domain-whois-dialog-panel .mat-mdc-dialog-content,
+  .domain-whois-dialog-panel .mdc-dialog__content {
+    overflow-x: hidden;
+  }
+
   .domain-form-dialog-panel .mat-mdc-dialog-surface {
     min-width: min(560px, 95vw);
     padding-inline: 8px;
@@ -1289,7 +1294,9 @@ a {
 .panel-surface.table-wrap .users-table.mat-mdc-table,
 .panel-surface.table-wrap table.users-table,
 .panel-surface.table-wrap .tickets-table.mat-mdc-table,
-.panel-surface.table-wrap table.tickets-table {
+.panel-surface.table-wrap table.tickets-table,
+.panel-surface.table-wrap .domains-table.mat-mdc-table,
+.panel-surface.table-wrap table.domains-table {
   width: 100%;
   min-width: 960px;
   background: var(--bg-primary) !important;
@@ -1297,12 +1304,16 @@ a {
   border-spacing: 0;
 }
 
-.panel-surface.table-wrap .users-table .mat-mdc-header-row {
+.panel-surface.table-wrap .users-table .mat-mdc-header-row,
+.panel-surface.table-wrap .tickets-table .mat-mdc-header-row,
+.panel-surface.table-wrap .domains-table .mat-mdc-header-row {
   height: 48px;
   background: var(--bg-secondary) !important;
 }
 
-.panel-surface.table-wrap .users-table .mat-mdc-header-cell {
+.panel-surface.table-wrap .users-table .mat-mdc-header-cell,
+.panel-surface.table-wrap .tickets-table .mat-mdc-header-cell,
+.panel-surface.table-wrap .domains-table .mat-mdc-header-cell {
   font-weight: 700 !important;
   font-size: 0.7rem !important;
   text-transform: uppercase;
@@ -1315,16 +1326,22 @@ a {
   vertical-align: middle;
 }
 
-.panel-surface.table-wrap .users-table .mat-mdc-row {
+.panel-surface.table-wrap .users-table .mat-mdc-row,
+.panel-surface.table-wrap .tickets-table .mat-mdc-row,
+.panel-surface.table-wrap .domains-table .mat-mdc-row {
   height: 56px;
   background: var(--bg-primary) !important;
 }
 
-.panel-surface.table-wrap .users-table .mat-mdc-row:nth-child(even) {
+.panel-surface.table-wrap .users-table .mat-mdc-row:nth-child(even),
+.panel-surface.table-wrap .tickets-table .mat-mdc-row:nth-child(even),
+.panel-surface.table-wrap .domains-table .mat-mdc-row:nth-child(even) {
   background: color-mix(in srgb, var(--bg-secondary) 70%, var(--bg-primary)) !important;
 }
 
-.panel-surface.table-wrap .users-table .mat-mdc-cell {
+.panel-surface.table-wrap .users-table .mat-mdc-cell,
+.panel-surface.table-wrap .tickets-table .mat-mdc-cell,
+.panel-surface.table-wrap .domains-table .mat-mdc-cell {
   padding: 12px 16px !important;
   border-bottom: 1px solid var(--border-light) !important;
   color: var(--text-primary) !important;
@@ -1334,15 +1351,23 @@ a {
 }
 
 .panel-surface.table-wrap .users-table .mat-mdc-row:hover,
-.panel-surface.table-wrap .users-table .mat-mdc-row:hover .mat-mdc-cell {
+.panel-surface.table-wrap .users-table .mat-mdc-row:hover .mat-mdc-cell,
+.panel-surface.table-wrap .tickets-table .mat-mdc-row:hover,
+.panel-surface.table-wrap .tickets-table .mat-mdc-row:hover .mat-mdc-cell,
+.panel-surface.table-wrap .domains-table .mat-mdc-row:hover,
+.panel-surface.table-wrap .domains-table .mat-mdc-row:hover .mat-mdc-cell {
   background: var(--bg-hover) !important;
 }
 
-.panel-surface.table-wrap .users-table .mat-sort-header-arrow {
+.panel-surface.table-wrap .users-table .mat-sort-header-arrow,
+.panel-surface.table-wrap .tickets-table .mat-sort-header-arrow,
+.panel-surface.table-wrap .domains-table .mat-sort-header-arrow {
   color: var(--primary) !important;
 }
 
-.panel-surface.table-wrap .users-table .mat-mdc-header-cell .mat-sort-header-container {
+.panel-surface.table-wrap .users-table .mat-mdc-header-cell .mat-sort-header-container,
+.panel-surface.table-wrap .tickets-table .mat-mdc-header-cell .mat-sort-header-container,
+.panel-surface.table-wrap .domains-table .mat-mdc-header-cell .mat-sort-header-container {
   justify-content: flex-start;
 }
 
@@ -1389,17 +1414,25 @@ a {
   text-align: end;
 }
 
-body.dark-theme .panel-surface.table-wrap .users-table .mat-mdc-header-cell {
+body.dark-theme .panel-surface.table-wrap .users-table .mat-mdc-header-cell,
+body.dark-theme .panel-surface.table-wrap .tickets-table .mat-mdc-header-cell,
+body.dark-theme .panel-surface.table-wrap .domains-table .mat-mdc-header-cell {
   background: var(--bg-secondary) !important;
   color: var(--text-muted) !important;
 }
 
-body.dark-theme .panel-surface.table-wrap .users-table .mat-mdc-row:nth-child(even) {
+body.dark-theme .panel-surface.table-wrap .users-table .mat-mdc-row:nth-child(even),
+body.dark-theme .panel-surface.table-wrap .tickets-table .mat-mdc-row:nth-child(even),
+body.dark-theme .panel-surface.table-wrap .domains-table .mat-mdc-row:nth-child(even) {
   background: color-mix(in srgb, var(--bg-secondary) 85%, #000) !important;
 }
 
 body.dark-theme .panel-surface.table-wrap .users-table .mat-mdc-row:hover,
-body.dark-theme .panel-surface.table-wrap .users-table .mat-mdc-row:hover .mat-mdc-cell {
+body.dark-theme .panel-surface.table-wrap .users-table .mat-mdc-row:hover .mat-mdc-cell,
+body.dark-theme .panel-surface.table-wrap .tickets-table .mat-mdc-row:hover,
+body.dark-theme .panel-surface.table-wrap .tickets-table .mat-mdc-row:hover .mat-mdc-cell,
+body.dark-theme .panel-surface.table-wrap .domains-table .mat-mdc-row:hover,
+body.dark-theme .panel-surface.table-wrap .domains-table .mat-mdc-row:hover .mat-mdc-cell {
   background: var(--bg-hover) !important;
 }
 

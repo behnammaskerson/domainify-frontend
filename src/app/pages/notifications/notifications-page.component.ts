@@ -89,7 +89,7 @@ type ReadFilter = 'ALL' | 'UNREAD';
                     </span>
                     <span class="copy">
                       <span class="message">{{ notificationService.messageText(notif) }}</span>
-                      @if (notif.ticketSubject) {
+                      @if (notif.ticketSubject && notif.type !== 'DOMAIN_RENEWAL') {
                         <span class="subject">{{ notif.ticketSubject }}</span>
                       }
                       <span class="meta">
@@ -396,7 +396,7 @@ export class NotificationsPageComponent implements OnInit {
 
   openNotification(notif: AppNotification): void {
     const markAndNavigate = () => {
-      const route = this.notificationService.ticketRoute(notif);
+      const route = this.notificationService.notificationRoute(notif);
       if (route) {
         this.router.navigate(route);
       }

@@ -16,7 +16,8 @@ export type NotificationType =
   | 'TICKET_REOPENED'
   | 'TICKET_WATCHER_ADDED'
   | 'TICKET_TRANSFERRED'
-  | 'TICKET_ESCALATED';
+  | 'TICKET_ESCALATED'
+  | 'DOMAIN_RENEWAL';
 
 export type TicketStatus = 'NEW' | 'OPEN' | 'PENDING' | 'ON_HOLD' | 'RESOLVED' | 'CLOSED';
 
@@ -120,6 +121,24 @@ export class NotificationService {
   }
 
   messageText(notif: AppNotification): string {
+    if (notif.type === 'DOMAIN_RENEWAL') {
+      const domain = notif.ticketSubject || '';
+      const expiresAt = notif.ticketPublicNumber || '';
+      let days = '';
+      if (expiresAt) {
+        const expiry = new Date(`${expiresAt}T00:00:00`);
+        if (!Number.isNaN(expiry.getTime())) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          days = String(Math.max(0, Math.round((expiry.getTime() - today.getTime()) / 86400000)));
+        }
+      }
+      return this.translate.instant('notifications.types.DOMAIN_RENEWAL', {
+        domain,
+        expiresAt,
+        days
+      });
+    }
     const autoEscalated = notif.type === 'TICKET_ESCALATED' && !notif.actorName;
     const key = autoEscalated
       ? 'notifications.types.TICKET_ESCALATED_AUTO'
@@ -166,6 +185,8 @@ export class NotificationService {
         return 'lock';
       case 'TICKET_REOPENED':
         return 'lock_open';
+      case 'DOMAIN_RENEWAL':
+        return 'event_upcoming';
       default:
         return 'notifications';
     }
@@ -184,6 +205,8 @@ export class NotificationService {
         return 'var(--text-muted)';
       case 'TICKET_REOPENED':
         return 'var(--success)';
+      case 'DOMAIN_RENEWAL':
+        return 'var(--warning)';
       default:
         return 'var(--warning)';
     }
@@ -208,6 +231,13 @@ export class NotificationService {
     }
     const days = Math.floor(hours / 24);
     return this.translate.instant('notifications.time.daysAgo', { count: days });
+  }
+
+  notificationRoute(notif: AppNotification): string[] | null {
+    if (notif.type === 'DOMAIN_RENEWAL') {
+      return ['/domains'];
+    }
+    return this.ticketRoute(notif);
   }
 
   ticketRoute(notif: AppNotification): string[] | null {

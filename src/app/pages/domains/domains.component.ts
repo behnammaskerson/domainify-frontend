@@ -18,6 +18,7 @@ import { PageHeroComponent } from '../../components/page-hero/page-hero.componen
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { DomainDialogComponent } from '../../components/domain-dialog/domain-dialog.component';
 import { DomainOwnershipDialogComponent } from '../../components/domain-ownership-dialog/domain-ownership-dialog.component';
+import { DomainWhoisDialogComponent } from '../../components/domain-whois-dialog/domain-whois-dialog.component';
 import { LocaleCurrencyPipe, LocaleDatePipe, LocaleDigitsPipe, LocaleNumberPipe } from '../../pipes/locale-format.pipe';
 import { ApiErrorService } from '../../services/api-error.service';
 import {
@@ -101,100 +102,93 @@ type StatusFilter = 'all' | 'active' | 'pending' | 'sold' | 'expired';
         </div>
 
         <div class="panel-surface table-wrap">
-          @if (loading && domains.length === 0) {
-            <p class="muted state-msg">{{ 'domains.loading' | translate }}</p>
-          } @else if (!loading && domains.length === 0) {
-            <div class="empty-state">
-              <mat-icon>language</mat-icon>
-              <p>{{ 'domains.empty' | translate }}</p>
-              <button mat-flat-button color="primary" type="button" (click)="openCreate()">
-                {{ 'domains.addNew' | translate }}
-              </button>
-            </div>
-          } @else {
-            <div class="table-scroll">
-              <table mat-table
-                     [dataSource]="domains"
-                     class="domains-table"
-                     matSort
-                     [matSortActive]="sortActive"
-                     [matSortDirection]="sortDirection"
-                     matSortDisableClear
-                     (matSortChange)="onSortChange($event)">
-                <ng-container matColumnDef="rowNumber">
-                  <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
-                  <td mat-cell *matCellDef="let domain; let i = index" class="col-row-num">
-                    {{ (pageIndex * pageSize + i + 1) | localeDigits }}
-                  </td>
-                </ng-container>
+          <div class="table-scroll">
+            <table mat-table
+                   [dataSource]="domains"
+                   class="mat-mdc-table domains-table"
+                   matSort
+                   [matSortActive]="sortActive"
+                   [matSortDirection]="sortDirection"
+                   matSortDisableClear
+                   [attr.aria-label]="'domains.title' | translate"
+                   (matSortChange)="onSortChange($event)">
+              <ng-container matColumnDef="rowNumber">
+                <th mat-header-cell *matHeaderCellDef class="col-row-num">{{ 'common.rowNumber' | translate }}</th>
+                <td mat-cell *matCellDef="let domain; let i = index" class="col-row-num">
+                  {{ (pageIndex * pageSize + i + 1) | localeDigits }}
+                </td>
+              </ng-container>
 
-                <ng-container matColumnDef="name">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header="name">{{ 'domains.table.name' | translate }}</th>
-                  <td mat-cell *matCellDef="let domain">
-                    <div class="domain-cell">
-                      <div>
-                        <div class="domain-name">{{ domain.name }}</div>
-                        <div class="domain-category">{{ domain.categoryName || '—' }}</div>
-                      </div>
-                    </div>
-                  </td>
-                </ng-container>
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="name">{{ 'domains.table.name' | translate }}</th>
+                <td mat-cell *matCellDef="let domain">
+                  <div class="domain-cell">
+                    <span class="cell-strong" dir="ltr">{{ domain.name }}</span>
+                    <span class="cell-muted">{{ domain.categoryName || '—' }}</span>
+                  </div>
+                </td>
+              </ng-container>
 
-                <ng-container matColumnDef="status">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header="status">{{ 'domains.table.status' | translate }}</th>
-                  <td mat-cell *matCellDef="let domain">
-                    <span class="status-pill" [class]="(domain.status || '').toLowerCase()">
-                      {{ 'domains.status.' + (domain.status || '').toLowerCase() | translate }}
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="status">{{ 'domains.table.status' | translate }}</th>
+                <td mat-cell *matCellDef="let domain">
+                  <span class="status-pill" [class]="(domain.status || '').toLowerCase()">
+                    {{ 'domains.status.' + (domain.status || '').toLowerCase() | translate }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="ownership">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="ownershipStatus">{{ 'domains.table.ownership' | translate }}</th>
+                <td mat-cell *matCellDef="let domain">
+                  <span class="method-pill ownership-pill" [class]="(domain.ownershipStatus || 'UNVERIFIED').toLowerCase()">
+                    {{ 'domains.ownershipStatus.' + (domain.ownershipStatus || 'UNVERIFIED').toLowerCase() | translate }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="price">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="price">{{ 'domains.table.price' | translate }}</th>
+                <td mat-cell *matCellDef="let domain">
+                  <span class="cell-strong price" dir="ltr">{{ domain.price | localeCurrency }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="expires">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="expiresAt">{{ 'domains.table.expires' | translate }}</th>
+                <td mat-cell *matCellDef="let domain">
+                  @if (domain.expiresAt) {
+                    <span class="cell-datetime expires">
+                      {{ domain.expiresAt | localeDate:{ month: 'short', year: 'numeric', day: 'numeric' } }}
+                      @if (domain.expiresSource === 'REGISTRAR') {
+                        <mat-icon class="expires-source" [matTooltip]="'domains.form.expiresFromRegistrar' | translate">cloud_done</mat-icon>
+                      }
                     </span>
-                  </td>
-                </ng-container>
+                  } @else {
+                    <span class="cell-muted">—</span>
+                  }
+                </td>
+              </ng-container>
 
-                <ng-container matColumnDef="ownership">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header="ownershipStatus">{{ 'domains.table.ownership' | translate }}</th>
-                  <td mat-cell *matCellDef="let domain">
-                    <span class="ownership-pill" [class]="(domain.ownershipStatus || 'UNVERIFIED').toLowerCase()">
-                      {{ 'domains.ownershipStatus.' + (domain.ownershipStatus || 'UNVERIFIED').toLowerCase() | translate }}
-                    </span>
-                  </td>
-                </ng-container>
-
-                <ng-container matColumnDef="price">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header="price">{{ 'domains.table.price' | translate }}</th>
-                  <td mat-cell *matCellDef="let domain">
-                    <span class="price">{{ domain.price | localeCurrency }}</span>
-                  </td>
-                </ng-container>
-
-                <ng-container matColumnDef="expires">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header="expiresAt">{{ 'domains.table.expires' | translate }}</th>
-                  <td mat-cell *matCellDef="let domain">
-                    @if (domain.expiresAt) {
-                      <span class="expires">{{ domain.expiresAt | localeDate:{ month: 'short', year: 'numeric', day: 'numeric' } }}</span>
-                    } @else {
-                      <span class="expires">—</span>
-                    }
-                  </td>
-                </ng-container>
-
-                <ng-container matColumnDef="actions">
-                  <th mat-header-cell *matHeaderCellDef></th>
-                  <td mat-cell *matCellDef="let domain">
-                    <button mat-icon-button
-                            type="button"
-                            [matMenuTriggerFor]="actionMenu"
-                            [attr.aria-label]="'a11y.domainActions' | translate:{ domain: domain.name }"
-                            [matTooltip]="'a11y.actions' | translate">
-                      <mat-icon>more_vert</mat-icon>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef class="col-actions"></th>
+                <td mat-cell *matCellDef="let domain" class="col-actions">
+                  <button mat-icon-button
+                          type="button"
+                          [matMenuTriggerFor]="actionMenu"
+                          [attr.aria-label]="'a11y.domainActions' | translate:{ domain: domain.name }"
+                          [matTooltip]="'a11y.actions' | translate">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #actionMenu="matMenu">
+                    <button mat-menu-item type="button" (click)="openView(domain)">
+                      <mat-icon>visibility</mat-icon>
+                      {{ 'common.view' | translate }}
                     </button>
-                    <mat-menu #actionMenu="matMenu">
-                      <button mat-menu-item type="button" (click)="openView(domain)">
-                        <mat-icon>visibility</mat-icon>
-                        {{ 'common.view' | translate }}
-                      </button>
-                      <button mat-menu-item type="button" (click)="openEdit(domain)">
-                        <mat-icon>edit</mat-icon>
-                        {{ 'common.edit' | translate }}
-                      </button>
+                    <button mat-menu-item type="button" (click)="openEdit(domain)">
+                      <mat-icon>edit</mat-icon>
+                      {{ 'common.edit' | translate }}
+                    </button>
                       <button mat-menu-item type="button" (click)="openOwnership(domain)">
                         <mat-icon>{{ domain.ownershipStatus === 'VERIFIED' ? 'verified' : 'verified_user' }}</mat-icon>
                         {{ (domain.ownershipStatus === 'VERIFIED'
@@ -203,36 +197,45 @@ type StatusFilter = 'all' | 'active' | 'pending' | 'sold' | 'expired';
                               ? 'domains.ownership.continue'
                               : 'domains.ownership.verify') | translate }}
                       </button>
-                      <button mat-menu-item type="button" class="delete-item" (click)="onDelete(domain)">
-                        <mat-icon>delete</mat-icon>
-                        {{ 'common.delete' | translate }}
+                      <button mat-menu-item type="button" (click)="openWhois(domain)">
+                        <mat-icon>travel_explore</mat-icon>
+                        {{ 'domains.actions.whois' | translate }}
                       </button>
-                    </mat-menu>
-                  </td>
-                </ng-container>
+                      <button mat-menu-item type="button" (click)="refreshExpiry(domain)">
+                        <mat-icon>event_repeat</mat-icon>
+                        {{ 'domains.actions.refreshExpiry' | translate }}
+                      </button>
+                    <button mat-menu-item type="button" class="delete-item" (click)="onDelete(domain)">
+                      <mat-icon>delete</mat-icon>
+                      {{ 'common.delete' | translate }}
+                    </button>
+                  </mat-menu>
+                </td>
+              </ng-container>
 
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-              </table>
-            </div>
+              <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              <tr class="mat-row empty-row" *matNoDataRow>
+                <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+                  <div class="empty-state">
+                    {{ loading ? ('common.loading' | translate) : ('domains.empty' | translate) }}
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
 
-            <mat-paginator
-              [length]="totalElements"
-              [pageIndex]="pageIndex"
-              [pageSize]="pageSize"
-              [pageSizeOptions]="[10, 25, 50]"
-              [disabled]="loading"
-              (page)="onPage($event)"
-              [attr.aria-label]="'domains.pagination' | translate">
-            </mat-paginator>
-          }
+          <mat-paginator
+            [length]="totalElements"
+            [pageIndex]="pageIndex"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="[5, 10, 25, 50]"
+            [showFirstLastButtons]="true"
+            [disabled]="loading"
+            (page)="onPage($event)"
+            [attr.aria-label]="'domains.pagination' | translate">
+          </mat-paginator>
         </div>
-
-        @if (totalElements > 0) {
-          <p class="result-count muted">
-            {{ 'domains.resultCount' | translate:{ count: (totalElements | localeDigits) } }}
-          </p>
-        }
       </div>
     </div>
   `,
@@ -241,150 +244,61 @@ type StatusFilter = 'all' | 'active' | 'pending' | 'sold' | 'expired';
       width: min(100%, 280px);
     }
 
-    .filter-bar {
+    .domain-cell {
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .filter-tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .filter-tab {
-      border: 1px solid var(--border-color);
-      background: transparent;
-      color: var(--text-secondary);
-      border-radius: 999px;
-      padding: 6px 12px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font: inherit;
-    }
-
-    .filter-tab.active {
-      border-color: var(--primary-color, var(--primary));
-      color: var(--text-primary);
-      background: color-mix(in srgb, var(--primary-color, var(--primary)) 12%, transparent);
-    }
-
-    .filter-tab .count {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .table-wrap {
-      padding: 0;
-      overflow: hidden;
-    }
-
-    .table-scroll {
-      overflow-x: auto;
-    }
-
-    .domains-table {
-      width: 100%;
-    }
-
-    .col-row-num {
-      width: 48px;
-      max-width: 48px;
-      text-align: center;
-      color: var(--text-muted);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .mat-mdc-header-cell {
-      font-weight: 700;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-      padding: 14px 20px;
-      border-bottom: 1px solid var(--border-color);
-      background: transparent;
-    }
-
-    .mat-mdc-cell {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border-light);
-      color: var(--text-primary);
-    }
-
-    .mat-mdc-row:last-child .mat-mdc-cell {
-      border-bottom: none;
-    }
-
-    .domain-name {
-      font-weight: 700;
-      font-size: 0.92rem;
-      color: var(--text-primary);
-    }
-
-    .domain-category {
-      font-size: 0.75rem;
-      color: var(--text-muted);
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
     }
 
     .price {
-      font-weight: 700;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
     }
 
     .expires {
-      color: var(--text-secondary);
-      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .expires-source {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
     }
 
     .delete-item {
       color: var(--danger) !important;
     }
 
-    .muted { color: var(--text-muted); }
-    .state-msg { padding: 24px 20px; margin: 0; }
     .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      padding: 40px 20px;
+      padding: 28px 16px;
       text-align: center;
       color: var(--text-muted);
     }
-    .result-count { margin: 10px 4px 0; font-size: 0.85rem; }
 
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: color-mix(in srgb, #64748b 12%, transparent);
+    .empty-row .mat-mdc-cell {
+      border-bottom: none !important;
     }
-    .status-pill.active { background: color-mix(in srgb, #16a34a 14%, transparent); }
-    .status-pill.pending { background: color-mix(in srgb, #d97706 14%, transparent); }
-    .status-pill.sold { background: color-mix(in srgb, #2563eb 14%, transparent); }
-    .status-pill.expired { background: color-mix(in srgb, #dc2626 12%, transparent); }
-    .ownership-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: color-mix(in srgb, #64748b 12%, transparent);
+
+    .ownership-pill.verified {
+      background: var(--success-light);
+      color: var(--success);
+      border-color: transparent;
     }
-    .ownership-pill.verified { background: color-mix(in srgb, #16a34a 14%, transparent); }
-    .ownership-pill.pending { background: color-mix(in srgb, #d97706 14%, transparent); }
-    .ownership-pill.unverified { background: color-mix(in srgb, #64748b 12%, transparent); }
+
+    .ownership-pill.pending {
+      background: var(--warning-light);
+      color: var(--warning);
+      border-color: transparent;
+    }
+
+    .ownership-pill.unverified {
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+    }
   `]
 })
 export class DomainsComponent implements OnInit, OnDestroy {
@@ -537,6 +451,34 @@ export class DomainsComponent implements OnInit, OnDestroy {
       if (updated) {
         this.reload();
       }
+    });
+  }
+
+  openWhois(domain: DomainItem): void {
+    const ref = this.dialog.open(DomainWhoisDialogComponent, {
+      width: '640px',
+      maxWidth: '95vw',
+      autoFocus: 'dialog',
+      panelClass: 'domain-whois-dialog-panel',
+      data: { domain }
+    });
+    ref.afterClosed().subscribe((result) => {
+      if (result?.appliedExpiry) {
+        this.reload();
+      }
+    });
+  }
+
+  refreshExpiry(domain: DomainItem): void {
+    if (!domain.id) {
+      return;
+    }
+    this.domainsService.refreshExpiryFromRegistrar(domain.id).subscribe({
+      next: () => {
+        this.snackBar.open(this.translate.instant('domains.form.expiryFetched'), undefined, { duration: 3000 });
+        this.reload();
+      },
+      error: (error) => this.showError(error)
     });
   }
 
