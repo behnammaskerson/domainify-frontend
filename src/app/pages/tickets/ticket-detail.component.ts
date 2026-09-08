@@ -21,6 +21,7 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-
 import { TicketMergeDialogComponent } from '../../components/ticket-merge-dialog/ticket-merge-dialog.component';
 import { TicketSplitDialogComponent } from '../../components/ticket-split-dialog/ticket-split-dialog.component';
 import { TicketLinkDialogComponent } from '../../components/ticket-link-dialog/ticket-link-dialog.component';
+import { TicketLinkRequesterDialogComponent } from '../../components/ticket-link-requester-dialog/ticket-link-requester-dialog.component';
 import { TicketEscalateDialogComponent } from '../../components/ticket-escalate-dialog/ticket-escalate-dialog.component';
 import { TicketTransferDialogComponent } from '../../components/ticket-transfer-dialog/ticket-transfer-dialog.component';
 import { TicketMessageRevisionsDialogComponent } from '../../components/ticket-message-revisions-dialog/ticket-message-revisions-dialog.component';
@@ -46,6 +47,7 @@ import {
   TicketReplyDraft,
   RelatedTicket,
   TicketTransfer,
+  TicketRequesterChange,
   TicketEscalation,
   TicketCsat
 } from '../../services/ticket.service';
@@ -265,6 +267,34 @@ type TicketDetailMode = 'customer' | 'admin';
               </div>
             </div>
             <div class="meta-row meta-row--secondary">
+              <div class="meta-item meta-requester">
+                <span class="meta-label">{{ 'tickets.detail.meta.customer' | translate }}</span>
+                <div class="meta-value">
+                  @if (isAdmin) {
+                    <div class="requester-controls">
+                      <span class="meta-text"
+                            [matTooltip]="(ticket.requesterName && ticket.requesterEmail)
+                              ? (ticket.requesterName + ' · ' + ticket.requesterEmail)
+                              : (ticket.requesterEmail || ticket.requesterName || '')">
+                        {{ ticket.requesterName || ticket.requesterEmail || '—' }}
+                      </span>
+                      @if (canLinkRequester && !ticket.deleted) {
+                        <button mat-stroked-button
+                                type="button"
+                                class="link-requester-btn"
+                                [disabled]="lifecycleBusy"
+                                [matTooltip]="'tickets.detail.linkRequester' | translate"
+                                (click)="openLinkRequester()">
+                          <mat-icon>person_search</mat-icon>
+                          <span class="link-requester-label">{{ 'tickets.detail.linkRequester' | translate }}</span>
+                        </button>
+                      }
+                    </div>
+                  } @else {
+                    <span class="meta-text">{{ ticket.requesterName || ticket.requesterEmail || '—' }}</span>
+                  }
+                </div>
+              </div>
               <div class="meta-item meta-assignee">
                 <span class="meta-label">{{ 'tickets.detail.meta.assignee' | translate }}</span>
                 <div class="meta-value">
@@ -512,6 +542,38 @@ type TicketDetailMode = 'customer' | 'admin';
                         {{ item.fromQueueName || ('tickets.detail.noQueue' | translate) }}
                         →
                         {{ item.toQueueName || ('tickets.detail.noQueue' | translate) }}
+                      </span>
+                    </div>
+                    @if (item.note) {
+                      <p class="transfer-note">{{ item.note }}</p>
+                    }
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+
+          @if (isAdmin && requesterChanges.length) {
+            <div class="tags-card panel-surface">
+              <div class="tags-header">
+                <div>
+                  <h2>{{ 'tickets.detail.requesterHistoryTitle' | translate }}</h2>
+                  <p>{{ 'tickets.detail.requesterHistoryHint' | translate }}</p>
+                </div>
+              </div>
+              <ul class="transfer-history">
+                @for (item of requesterChanges; track item.id) {
+                  <li>
+                    <div class="transfer-meta">
+                      <span>{{ item.changedByName || '—' }}</span>
+                      <span class="muted-inline" dir="ltr">{{ item.createdAt | localeDate:dateTimeFormat }}</span>
+                    </div>
+                    <div class="transfer-line">
+                      <span>
+                        {{ 'tickets.detail.meta.customer' | translate }}:
+                        {{ item.fromRequesterName || item.fromRequesterEmail || '—' }}
+                        →
+                        {{ item.toRequesterName || item.toRequesterEmail || '—' }}
                       </span>
                     </div>
                     @if (item.note) {
@@ -1002,7 +1064,10 @@ type TicketDetailMode = 'customer' | 'admin';
           }
             </div>
             @if (isAdmin && ticketId) {
-              <app-ticket-customer-side-panel class="detail-side" [ticketId]="ticketId" />
+              <app-ticket-customer-side-panel
+                class="detail-side"
+                [ticketId]="ticketId"
+                [requesterId]="ticket.requesterId ?? null" />
             }
           </div>
         }
@@ -1070,7 +1135,7 @@ type TicketDetailMode = 'customer' | 'admin';
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
     .meta-row--secondary {
-      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       padding-top: 12px;
       border-top: 1px solid var(--border-color);
     }
@@ -1088,7 +1153,8 @@ type TicketDetailMode = 'customer' | 'admin';
       width: 100%;
     }
     .meta-value > .meta-field,
-    .meta-value > .assignee-controls {
+    .meta-value > .assignee-controls,
+    .meta-value > .requester-controls {
       flex: 1 1 auto;
       min-width: 0;
     }
@@ -1109,6 +1175,7 @@ type TicketDetailMode = 'customer' | 'admin';
     }
     .meta-datetime { font-variant-numeric: tabular-nums; }
     .meta-queue,
+    .meta-requester,
     .meta-assignee { min-width: 0; }
     .meta-created,
     .meta-due {
@@ -1216,6 +1283,27 @@ type TicketDetailMode = 'customer' | 'admin';
       gap: 8px;
       width: 100%;
       min-width: 0;
+    }
+    .requester-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      min-width: 0;
+    }
+    .requester-controls:not(:has(.link-requester-btn)) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .link-requester-btn {
+      height: 40px !important;
+      min-width: 40px !important;
+      padding: 0 10px !important;
+      line-height: 1 !important;
+      flex-shrink: 0;
+    }
+    .link-requester-btn .link-requester-label {
+      margin-inline-start: 4px;
     }
     .assignee-controls:not(:has(.assign-me-btn)) {
       grid-template-columns: minmax(0, 1fr);
@@ -1585,8 +1673,10 @@ type TicketDetailMode = 'customer' | 'admin';
       }
     }
     @media (max-width: 900px) {
-      .assign-me-label { display: none; }
-      .assign-me-btn {
+      .assign-me-label,
+      .link-requester-label { display: none; }
+      .assign-me-btn,
+      .link-requester-btn {
         width: 40px !important;
         padding: 0 !important;
       }
@@ -1596,7 +1686,8 @@ type TicketDetailMode = 'customer' | 'admin';
       .meta-row--secondary {
         grid-template-columns: 1fr;
       }
-      .assignee-controls {
+      .assignee-controls,
+      .requester-controls {
         grid-template-columns: minmax(0, 1fr) auto;
       }
       .attachments-header, .message-header { flex-direction: column; }
@@ -1656,6 +1747,7 @@ export class TicketDetailComponent implements OnInit {
   canWatch = false;
   watching = false;
   canTransfer = false;
+  canLinkRequester = false;
   canEscalate = false;
   canRateCsat = false;
   csat: TicketCsat | null = null;
@@ -1665,6 +1757,7 @@ export class TicketDetailComponent implements OnInit {
   csatSubmitting = false;
   watchers: TicketAssigneeOption[] = [];
   transfers: TicketTransfer[] = [];
+  requesterChanges: TicketRequesterChange[] = [];
   escalations: TicketEscalation[] = [];
   watcherToAddId: number | null = null;
   watcherBusy = false;
@@ -2089,6 +2182,47 @@ export class TicketDetailComponent implements OnInit {
             this.applyDetail(detail);
             this.lifecycleBusy = false;
             this.snackBar.open(this.translate.instant('tickets.detail.transferSuccess'), undefined, { duration: 3000 });
+          },
+          error: (error) => {
+            this.lifecycleBusy = false;
+            this.showError(this.apiError.resolve(error));
+          }
+        });
+      });
+  }
+
+  openLinkRequester(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canLinkRequester || this.lifecycleBusy || !this.ticket) {
+      return;
+    }
+    this.dialog
+      .open(TicketLinkRequesterDialogComponent, {
+        width: '520px',
+        maxWidth: '95vw',
+        panelClass: ['app-dialog', 'ticket-link-requester-dialog-panel'],
+        data: {
+          publicNumber: this.ticket.publicNumber,
+          currentRequesterId: this.ticket.requesterId ?? null,
+          currentRequesterName: this.ticket.requesterName ?? null,
+          currentRequesterEmail: this.ticket.requesterEmail ?? null
+        }
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (!result?.requesterId || !this.ticketId) {
+          return;
+        }
+        this.lifecycleBusy = true;
+        this.ticketService.linkAdminTicketRequester(this.ticketId, {
+          requesterId: result.requesterId,
+          note: result.note || undefined
+        }).subscribe({
+          next: (detail) => {
+            this.applyDetail(detail);
+            this.lifecycleBusy = false;
+            this.snackBar.open(this.translate.instant('tickets.detail.linkRequesterSuccess'), undefined, {
+              duration: 3000
+            });
           },
           error: (error) => {
             this.lifecycleBusy = false;
@@ -2937,6 +3071,7 @@ export class TicketDetailComponent implements OnInit {
     this.canWatch = !!detail.canWatch;
     this.watching = !!detail.watching;
     this.canTransfer = !!detail.canTransfer;
+    this.canLinkRequester = !!detail.canLinkRequester;
     this.canEscalate = !!detail.canEscalate;
     this.canRateCsat = !!detail.canRateCsat;
     this.csat = detail.csat ?? null;
@@ -2946,6 +3081,7 @@ export class TicketDetailComponent implements OnInit {
     }
     this.watchers = [...(detail.watchers ?? [])];
     this.transfers = [...(detail.transfers ?? [])];
+    this.requesterChanges = [...(detail.requesterChanges ?? [])];
     this.escalations = [...(detail.escalations ?? [])];
     this.draftDueAt = detail.ticket?.dueAt ?? null;
     this.reopenUntil = detail.reopenUntil ?? null;

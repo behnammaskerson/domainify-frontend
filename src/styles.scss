@@ -596,6 +596,13 @@ body.dark-theme {
     overflow: visible !important;
   }
 
+  .ticket-link-requester-dialog-panel .mat-mdc-dialog-content,
+  .ticket-link-requester-dialog-panel .mdc-dialog__content {
+    max-height: none !important;
+    overflow: visible !important;
+    overflow-y: visible !important;
+  }
+
   .domain-whois-dialog-panel .mat-mdc-dialog-content,
   .domain-whois-dialog-panel .mdc-dialog__content {
     overflow-x: hidden;

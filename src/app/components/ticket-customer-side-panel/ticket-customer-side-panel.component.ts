@@ -397,6 +397,8 @@ export class TicketCustomerSidePanelComponent implements OnChanges {
   private readonly translationService = inject(TranslationService);
 
   @Input({ required: true }) ticketId!: number;
+  /** When the linked customer changes, reload context even if ticketId is unchanged. */
+  @Input() requesterId: number | null = null;
 
   readonly dateFormat = SMS_DATETIME_FORMAT;
 
@@ -405,7 +407,7 @@ export class TicketCustomerSidePanelComponent implements OnChanges {
   context: TicketCustomerContext | null = null;
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['ticketId'] && this.ticketId != null) {
+    if ((changes['ticketId'] || changes['requesterId']) && this.ticketId != null) {
       this.reload();
     }
   }

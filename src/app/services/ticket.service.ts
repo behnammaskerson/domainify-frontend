@@ -259,11 +259,13 @@ export interface TicketDetail {
   canWatch?: boolean;
   watching?: boolean;
   canTransfer?: boolean;
+  canLinkRequester?: boolean;
   canEscalate?: boolean;
   canRateCsat?: boolean;
   csat?: TicketCsat | null;
   watchers?: TicketAssigneeOption[];
   transfers?: TicketTransfer[];
+  requesterChanges?: TicketRequesterChange[];
   escalations?: TicketEscalation[];
   reopenUntil?: string;
   reopenWindowDays?: number;
@@ -282,6 +284,20 @@ export interface TicketTransfer {
   fromQueueName?: string | null;
   toQueueId?: number | null;
   toQueueName?: string | null;
+  note?: string | null;
+  createdAt?: string;
+}
+
+export interface TicketRequesterChange {
+  id: number;
+  changedById?: number | null;
+  changedByName?: string | null;
+  fromRequesterId?: number | null;
+  fromRequesterName?: string | null;
+  fromRequesterEmail?: string | null;
+  toRequesterId?: number | null;
+  toRequesterName?: string | null;
+  toRequesterEmail?: string | null;
   note?: string | null;
   createdAt?: string;
 }
@@ -708,6 +724,13 @@ export class TicketService {
 
   assignAdminTicket(id: number, assigneeId: number | null): Observable<TicketDetail> {
     return this.http.patch<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/assignee`, { assigneeId });
+  }
+
+  linkAdminTicketRequester(
+    id: number,
+    payload: { requesterId: number; note?: string }
+  ): Observable<TicketDetail> {
+    return this.http.patch<TicketDetail>(`${this.API_URL}/admin/tickets/${id}/requester`, payload);
   }
 
   bulkAdminTickets(payload: BulkTicketActionPayload): Observable<BulkTicketActionResult> {
