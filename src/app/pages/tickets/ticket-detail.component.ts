@@ -21,6 +21,7 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-
 import { TicketMergeDialogComponent } from '../../components/ticket-merge-dialog/ticket-merge-dialog.component';
 import { TicketSplitDialogComponent } from '../../components/ticket-split-dialog/ticket-split-dialog.component';
 import { TicketLinkDialogComponent } from '../../components/ticket-link-dialog/ticket-link-dialog.component';
+import { TicketLinkDomainDialogComponent } from '../../components/ticket-link-domain-dialog/ticket-link-domain-dialog.component';
 import { TicketLinkRequesterDialogComponent } from '../../components/ticket-link-requester-dialog/ticket-link-requester-dialog.component';
 import { TicketEscalateDialogComponent } from '../../components/ticket-escalate-dialog/ticket-escalate-dialog.component';
 import { TicketTransferDialogComponent } from '../../components/ticket-transfer-dialog/ticket-transfer-dialog.component';
@@ -46,6 +47,7 @@ import {
   TicketReplyTemplate,
   TicketReplyDraft,
   RelatedTicket,
+  RelatedDomain,
   TicketTransfer,
   TicketRequesterChange,
   TicketEscalation,
@@ -723,6 +725,55 @@ type TicketDetailMode = 'customer' | 'admin';
                                 [disabled]="lifecycleBusy"
                                 [matTooltip]="'tickets.detail.unlinkRelated' | translate"
                                 (click)="unlinkRelatedTicket(related.id)">
+                          <mat-icon>link_off</mat-icon>
+                        </button>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          }
+
+          @if (isAdmin) {
+            <div class="related-card panel-surface">
+              <div class="tags-header">
+                <div>
+                  <h2>{{ 'tickets.detail.relatedDomainsTitle' | translate }}</h2>
+                  <p>{{ 'tickets.detail.relatedDomainsHint' | translate }}</p>
+                </div>
+                @if (canLinkDomains) {
+                  <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="linkDomains()">
+                    <mat-icon>language</mat-icon>
+                    {{ 'tickets.detail.linkDomain' | translate }}
+                  </button>
+                }
+              </div>
+              @if (relatedDomains.length === 0) {
+                <p class="muted-inline">{{ 'tickets.detail.noRelatedDomains' | translate }}</p>
+              } @else {
+                <ul class="related-list">
+                  @for (domain of relatedDomains; track domain.id) {
+                    <li class="related-item">
+                      <a class="related-link" [routerLink]="['/domains']" [queryParams]="{ q: domain.name }">
+                        <span class="related-number" dir="ltr">{{ domain.name }}</span>
+                        @if (domain.status) {
+                          <span class="status-pill" [attr.data-status]="domain.status">
+                            {{ ('domains.status.' + (domain.status | lowercase)) | translate }}
+                          </span>
+                        }
+                        @if (domain.ownershipStatus) {
+                          <span class="muted-inline">
+                            {{ ('domains.ownershipStatus.' + (domain.ownershipStatus | lowercase)) | translate }}
+                          </span>
+                        }
+                      </a>
+                      @if (canLinkDomains) {
+                        <button mat-icon-button
+                                type="button"
+                                [disabled]="lifecycleBusy"
+                                [matTooltip]="'tickets.detail.unlinkDomain' | translate"
+                                (click)="unlinkDomain(domain.id)">
                           <mat-icon>link_off</mat-icon>
                         </button>
                       }
@@ -1743,6 +1794,7 @@ export class TicketDetailComponent implements OnInit {
   canMerge = false;
   canSplit = false;
   canLinkRelated = false;
+  canLinkDomains = false;
   canEditDueDate = false;
   canWatch = false;
   watching = false;
@@ -1839,6 +1891,10 @@ export class TicketDetailComponent implements OnInit {
 
   get relatedTickets(): RelatedTicket[] {
     return this.ticket?.relatedTickets ?? [];
+  }
+
+  get relatedDomains(): RelatedDomain[] {
+    return this.ticket?.relatedDomains ?? [];
   }
 
   get availableCatalogTags(): TicketTag[] {
@@ -2394,6 +2450,62 @@ export class TicketDetailComponent implements OnInit {
         this.applyDetail(detail);
         this.lifecycleBusy = false;
         this.snackBar.open(this.translate.instant('tickets.detail.unlinkedSuccess'), undefined, { duration: 3000 });
+      },
+      error: (error) => {
+        this.lifecycleBusy = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  linkDomains(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canLinkDomains || this.lifecycleBusy) {
+      return;
+    }
+    this.dialog
+      .open(TicketLinkDomainDialogComponent, {
+        width: '640px',
+        maxWidth: '95vw',
+        panelClass: 'app-dialog',
+        data: {
+          ticketId: this.ticketId,
+          publicNumber: this.ticket?.publicNumber
+        }
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (!result?.domainIds?.length || !this.ticketId) {
+          return;
+        }
+        this.lifecycleBusy = true;
+        this.ticketService.linkAdminDomains(this.ticketId, result.domainIds).subscribe({
+          next: (detail) => {
+            this.applyDetail(detail);
+            this.lifecycleBusy = false;
+            this.snackBar.open(this.translate.instant('tickets.detail.linkedDomainsSuccess'), undefined, {
+              duration: 3000
+            });
+          },
+          error: (error) => {
+            this.lifecycleBusy = false;
+            this.showError(this.apiError.resolve(error));
+          }
+        });
+      });
+  }
+
+  unlinkDomain(domainId: number): void {
+    if (!this.isAdmin || !this.ticketId || !this.canLinkDomains || this.lifecycleBusy) {
+      return;
+    }
+    this.lifecycleBusy = true;
+    this.ticketService.unlinkAdminDomain(this.ticketId, domainId).subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.lifecycleBusy = false;
+        this.snackBar.open(this.translate.instant('tickets.detail.unlinkedDomainSuccess'), undefined, {
+          duration: 3000
+        });
       },
       error: (error) => {
         this.lifecycleBusy = false;
@@ -3067,6 +3179,7 @@ export class TicketDetailComponent implements OnInit {
     this.canMerge = !!detail.canMerge;
     this.canSplit = !!detail.canSplit;
     this.canLinkRelated = !!detail.canLinkRelated;
+    this.canLinkDomains = !!detail.canLinkDomains;
     this.canEditDueDate = !!detail.canEditDueDate;
     this.canWatch = !!detail.canWatch;
     this.watching = !!detail.watching;

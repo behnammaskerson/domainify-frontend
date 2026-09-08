@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import { PagedDomains } from './domains.service';
 
 export type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 export type TicketStatus = 'NEW' | 'OPEN' | 'PENDING' | 'ON_HOLD' | 'RESOLVED' | 'CLOSED';
@@ -12,6 +13,13 @@ export interface RelatedTicket {
   subject?: string;
   status?: TicketStatus;
   requesterName?: string;
+}
+
+export interface RelatedDomain {
+  id: number;
+  name: string;
+  status?: 'ACTIVE' | 'PENDING' | 'SOLD' | 'EXPIRED';
+  ownershipStatus?: 'UNVERIFIED' | 'PENDING' | 'VERIFIED';
 }
 
 export interface TicketCategory {
@@ -89,6 +97,7 @@ export interface Ticket {
   splitFromPublicNumber?: string;
   splitChildPublicNumbers?: string[];
   relatedTickets?: RelatedTicket[];
+  relatedDomains?: RelatedDomain[];
   tags?: TicketTag[];
   createdAt?: string;
   updatedAt?: string;
@@ -255,6 +264,7 @@ export interface TicketDetail {
   canMerge?: boolean;
   canSplit?: boolean;
   canLinkRelated?: boolean;
+  canLinkDomains?: boolean;
   canEditDueDate?: boolean;
   canWatch?: boolean;
   watching?: boolean;
@@ -816,6 +826,37 @@ export class TicketService {
   unlinkAdminRelatedTicket(ticketId: number, relatedTicketId: number): Observable<TicketDetail> {
     return this.http.delete<TicketDetail>(
       `${this.API_URL}/admin/tickets/${ticketId}/related/${relatedTicketId}`
+    );
+  }
+
+  listAdminLinkableDomains(
+    ticketId: number,
+    params?: { q?: string; page?: number; size?: number }
+  ): Observable<PagedDomains> {
+    let httpParams = new HttpParams();
+    if (params?.q?.trim()) {
+      httpParams = httpParams.set('q', params.q.trim());
+    }
+    if (params?.page != null) {
+      httpParams = httpParams.set('page', String(params.page));
+    }
+    if (params?.size != null) {
+      httpParams = httpParams.set('size', String(params.size));
+    }
+    return this.http.get<PagedDomains>(`${this.API_URL}/admin/tickets/${ticketId}/linkable-domains`, {
+      params: httpParams
+    });
+  }
+
+  linkAdminDomains(ticketId: number, domainIds: number[]): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${ticketId}/domains`, {
+      domainIds
+    });
+  }
+
+  unlinkAdminDomain(ticketId: number, domainId: number): Observable<TicketDetail> {
+    return this.http.delete<TicketDetail>(
+      `${this.API_URL}/admin/tickets/${ticketId}/domains/${domainId}`
     );
   }
 
