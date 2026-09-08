@@ -112,6 +112,7 @@
     "marketplace": "السوق",
     "myListings": "قوائمي",
     "myOffers": "عروضي",
+    "myOrders": "طلباتي",
     "settings": "الإعدادات",
     "createTicket": "إنشاء تذكرة",
     "myTickets": "تذاكري",
@@ -138,7 +139,9 @@
     "smsReceiveReports": "تقارير الاستلام",
     "smsLiveSends": "إرسالات اليوم",
     "smsArchiveSends": "الإرسالات المؤرشفة",
-    "smsDailyPacks": "حزم اليوم"
+    "smsDailyPacks": "حزم اليوم",
+    "wallet": "المحفظة",
+    "domainBusiness": "أعمال النطاقات"
   },
   "tickets": {
     "agentUnavailable": "غير متاح",
@@ -754,24 +757,78 @@
       "linesEmpty": "لا توجد خطوط رسائل قصيرة في حسابك.",
       "linesUnavailable": "تعذر جلب خطوط الرسائل القصيرة",
       "retry": "إعادة المحاولة",
-      "step1": { "label": "معلومات المرسل والمستلمين", "subtitle": "اختر خط الإرسال ووقت الإرسال وارفع ملف جهات الاتصال.", "inProgress": "قيد الإكمال", "done": "مكتمل", "pending": "الخطوة الأولى" },
-      "step2": { "label": "نص الرسالة", "subtitle": "اكتب نص الرسالة. تعتمد حدود الأحرف على محتوى النص.", "inProgress": "قيد الإكمال", "done": "مكتمل", "pending": "الخطوة الثانية" },
-      "step3": { "label": "المراجعة والتأكيد", "inProgress": "قيد المراجعة", "pending": "الخطوة الثالثة", "done": "مكتمل" },
-      "lineNumber": "خط الإرسال", "messageText": "نص الرسالة", "scheduleTitle": "وقت الإرسال", "scheduleNow": "الإرسال الآن", "scheduleLater": "جدولة لوقت لاحق",
-      "sendDate": "تاريخ الإرسال", "sendTime": "وقت الإرسال", "sendDateTimeHint": "يجب أن يكون بين ساعة واحدة و365 يوماً من الآن", "sendDateTimeInvalid": "يجب أن يكون وقت الإرسال بين ساعة واحدة و365 يوماً من الآن",
-      "uploadTitle": "رفع ملف جهات الاتصال", "sampleTxt": "تنزيل نموذج (txt)", "sampleExcel": "تنزيل نموذج (xlsx)",
-      "uploadPrompt": "انقر للرفع أو اسحب الملف وأفلته هنا", "uploadFormats": "الصيغ المدعومة: txt, xls, xlsx", "uploadButton": "رفع ملف",
+      "step1": {
+        "label": "معلومات المرسل والمستلمين",
+        "subtitle": "اختر خط الإرسال ووقت الإرسال وارفع ملف جهات الاتصال.",
+        "inProgress": "قيد الإكمال",
+        "done": "مكتمل",
+        "pending": "الخطوة الأولى"
+      },
+      "step2": {
+        "label": "نص الرسالة",
+        "subtitle": "اكتب نص الرسالة. تعتمد حدود الأحرف على محتوى النص.",
+        "inProgress": "قيد الإكمال",
+        "done": "مكتمل",
+        "pending": "الخطوة الثانية"
+      },
+      "step3": {
+        "label": "المراجعة والتأكيد",
+        "inProgress": "قيد المراجعة",
+        "pending": "الخطوة الثالثة",
+        "done": "مكتمل"
+      },
+      "lineNumber": "خط الإرسال",
+      "messageText": "نص الرسالة",
+      "scheduleTitle": "وقت الإرسال",
+      "scheduleNow": "الإرسال الآن",
+      "scheduleLater": "جدولة لوقت لاحق",
+      "sendDate": "تاريخ الإرسال",
+      "sendTime": "وقت الإرسال",
+      "sendDateTimeHint": "يجب أن يكون بين ساعة واحدة و365 يوماً من الآن",
+      "sendDateTimeInvalid": "يجب أن يكون وقت الإرسال بين ساعة واحدة و365 يوماً من الآن",
+      "uploadTitle": "رفع ملف جهات الاتصال",
+      "sampleTxt": "تنزيل نموذج (txt)",
+      "sampleExcel": "تنزيل نموذج (xlsx)",
+      "uploadPrompt": "انقر للرفع أو اسحب الملف وأفلته هنا",
+      "uploadFormats": "الصيغ المدعومة: txt, xls, xlsx",
+      "uploadButton": "رفع ملف",
       "fileStructureNote": "يجب أن يطابق هيكل الملف النموذج. استخدم أرقاماً إنجليزية لأرقام الجوال.",
-      "fileParsing": "جارٍ قراءة الملف...", "uploadedFile": "ملف جهات الاتصال", "fileRequired": "ارفع ملف جهات الاتصال للمتابعة",
-      "unsupportedFormat": "صيغة ملف غير مدعومة. استخدم txt أو xls أو xlsx.", "fileParseFailed": "تعذرت قراءة ملف جهات الاتصال",
-      "noSendableMobiles": "لم يتم العثور على أرقام جوال صالحة في الملف", "mobilesMax": "الحد الأقصى 100 جهة اتصال قابلة للإرسال",
-      "charCount": "{{count}} / {{max}} حرف | {{parts}} رسالة", "nextStep": "الخطوة التالية", "previousStep": "السابق",
-      "summaryTitle": "المراجعة والتأكيد", "summarySubtitle": "راجع التفاصيل أدناه قبل الإرسال.",
-      "sectionSender": "المرسل والمستلمون", "sectionMessage": "نص الرسالة", "sectionSchedule": "وقت الإرسال", "sectionCost": "التكلفة التقديرية",
-      "recipientCount": "جهات الاتصال المحددة", "edit": "تعديل", "sendNow": "الإرسال الآن",
-      "estimatedTotal": "{{parts}} رسالة × {{recipients}} مستلم = {{total}} رسالة إجمالاً", "confirmSend": "تأكيد وإرسال",
-      "success": "تم الإرسال الجماعي بنجاح", "failed": "فشل الإرسال الجماعي", "packId": "معرّف الحزمة", "cost": "التكلفة", "messageIds": "معرّفات الرسائل", "sendAnother": "إرسال جماعي آخر",
-      "contactsDialog": { "title": "تفاصيل جهات الاتصال", "total": "إجمالي الأرقام", "invalid": "أرقام غير صالحة", "duplicates": "أرقام مكررة", "sendable": "جهات اتصال قابلة للإرسال", "confirm": "تأكيد", "revise": "رفع مجدداً" }
+      "fileParsing": "جارٍ قراءة الملف...",
+      "uploadedFile": "ملف جهات الاتصال",
+      "fileRequired": "ارفع ملف جهات الاتصال للمتابعة",
+      "unsupportedFormat": "صيغة ملف غير مدعومة. استخدم txt أو xls أو xlsx.",
+      "fileParseFailed": "تعذرت قراءة ملف جهات الاتصال",
+      "noSendableMobiles": "لم يتم العثور على أرقام جوال صالحة في الملف",
+      "mobilesMax": "الحد الأقصى 100 جهة اتصال قابلة للإرسال",
+      "charCount": "{{count}} / {{max}} حرف | {{parts}} رسالة",
+      "nextStep": "الخطوة التالية",
+      "previousStep": "السابق",
+      "summaryTitle": "المراجعة والتأكيد",
+      "summarySubtitle": "راجع التفاصيل أدناه قبل الإرسال.",
+      "sectionSender": "المرسل والمستلمون",
+      "sectionMessage": "نص الرسالة",
+      "sectionSchedule": "وقت الإرسال",
+      "sectionCost": "التكلفة التقديرية",
+      "recipientCount": "جهات الاتصال المحددة",
+      "edit": "تعديل",
+      "sendNow": "الإرسال الآن",
+      "estimatedTotal": "{{parts}} رسالة × {{recipients}} مستلم = {{total}} رسالة إجمالاً",
+      "confirmSend": "تأكيد وإرسال",
+      "success": "تم الإرسال الجماعي بنجاح",
+      "failed": "فشل الإرسال الجماعي",
+      "packId": "معرّف الحزمة",
+      "cost": "التكلفة",
+      "messageIds": "معرّفات الرسائل",
+      "sendAnother": "إرسال جماعي آخر",
+      "contactsDialog": {
+        "title": "تفاصيل جهات الاتصال",
+        "total": "إجمالي الأرقام",
+        "invalid": "أرقام غير صالحة",
+        "duplicates": "أرقام مكررة",
+        "sendable": "جهات اتصال قابلة للإرسال",
+        "confirm": "تأكيد",
+        "revise": "رفع مجدداً"
+      }
     },
     "scheduled": {
       "eyebrow": "إدارة الرسائل القصيرة",
@@ -799,11 +856,35 @@
       "deleteConfirm": "حذف السجل",
       "deleteSuccess": "تم حذف سجل الإرسال المجدول.",
       "returnedCredit": "مُعاد: {{amount}}",
-      "filters": { "all": "الكل", "PENDING": "معلّق", "CANCELLED": "ملغى", "SENT": "مُرسل" },
-      "source": { "SINGLE": "إرسال فردي", "BULK": "إرسال جماعي", "FILE": "إرسال من ملف" },
-      "sourceFilter": { "all": "كل المصادر" },
-      "status": { "PENDING": "معلّق", "CANCELLED": "ملغى", "SENT": "مُرسل" },
-      "table": { "source": "المصدر", "packId": "معرّف الحزمة", "line": "خط الإرسال", "recipients": "المستلمون", "message": "الرسالة", "scheduledAt": "وقت الإرسال", "status": "الحالة", "cost": "التكلفة" }
+      "filters": {
+        "all": "الكل",
+        "PENDING": "معلّق",
+        "CANCELLED": "ملغى",
+        "SENT": "مُرسل"
+      },
+      "source": {
+        "SINGLE": "إرسال فردي",
+        "BULK": "إرسال جماعي",
+        "FILE": "إرسال من ملف"
+      },
+      "sourceFilter": {
+        "all": "كل المصادر"
+      },
+      "status": {
+        "PENDING": "معلّق",
+        "CANCELLED": "ملغى",
+        "SENT": "مُرسل"
+      },
+      "table": {
+        "source": "المصدر",
+        "packId": "معرّف الحزمة",
+        "line": "خط الإرسال",
+        "recipients": "المستلمون",
+        "message": "الرسالة",
+        "scheduledAt": "وقت الإرسال",
+        "status": "الحالة",
+        "cost": "التكلفة"
+      }
     },
     "deliveryStates": {
       "1": "تم التسليم",
@@ -996,7 +1077,12 @@
     "topDomainsTitle": "أفضل النطاقات أداءً",
     "topDomainsSubtitle": "بناءً على القيمة وحركة المرور",
     "views": "المشاهدات",
-    "periods": { "1W": "أسبوع", "1M": "شهر", "3M": "٣ أشهر", "1Y": "سنة" },
+    "periods": {
+      "1W": "أسبوع",
+      "1M": "شهر",
+      "3M": "٣ أشهر",
+      "1Y": "سنة"
+    },
     "activities": {
       "sold": "تم بيع النطاق: {{domain}}",
       "added": "نطاق جديد: {{domain}}",
@@ -1174,7 +1260,9 @@
       "marketValue": "القيمة السوقية التقديرية",
       "competitionLow": "منافسون قليلون في المجال"
     },
-    "competitionLevels": { "low": "منخفض" },
+    "competitionLevels": {
+      "low": "منخفض"
+    },
     "overview": {
       "registrar": "المسجّل",
       "created": "تاريخ الإنشاء",
@@ -1208,6 +1296,7 @@
     "eyebrow": "السوق",
     "myListings": "قوائمي",
     "myOffers": "عروضي",
+    "myOrders": "طلباتي",
     "search": "ابحث في القوائم...",
     "empty": "لا توجد قوائم نشطة بعد. أدرج نطاقاً موثّقاً من نطاقاتي.",
     "featured": "نطاقات مميزة",
@@ -1221,11 +1310,26 @@
     "buyNow": "اشترِ الآن",
     "offers": "{{count}} عروض",
     "tags": {
-      "premium": "مميز", "crypto": "عملات", "finance": "مالية", "ai": "ذكاء اصطناعي",
-      "startup": "Startup", "tech": "تقنية", "saas": "SaaS", "cloud": "سحابة",
-      "business": "أعمال", "nft": "NFT", "marketplace": "سوق", "green": "أخضر",
-      "energy": "طاقة", "fintech": "FinTech", "hub": "Hub", "remote": "عن بُعد",
-      "work": "عمل", "data": "بيانات", "devops": "DevOps", "health": "صحة"
+      "premium": "مميز",
+      "crypto": "عملات",
+      "finance": "مالية",
+      "ai": "ذكاء اصطناعي",
+      "startup": "Startup",
+      "tech": "تقنية",
+      "saas": "SaaS",
+      "cloud": "سحابة",
+      "business": "أعمال",
+      "nft": "NFT",
+      "marketplace": "سوق",
+      "green": "أخضر",
+      "energy": "طاقة",
+      "fintech": "FinTech",
+      "hub": "Hub",
+      "remote": "عن بُعد",
+      "work": "عمل",
+      "data": "بيانات",
+      "devops": "DevOps",
+      "health": "صحة"
     },
     "descriptions": {
       "cryptoCom": "نطاق .com مميز من كلمة واحدة في مجال العملات الرقمية.",
@@ -1325,7 +1429,7 @@
     },
     "confirm": {
       "acceptTitle": "قبول العرض؟",
-      "acceptMessage": "قبول السعر الحالي لـ {{domain}}. سيتم تعليم القائمة كمباعة.",
+      "acceptMessage": "قبول السعر الحالي لـ {{domain}}. يجب على المشتري الدفع قبل تعليم القائمة كمباعة.",
       "rejectTitle": "رفض العرض؟",
       "rejectMessage": "رفض التفاوض الحالي لـ {{domain}}.",
       "withdrawTitle": "سحب العرض؟",
@@ -1335,6 +1439,7 @@
       "created": "تم إرسال العرض",
       "countered": "تم إرسال العرض المضاد",
       "accepted": "تم قبول العرض",
+      "acceptedPendingPay": "تم قبول العرض. أكمل الدفع لإنهاء الشراء.",
       "rejected": "تم رفض العرض",
       "withdrawn": "تم سحب العرض"
     },
@@ -1365,14 +1470,18 @@
     "languageLabel": "لغة العرض",
     "languageDesc": "لغة الواجهة ولغة إشعارات البريد وSMS وداخل التطبيق",
     "emailNotifications": "إشعارات البريد",
-    "emailNotificationsDesc": "تنبيهات بريد لتحديثات التذاكر وتذكيرات تجديد النطاق (٩٠/٦٠/٣٠ يومًا قبل الانتهاء)",
+    "emailNotificationsDesc": "تنبيهات بريد للتذاكر وتجديد النطاق والعروض ومعاملات الدفع",
     "emailNotificationsEnabled": "تم تفعيل تنبيهات البريد",
     "emailNotificationsDisabled": "تم إيقاف تنبيهات البريد",
     "smsNotifications": "إشعارات الرسائل القصيرة",
-    "smsNotificationsDesc": "الاشتراك في SMS للتذاكر العاجلة وتذكيرات تجديد النطاق (يتطلب هاتفاً موثّقاً)",
+    "smsNotificationsDesc": "الاشتراك في SMS للتذاكر العاجلة والتجديد والعروض والدفع (يتطلب هاتفاً موثّقاً)",
     "smsNotificationsNeedPhone": "أضف هاتفاً وتحقق منه في الملف الشخصي لتفعيل تنبيهات SMS.",
     "smsNotificationsEnabled": "تم تفعيل تنبيهات SMS",
     "smsNotificationsDisabled": "تم إيقاف تنبيهات SMS",
+    "paymentNotifications": "إشعارات الدفع",
+    "paymentNotificationsDesc": "تنبيهات داخل التطبيق والبريد وSMS لشحن المحفظة والتعديلات (تتطلب أيضاً مفاتيح البريد/SMS أعلاه)",
+    "paymentNotificationsEnabled": "تم تفعيل تنبيهات الدفع",
+    "paymentNotificationsDisabled": "تم إيقاف تنبيهات الدفع",
     "ticketAvailability": "متاح للتذاكر",
     "ticketAvailabilityDesc": "عند الإيقاف، يتخطاك التعيين التلقائي. يمكن للزملاء تعيين التذاكر أو نقلها إليك يدويًا.",
     "ticketAvailabilityEnabled": "أنت متاح للتعيين التلقائي للتذاكر",
@@ -1782,6 +1891,35 @@
       "actionFailed": "فشلت عملية المصادقة الثنائية",
       "secretCopied": "تم نسخ المفتاح إلى الحافظة",
       "backupCopied": "تم نسخ رموز النسخ الاحتياطي إلى الحافظة"
+    },
+    "paymentSettings": {
+      "title": "المدفوعات",
+      "subtitle": "بوابة التاجر وشحن المحفظة وإعدادات الرسوم. للمسؤول فقط.",
+      "loading": "جاري تحميل إعدادات الدفع...",
+      "enabled": "تفعيل المدفوعات",
+      "sandbox": "وضع التجربة",
+      "merchantId": "معرّف التاجر",
+      "accessToken": "رمز الوصول (الاسترداد)",
+      "accessTokenHint": "اختياري في المرحلة 1؛ مطلوب لاحقاً للاسترداد",
+      "accessTokenHintKeep": "اتركه فارغاً للاحتفاظ بالرمز الحالي",
+      "callbackPublicBaseUrl": "عنوان الواجهة العامة",
+      "callbackHint": "لرابط عودة الدفع، مثل http://localhost:4200",
+      "minTopUpIrt": "الحد الأدنى للشحن (تومان)",
+      "commissionPercent": "نسبة العمولة (لاحقاً)",
+      "featuredListingPriceIrt": "سعر الإعلان المميز (لاحقاً)",
+      "escrowHoldDays": "أيام حجز الضمان (لاحقاً)",
+      "notificationsTitle": "إشعارات الدفع",
+      "notificationsSubtitle": "تفعيل/إيقاف عام لتنبيهات شحن المحفظة والتعديل.",
+      "notificationsEnabled": "تفعيل إشعارات الدفع",
+      "channels": "القنوات",
+      "channelInApp": "داخل التطبيق",
+      "channelEmail": "البريد",
+      "channelSms": "SMS",
+      "channelError": "فعّل قناة واحدة على الأقل عند تفعيل إشعارات الدفع.",
+      "save": "حفظ إعدادات الدفع",
+      "saved": "تم تحديث إعدادات الدفع",
+      "minTopUpInvalid": "أدخل حداً أدنى صالحاً للشحن",
+      "featuredPriceInvalid": "أدخل سعراً صالحاً للإعلان المميز"
     }
   },
   "users": {
@@ -1860,12 +1998,26 @@
       "enable": "تفعيل",
       "disable": "تعطيل",
       "changeRole": "تغيير الدور",
+      "adjustWallet": "تعديل المحفظة",
       "enableEmailNotifications": "تفعيل تنبيهات البريد",
       "disableEmailNotifications": "إيقاف تنبيهات البريد",
       "enableSmsNotifications": "تفعيل تنبيهات SMS",
       "disableSmsNotifications": "إيقاف تنبيهات SMS",
       "markTicketAvailable": "تعيين كمتاح للتذاكر",
       "markTicketUnavailable": "تعيين كغير متاح للتذاكر"
+    },
+    "wallet": {
+      "adjustTitle": "تعديل المحفظة",
+      "adjustHint": "زيادة أو إنقاص الرصيد المتاح لـ {{name}}.",
+      "currentBalance": "الرصيد الحالي",
+      "direction": "نوع التعديل",
+      "credit": "زيادة (دائن)",
+      "debit": "إنقاص (مدين)",
+      "amount": "المبلغ (IRT)",
+      "amountInvalid": "أدخل مبلغاً لا يقل عن 1",
+      "note": "السبب / ملاحظة",
+      "noteRequired": "الملاحظة مطلوبة",
+      "apply": "تطبيق التعديل"
     },
     "confirm": {
       "deleteTitle": "حذف حساب المستخدم؟",
@@ -1885,6 +2037,8 @@
       "enabled": "تم تفعيل المستخدم",
       "disabled": "تم تعطيل المستخدم",
       "roleUpdated": "تم تحديث الدور",
+      "walletCredited": "تمت زيادة رصيد المحفظة",
+      "walletDebited": "تم إنقاص رصيد المحفظة",
       "emailNotificationsEnabled": "تم تفعيل تنبيهات بريد المستخدم",
       "emailNotificationsDisabled": "تم إيقاف تنبيهات بريد المستخدم",
       "smsNotificationsEnabled": "تم تفعيل تنبيهات SMS للمستخدم",
@@ -1915,7 +2069,6 @@
     "turkish": "التركية",
     "copy": "نسخ",
     "copied": "تم النسخ",
-    "close": "إغلاق",
     "retry": "إعادة المحاولة",
     "backToTop": "العودة للأعلى",
     "rowNumber": "#"
@@ -2124,7 +2277,29 @@
     "TICKET_ARCHIVE_REQUIRES_CLOSED": "يمكن أرشفة التذاكر المغلقة فقط",
     "TICKET_ALREADY_DELETED": "التذكرة محذوفة بالفعل",
     "TICKET_NOT_DELETED": "التذكرة غير محذوفة",
-    "TICKET_DELETED": "تم حذف هذه التذكرة"
+    "TICKET_DELETED": "تم حذف هذه التذكرة",
+    "PAYMENT_DISABLED": "المدفوعات معطّلة حالياً",
+    "PAYMENT_MERCHANT_REQUIRED": "قم بضبط معرّف التاجر أولاً",
+    "PAYMENT_CALLBACK_URL_INVALID": "أدخل عنوان عودة صالحاً",
+    "PAYMENT_AMOUNT_TOO_LOW": "المبلغ أقل من الحد الأدنى للشحن",
+    "PAYMENT_AUTHORITY_REQUIRED": "رمز الدفع مفقود",
+    "PAYMENT_INTENT_NOT_FOUND": "لم يُعثر على الدفع",
+    "PAYMENT_PURPOSE_UNSUPPORTED": "نوع الدفع غير مدعوم بعد",
+    "PAYMENT_GATEWAY_ERROR": "فشل طلب بوابة الدفع",
+    "PAYMENT_VERIFY_FAILED": "فشل التحقق من الدفع",
+    "WALLET_AMOUNT_INVALID": "مبلغ المحفظة غير صالح",
+    "WALLET_NOT_FOUND": "لم يُعثر على المحفظة",
+    "WALLET_INSUFFICIENT_BALANCE": "رصيد المحفظة غير كافٍ",
+    "PAYMENT_NOTIFICATION_SETTINGS_INVALID": "فعّل قناة إشعار دفع واحدة على الأقل",
+    "ORDER_NOT_FOUND": "الطلب غير موجود",
+    "ORDER_NOT_PENDING_PAYMENT": "الطلب ليس بانتظار الدفع",
+    "ORDER_ALREADY_PAID": "تم دفع الطلب مسبقاً",
+    "ORDER_FORBIDDEN": "غير مسموح لك بالوصول إلى هذا الطلب",
+    "ORDER_LISTING_NOT_ACTIVE": "القائمة غير متاحة للشراء",
+    "ORDER_SELF_PURCHASE": "لا يمكنك شراء قائمتك الخاصة",
+    "ORDER_PENDING_EXISTS": "يوجد بالفعل طلب بانتظار الدفع لهذه القائمة",
+    "ORDER_PAYMENT_REQUIRED": "الدفع مطلوب لإكمال هذا الطلب",
+    "ORDER_WALLET_PAY_FAILED": "فشل الدفع من المحفظة"
   },
   "avatar": {
     "title": "تعديل الصورة",
@@ -2201,7 +2376,15 @@
       "OFFER_ACCEPTED": "قبل {{actor}} العرض على {{domain}} ({{amount}})",
       "OFFER_REJECTED": "رفض {{actor}} العرض على {{domain}}",
       "OFFER_WITHDRAWN": "سحب {{actor}} عرضاً على {{domain}}",
-      "OFFER_EXPIRED": "انتهت صلاحية عرض {{amount}} على {{domain}}"
+      "OFFER_EXPIRED": "انتهت صلاحية عرض {{amount}} على {{domain}}",
+      "PAYMENT_TOP_UP_SUCCESS": "تم شحن المحفظة بمبلغ {{amount}} تومان (مرجع {{ref}})",
+      "PAYMENT_TOP_UP_FAILED": "فشل شحن {{amount}} تومان",
+      "PAYMENT_TOP_UP_CANCELLED": "أُلغي شحن {{amount}} تومان",
+      "PAYMENT_WALLET_ADJUSTED": "{{actor}} {{direction}} رصيد محفظتك بمبلغ {{amount}} ({{note}})"
+    },
+    "paymentDirection": {
+      "credit": "زاد",
+      "debit": "أنقص"
     }
   },
   "toolbar": {
@@ -2209,11 +2392,137 @@
     "logout": "تسجيل الخروج",
     "notifications": "الإشعارات",
     "settings": "الإعدادات",
+    "walletBalance": "رصيد المحفظة",
     "notifSold": "تم بيع النطاق: crypto.com",
     "notifOffer": "عرض جديد على ai-startup.io",
     "notifExpired": "انتهاء قريب: web3.xyz",
     "time5m": "منذ 5 د",
     "time1h": "منذ ساعة",
     "time3h": "منذ 3 س"
+  },
+  "wallet": {
+    "eyebrow": "الأرصدة",
+    "title": "المحفظة",
+    "subtitle": "اشحن رصيدك وتابع سجل الحركات.",
+    "loading": "جاري تحميل المحفظة...",
+    "paymentsDisabled": "الشحن معطّل حتى يفعّل المسؤول المدفوعات من الإعدادات.",
+    "available": "المتاح",
+    "held": "المحتجز",
+    "paymentsTitle": "المدفوعات",
+    "paymentsSubtitle": "محاولات الشحن ونتائج البوابة.",
+    "emptyPayments": "لا توجد محاولات دفع بعد",
+    "refId": "مرجع",
+    "ledgerTitle": "السجل",
+    "ledgerSubtitle": "الدائن والمدين المطبق على رصيدك.",
+    "emptyLedger": "لا يوجد نشاط بعد",
+    "paymentStatus": {
+      "CREATED": "تم الإنشاء",
+      "REDIRECTED": "قيد الانتظار",
+      "VERIFIED": "تم التحقق",
+      "FAILED": "فشل",
+      "CANCELLED": "أُلغي"
+    },
+    "table": {
+      "date": "التاريخ",
+      "type": "النوع",
+      "direction": "الاتجاه",
+      "amount": "المبلغ",
+      "availableAfter": "المتاح بعد"
+    },
+    "direction": {
+      "CREDIT": "دائن",
+      "DEBIT": "مدين"
+    },
+    "entryType": {
+      "TOP_UP": "شحن",
+      "HOLD": "حجز",
+      "RELEASE": "تحرير",
+      "CAPTURE_TO_SELLER": "تحويل للبائع",
+      "COMMISSION": "عمولة",
+      "PURCHASE": "شراء",
+      "REFUND": "استرداد",
+      "FEATURED_FEE": "رسوم مميز",
+      "PAYOUT": "سحب",
+      "ADJUSTMENT": "تعديل"
+    },
+    "topUp": {
+      "cta": "شحن",
+      "title": "شحن المحفظة",
+      "hint": "الحد الأدنى {{min}} تومان. سيتم تحويلك إلى بوابة الدفع.",
+      "amount": "المبلغ (تومان)",
+      "amountRequired": "أدخل المبلغ",
+      "amountTooLow": "الحد الأدنى للشحن {{min}} تومان",
+      "continue": "متابعة الدفع"
+    },
+    "openPaymentSettings": "فتح إعدادات الدفع"
+  },
+  "payments": {
+    "return": {
+      "eyebrow": "المدفوعات",
+      "title": "نتيجة الدفع",
+      "subtitle": "جارٍ تأكيد دفعتك.",
+      "verifying": "جارٍ التحقق من الدفع…",
+      "verifyingHint": "يرجى الانتظار بينما نؤكد استجابة البوابة.",
+      "success": "تم التحقق وشحن المحفظة.",
+      "successHint": "تم تحديث رصيدك المتاح.",
+      "orderSuccess": "تم التحقق من دفع السوق.",
+      "orderSuccessHint": "الأموال محتجزة حتى التحرير. تابع الطلب من طلباتي.",
+      "alreadyVerified": "تم التحقق من هذه الدفعة مسبقاً.",
+      "cancelled": "أُلغي الدفع أو فشل في البوابة.",
+      "cancelledHint": "لم تُضف أي أموال. يمكنك المحاولة مجدداً من المحفظة.",
+      "failedTitle": "تعذّر التحقق من الدفع",
+      "amount": "المبلغ",
+      "refId": "رقم المرجع",
+      "available": "الرصيد المتاح",
+      "backToWallet": "العودة إلى المحفظة",
+      "backToOrders": "طلباتي"
+    }
+  },
+  "orders": {
+    "eyebrow": "الدفع",
+    "title": "طلباتي",
+    "subtitle": "تتبّع مشتريات ومبيعات السوق المحتجزة",
+    "browseMarketplace": "تصفح السوق",
+    "roleFilter": "الدور",
+    "empty": "لا توجد طلبات سوق بعد.",
+    "role": {
+      "all": "الكل",
+      "buyer": "مشتري",
+      "seller": "بائع"
+    },
+    "table": {
+      "domain": "النطاق",
+      "role": "دورك",
+      "gross": "الإجمالي",
+      "status": "الحالة",
+      "updated": "التحديث"
+    },
+    "status": {
+      "PENDING_PAYMENT": "بانتظار الدفع",
+      "PAID_HELD": "مدفوع · محتجز",
+      "RELEASED": "محرّر",
+      "REFUNDED": "مسترد",
+      "CANCELLED": "ملغى",
+      "DISPUTED": "نزاع"
+    },
+    "actions": {
+      "pay": "ادفع الآن",
+      "refresh": "تحديث"
+    },
+    "checkout": {
+      "title": "إكمال الشراء",
+      "gross": "إجمالي الشراء",
+      "commission": "عمولة المنصة",
+      "sellerNet": "صافي البائع",
+      "walletAvailable": "رصيد المحفظة",
+      "deadline": "ادفع قبل {{when}}",
+      "payWallet": "الدفع من المحفظة",
+      "payGateway": "الدفع عبر البوابة"
+    },
+    "toast": {
+      "paid": "تم الدفع. الأموال محتجزة.",
+      "gatewayMissing": "رابط بوابة الدفع مفقود",
+      "refreshed": "تم تحديث الطلب"
+    }
   }
 }

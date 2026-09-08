@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { MarketplaceOrder } from './orders.service';
 
 export type DomainListingOfferStatus =
   | 'PENDING'
@@ -46,6 +47,11 @@ export interface ListingOffer {
   updatedAt?: string;
   respondedAt?: string | null;
   events?: OfferEvent[];
+}
+
+export interface AcceptOfferResponse {
+  offer: ListingOffer;
+  order: MarketplaceOrder;
 }
 
 export interface PagedOffers {
@@ -100,8 +106,8 @@ export class OffersService {
     return this.http.post<ListingOffer>(`${this.API_URL}/offers/${id}/counter`, payload);
   }
 
-  accept(id: number): Observable<ListingOffer> {
-    return this.http.post<ListingOffer>(`${this.API_URL}/offers/${id}/accept`, {});
+  accept(id: number): Observable<AcceptOfferResponse> {
+    return this.http.post<AcceptOfferResponse>(`${this.API_URL}/offers/${id}/accept`, {});
   }
 
   reject(id: number): Observable<ListingOffer> {

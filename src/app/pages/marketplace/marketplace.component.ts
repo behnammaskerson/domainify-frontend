@@ -9,14 +9,16 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
+import { CheckoutDialogComponent } from '../../components/checkout-dialog/checkout-dialog.component';
 import { OfferDialogComponent } from '../../components/offer-dialog/offer-dialog.component';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { LocaleCurrencyPipe } from '../../pipes/locale-format.pipe';
 import { ApiErrorService } from '../../services/api-error.service';
 import { AuthService } from '../../services/auth.service';
 import { DomainListing, ListingsService } from '../../services/listings.service';
+import { OrdersService } from '../../services/orders.service';
 
 @Component({
   selector: 'app-marketplace',
@@ -49,6 +51,10 @@ import { DomainListing, ListingsService } from '../../services/listings.service'
         <a mat-stroked-button type="button" class="hero-cta" routerLink="/marketplace/my-offers">
           <mat-icon>handshake</mat-icon>
           {{ 'marketplace.myOffers' | translate }}
+        </a>
+        <a mat-stroked-button type="button" class="hero-cta" routerLink="/marketplace/my-orders">
+          <mat-icon>receipt_long</mat-icon>
+          {{ 'marketplace.myOrders' | translate }}
         </a>
       </app-page-hero>
 
@@ -93,10 +99,18 @@ import { DomainListing, ListingsService } from '../../services/listings.service'
                       }
                     </div>
                     @if (canOffer(item)) {
-                      <button mat-stroked-button type="button" class="offer-btn" (click)="makeOffer(item)">
-                        <mat-icon>handshake</mat-icon>
-                        {{ 'marketplace.makeOffer' | translate }}
-                      </button>
+                      <div class="listing-actions">
+                        <button mat-flat-button color="primary" type="button" class="buy-btn"
+                                [disabled]="buyingId === item.id"
+                                (click)="buyNow(item)">
+                          <mat-icon>shopping_cart</mat-icon>
+                          {{ 'marketplace.buyNow' | translate }}
+                        </button>
+                        <button mat-stroked-button type="button" class="offer-btn" (click)="makeOffer(item)">
+                          <mat-icon>handshake</mat-icon>
+                          {{ 'marketplace.makeOffer' | translate }}
+                        </button>
+                      </div>
                     }
                   </article>
                 }
@@ -129,10 +143,18 @@ import { DomainListing, ListingsService } from '../../services/listings.service'
                       }
                     </div>
                     @if (canOffer(item)) {
-                      <button mat-stroked-button type="button" class="offer-btn" (click)="makeOffer(item)">
-                        <mat-icon>handshake</mat-icon>
-                        {{ 'marketplace.makeOffer' | translate }}
-                      </button>
+                      <div class="listing-actions">
+                        <button mat-flat-button color="primary" type="button" class="buy-btn"
+                                [disabled]="buyingId === item.id"
+                                (click)="buyNow(item)">
+                          <mat-icon>shopping_cart</mat-icon>
+                          {{ 'marketplace.buyNow' | translate }}
+                        </button>
+                        <button mat-stroked-button type="button" class="offer-btn" (click)="makeOffer(item)">
+                          <mat-icon>handshake</mat-icon>
+                          {{ 'marketplace.makeOffer' | translate }}
+                        </button>
+                      </div>
                     }
                   </article>
                 }
@@ -172,20 +194,26 @@ import { DomainListing, ListingsService } from '../../services/listings.service'
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .offer-btn {
+    .listing-actions {
       margin-top: 10px;
-      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
+    .buy-btn, .offer-btn { width: 100%; }
   `]
 })
 export class MarketplaceComponent implements OnInit, OnDestroy {
   private readonly listingsService = inject(ListingsService);
+  private readonly ordersService = inject(OrdersService);
   private readonly authService = inject(AuthService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly apiError = inject(ApiErrorService);
+  private readonly translate = inject(TranslateService);
 
   loading = false;
+  buyingId: number | null = null;
   search = '';
   featured: DomainListing[] = [];
   recent: DomainListing[] = [];
@@ -215,6 +243,35 @@ export class MarketplaceComponent implements OnInit, OnDestroy {
       data: { mode: 'create', listing: item }
     });
     ref.afterClosed().subscribe();
+  }
+
+  buyNow(item: DomainListing): void {
+    if (this.buyingId != null) return;
+    this.buyingId = item.id;
+    this.ordersService.buyNow(item.id).subscribe({
+      next: (order) => {
+        this.buyingId = null;
+        const ref = this.dialog.open(CheckoutDialogComponent, {
+          width: '520px',
+          maxWidth: '95vw',
+          panelClass: 'app-dialog',
+          data: { order }
+        });
+        ref.afterClosed().subscribe((paid) => {
+          if (paid) {
+            this.snackBar.open(this.translate.instant('orders.toast.paid'), undefined, { duration: 3500 });
+            this.reload();
+          }
+        });
+      },
+      error: (error) => {
+        this.buyingId = null;
+        this.snackBar.open(this.apiError.resolve(error), undefined, {
+          duration: 6000,
+          panelClass: ['error-snackbar']
+        });
+      }
+    });
   }
 
   reload(): void {

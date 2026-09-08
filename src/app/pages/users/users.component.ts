@@ -27,6 +27,11 @@ import { PasswordPolicy, PasswordPolicyService } from '../../services/password-p
 import { buildPasswordValidators } from '../../utils/password-policy.validators';
 import { LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
+import {
+  AdjustWalletDialogComponent,
+  AdjustWalletDialogResult
+} from '../../components/adjust-wallet-dialog/adjust-wallet-dialog.component';
+import { WalletService } from '../../services/wallet.service';
 import { findPhoneCountry, formatPhoneDigits } from '../../utils/phone-countries';
 import { Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 
@@ -481,6 +486,10 @@ export class UserFormDialogComponent {
                           <mat-icon>edit</mat-icon>
                           {{ 'common.edit' | translate }}
                         </button>
+                        <button mat-menu-item type="button" (click)="adjustWallet(user)">
+                          <mat-icon>account_balance_wallet</mat-icon>
+                          {{ 'users.actions.adjustWallet' | translate }}
+                        </button>
                         <button mat-menu-item type="button" (click)="toggleEnabled(user)">
                           <mat-icon>{{ user.enabled ? 'block' : 'check_circle' }}</mat-icon>
                           {{ (user.enabled ? 'users.actions.disable' : 'users.actions.enable') | translate }}
@@ -704,6 +713,10 @@ export class UserFormDialogComponent {
                     <button mat-menu-item type="button" (click)="openEdit(user)">
                       <mat-icon>edit</mat-icon>
                       {{ 'common.edit' | translate }}
+                    </button>
+                    <button mat-menu-item type="button" (click)="adjustWallet(user)">
+                      <mat-icon>account_balance_wallet</mat-icon>
+                      {{ 'users.actions.adjustWallet' | translate }}
                     </button>
                     <button mat-menu-item type="button" (click)="toggleEnabled(user)">
                       <mat-icon>{{ user.enabled ? 'block' : 'check_circle' }}</mat-icon>
@@ -1292,6 +1305,7 @@ export class UsersComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   private readonly usersService = inject(UsersService);
+  private readonly walletService = inject(WalletService);
   private readonly apiError = inject(ApiErrorService);
   private readonly translate = inject(TranslateService);
   private readonly translationService = inject(TranslationService);
@@ -1578,6 +1592,45 @@ export class UsersComponent implements OnInit {
             password ? 'users.messages.passwordUpdated' : 'users.messages.updated'
           ));
           this.loadUsers();
+        },
+        error: (error) => this.showError(error)
+      });
+    });
+  }
+
+  adjustWallet(user: ManagedUser): void {
+    const displayName = `${user.firstName} ${user.lastName}`.trim() || user.email;
+    this.walletService.getUserWallet(user.id, 1).subscribe({
+      next: (wallet) => {
+        this.openAdjustWalletDialog(user, displayName, wallet.availableBalance);
+      },
+      error: () => {
+        this.openAdjustWalletDialog(user, displayName, null);
+      }
+    });
+  }
+
+  private openAdjustWalletDialog(
+    user: ManagedUser,
+    displayName: string,
+    availableBalance: number | null
+  ): void {
+    const ref = this.dialog.open(AdjustWalletDialogComponent, {
+      width: '440px',
+      maxWidth: '95vw',
+      data: { userName: displayName, availableBalance }
+    });
+    ref.afterClosed().subscribe((result: AdjustWalletDialogResult | null) => {
+      if (!result) {
+        return;
+      }
+      this.walletService.adjustUserWallet(user.id, result).subscribe({
+        next: () => {
+          this.snack(this.translate.instant(
+            result.direction === 'CREDIT'
+              ? 'users.messages.walletCredited'
+              : 'users.messages.walletDebited'
+          ));
         },
         error: (error) => this.showError(error)
       });

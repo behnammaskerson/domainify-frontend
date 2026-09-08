@@ -171,6 +171,14 @@ export class UsersService {
     return this.http.patch<ManagedUser>(`${this.API_URL}/users/me/sms-notifications`, { enabled });
   }
 
+  setPaymentNotificationsEnabled(enabled: boolean): Observable<ManagedUser> {
+    return this.http.patch<ManagedUser>(`${this.API_URL}/users/me/payment-notifications`, { enabled });
+  }
+
+  setUserPaymentNotificationsEnabled(id: number, enabled: boolean): Observable<ManagedUser> {
+    return this.http.patch<ManagedUser>(`${this.API_URL}/users/${id}/payment-notifications`, { enabled });
+  }
+
   setTicketAvailable(enabled: boolean): Observable<ManagedUser> {
     return this.http.patch<ManagedUser>(`${this.API_URL}/users/me/ticket-availability`, { enabled });
   }

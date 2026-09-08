@@ -22,6 +22,7 @@ interface NavGroupChild {
   labelKey: string;
   route: string;
   exact?: boolean;
+  adminOnly?: boolean;
 }
 
 @Component({
@@ -52,7 +53,65 @@ interface NavGroupChild {
       </div>
 
       <nav class="nav">
-        @for (item of visibleNavItems; track item.route) {
+        @for (item of visiblePrimaryNavItems; track item.route) {
+          <a class="nav-link"
+             [routerLink]="item.route"
+             routerLinkActive="active"
+             [routerLinkActiveOptions]="item.exact
+               ? { paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }
+               : { paths: 'subset', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }"
+             (click)="onNavigate()"
+             [matTooltip]="collapsed ? (item.labelKey | translate) : ''"
+             [matTooltipPosition]="tooltipPosition()">
+            <mat-icon>{{ item.icon }}</mat-icon>
+            @if (!collapsed) {
+              <span>{{ item.labelKey | translate }}</span>
+            }
+          </a>
+        }
+
+        @if (collapsed) {
+          @for (child of visibleDomainBusinessChildren; track child.route) {
+            <a class="nav-link"
+               [routerLink]="child.route"
+               routerLinkActive="active"
+               [routerLinkActiveOptions]="child.exact
+                 ? { paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }
+                 : { paths: 'subset', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }"
+               (click)="onNavigate()"
+               [matTooltip]="child.labelKey | translate"
+               [matTooltipPosition]="tooltipPosition()">
+              <mat-icon>{{ child.icon }}</mat-icon>
+            </a>
+          }
+        } @else {
+          <div class="nav-group" [class.expanded]="domainBusinessExpanded">
+            <button type="button"
+                    class="nav-link nav-group-trigger"
+                    (click)="toggleDomainBusinessGroup()"
+                    [attr.aria-expanded]="domainBusinessExpanded">
+              <mat-icon>language</mat-icon>
+              <span class="nav-group-label">{{ 'menu.domainBusiness' | translate }}</span>
+              <mat-icon class="chevron">{{ domainBusinessExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+            </button>
+            @if (domainBusinessExpanded) {
+              @for (child of visibleDomainBusinessChildren; track child.route) {
+                <a class="nav-link nav-child"
+                   [routerLink]="child.route"
+                   routerLinkActive="active"
+                   [routerLinkActiveOptions]="child.exact
+                     ? { paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }
+                     : { paths: 'subset', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }"
+                   (click)="onNavigate()">
+                  <mat-icon>{{ child.icon }}</mat-icon>
+                  <span>{{ child.labelKey | translate }}</span>
+                </a>
+              }
+            }
+          </div>
+        }
+
+        @for (item of visibleSecondaryNavItems; track item.route) {
           <a class="nav-link"
              [routerLink]="item.route"
              routerLinkActive="active"
@@ -102,14 +161,6 @@ interface NavGroupChild {
                [matTooltip]="'menu.ticketCategories' | translate"
                [matTooltipPosition]="tooltipPosition()">
               <mat-icon>category</mat-icon>
-            </a>
-            <a class="nav-link"
-               routerLink="/domains/categories"
-               routerLinkActive="active"
-               (click)="onNavigate()"
-               [matTooltip]="'menu.domainCategories' | translate"
-               [matTooltipPosition]="tooltipPosition()">
-              <mat-icon>account_tree</mat-icon>
             </a>
             <a class="nav-link"
                routerLink="/tickets/queues"
@@ -447,25 +498,44 @@ export class SidebarComponent implements OnInit {
 
   smsExpanded = false;
   supportExpanded = false;
+  domainBusinessExpanded = false;
 
   tooltipPosition = computed(() => this.translationService.isRtl() ? 'left' : 'right');
 
-  navItems: NavItem[] = [
+  primaryNavItems: NavItem[] = [
     { icon: 'dashboard', labelKey: 'menu.dashboard', route: '/dashboard' },
     { icon: 'notifications', labelKey: 'menu.notifications', route: '/notifications' },
+    { icon: 'account_balance_wallet', labelKey: 'menu.wallet', route: '/wallet' }
+  ];
+
+  secondaryNavItems: NavItem[] = [
+    { icon: 'bar_chart', labelKey: 'menu.analytics', route: '/analytics' },
+    { icon: 'people', labelKey: 'menu.users', route: '/user' },
+    { icon: 'description', labelKey: 'menu.reports', route: '/reports' }
+  ];
+
+  get visiblePrimaryNavItems(): NavItem[] {
+    return this.primaryNavItems.filter((item) => !item.adminOnly || this.authService.isAdmin());
+  }
+
+  get visibleSecondaryNavItems(): NavItem[] {
+    return this.secondaryNavItems.filter((item) => !item.adminOnly || this.authService.isAdmin());
+  }
+
+  readonly domainBusinessNavChildren: NavGroupChild[] = [
     { icon: 'language', labelKey: 'menu.domains', route: '/domains', exact: true },
     { icon: 'account_tree', labelKey: 'menu.domainCategories', route: '/domains/categories', adminOnly: true },
     { icon: 'analytics', labelKey: 'menu.analyzer', route: '/analyzer' },
     { icon: 'storefront', labelKey: 'menu.marketplace', route: '/marketplace', exact: true },
     { icon: 'sell', labelKey: 'menu.myListings', route: '/marketplace/my-listings' },
     { icon: 'handshake', labelKey: 'menu.myOffers', route: '/marketplace/my-offers' },
-    { icon: 'bar_chart', labelKey: 'menu.analytics', route: '/analytics' },
-    { icon: 'people', labelKey: 'menu.users', route: '/user' },
-    { icon: 'description', labelKey: 'menu.reports', route: '/reports' }
+    { icon: 'receipt_long', labelKey: 'menu.myOrders', route: '/marketplace/my-orders' }
   ];
 
-  get visibleNavItems(): NavItem[] {
-    return this.navItems.filter((item) => !item.adminOnly || this.authService.isAdmin());
+  get visibleDomainBusinessChildren(): NavGroupChild[] {
+    return this.domainBusinessNavChildren.filter(
+      (child) => !child.adminOnly || this.authService.isAdmin()
+    );
   }
 
   readonly supportNavChildren: NavGroupChild[] = [
@@ -520,6 +590,10 @@ export class SidebarComponent implements OnInit {
     this.supportExpanded = !this.supportExpanded;
   }
 
+  toggleDomainBusinessGroup(): void {
+    this.domainBusinessExpanded = !this.domainBusinessExpanded;
+  }
+
   onNavigate(): void {
     this.closeMobile.emit();
   }
@@ -527,5 +601,9 @@ export class SidebarComponent implements OnInit {
   private updateGroupExpanded(url: string): void {
     this.smsExpanded = url.startsWith('/sms');
     this.supportExpanded = url.startsWith('/tickets') || url.startsWith('/admin/tickets');
+    this.domainBusinessExpanded =
+      url.startsWith('/domains')
+      || url.startsWith('/analyzer')
+      || url.startsWith('/marketplace');
   }
 }

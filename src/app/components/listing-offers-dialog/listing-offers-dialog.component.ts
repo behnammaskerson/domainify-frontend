@@ -213,7 +213,9 @@ export class ListingOffersDialogComponent implements OnInit {
       this.offersService.accept(offer.id).subscribe({
         next: () => {
           this.changed = true;
-          this.snackBar.open(this.translate.instant('offers.toast.accepted'), undefined, { duration: 3000 });
+          this.snackBar.open(this.translate.instant('offers.toast.acceptedPendingPay'), undefined, {
+            duration: 4500
+          });
           this.reload();
           this.dialogRef.close(true);
         },

@@ -15,15 +15,18 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
+import { CheckoutDialogComponent } from '../../components/checkout-dialog/checkout-dialog.component';
 import { OfferDialogComponent } from '../../components/offer-dialog/offer-dialog.component';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { LocaleCurrencyPipe, LocaleDatePipe } from '../../pipes/locale-format.pipe';
 import { ApiErrorService } from '../../services/api-error.service';
+import { AuthService } from '../../services/auth.service';
 import {
   DomainListingOfferStatus,
   ListingOffer,
   OffersService
 } from '../../services/offers.service';
+import { MarketplaceOrder } from '../../services/orders.service';
 
 @Component({
   selector: 'app-my-offers',
@@ -188,6 +191,7 @@ import {
 })
 export class MyOffersPageComponent implements OnInit, OnDestroy {
   private readonly offersService = inject(OffersService);
+  private readonly authService = inject(AuthService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly apiError = inject(ApiErrorService);
@@ -200,8 +204,12 @@ export class MyOffersPageComponent implements OnInit, OnDestroy {
   pageIndex = 0;
   pageSize = 10;
   totalElements = 0;
+  private userId: number | null = null;
 
   ngOnInit(): void {
+    this.authService.currentUser$.subscribe((user) => {
+      this.userId = user?.id ?? null;
+    }).unsubscribe();
     this.reload();
   }
 
@@ -258,12 +266,28 @@ export class MyOffersPageComponent implements OnInit, OnDestroy {
     ref.afterClosed().subscribe((ok) => {
       if (!ok) return;
       this.offersService.accept(offer.id).subscribe({
-        next: () => {
-          this.snackBar.open(this.translate.instant('offers.toast.accepted'), undefined, { duration: 3000 });
+        next: (res) => {
+          this.snackBar.open(this.translate.instant('offers.toast.acceptedPendingPay'), undefined, {
+            duration: 4000
+          });
           this.reload();
+          this.openCheckoutIfBuyer(res.order);
         },
         error: (error) => this.fail(error)
       });
+    });
+  }
+
+  private openCheckoutIfBuyer(order: MarketplaceOrder): void {
+    if (!order || order.status !== 'PENDING_PAYMENT') return;
+    if (this.userId == null || order.buyerId !== this.userId) return;
+    this.dialog.open(CheckoutDialogComponent, {
+      width: '520px',
+      maxWidth: '95vw',
+      panelClass: 'app-dialog',
+      data: { order }
+    }).afterClosed().subscribe((paid) => {
+      if (paid) this.reload();
     });
   }
 

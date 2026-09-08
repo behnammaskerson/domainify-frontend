@@ -21,6 +21,7 @@ import { PasswordPolicyService, PasswordPolicy } from '../../services/password-p
 import { SmsConfigService, SmsCreditResult, SmsLinesResult, SmsProviderResult } from '../../services/sms-config.service';
 import { EmailConfigService } from '../../services/email-config.service';
 import { DomainSettingsService } from '../../services/domain-settings.service';
+import { PaymentSettingsService } from '../../services/payment-settings.service';
 import {
   buildPasswordValidators,
   buildPasswordPolicyChecks,
@@ -42,6 +43,7 @@ import {
   isValidNationalPhone,
   phonePlaceholder
 } from '../../utils/phone-countries';
+import { toLatinDigits } from '../../utils/locale-digits';
 import type { CountryCode } from 'libphonenumber-js';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -407,6 +409,17 @@ interface SettingsNavItem {
                               [checked]="smsNotificationsEnabled"
                               [disabled]="smsNotificationsSaving || !hasVerifiedPhoneForSms"
                               (change)="onSmsNotificationsToggle($event.checked)">
+            </mat-slide-toggle>
+          </div>
+          <div class="setting-row">
+            <div class="setting-copy">
+              <span class="setting-label">{{ 'settings.paymentNotifications' | translate }}</span>
+              <span class="setting-desc">{{ 'settings.paymentNotificationsDesc' | translate }}</span>
+            </div>
+            <mat-slide-toggle color="primary"
+                              [checked]="paymentNotificationsEnabled"
+                              [disabled]="paymentNotificationsSaving"
+                              (change)="onPaymentNotificationsToggle($event.checked)">
             </mat-slide-toggle>
           </div>
           @if (authService.isAdmin()) {
@@ -933,6 +946,116 @@ interface SettingsNavItem {
               </div>
             }
           </section>
+
+          <section class="settings-group settings-anchor" id="payment-settings">
+            <h2 class="settings-group-title">{{ 'settings.paymentSettings.title' | translate }}</h2>
+            <p class="settings-group-desc">{{ 'settings.paymentSettings.subtitle' | translate }}</p>
+
+            @if (paymentSettingsLoading) {
+              <p class="settings-group-desc">{{ 'settings.paymentSettings.loading' | translate }}</p>
+            } @else {
+              <form [formGroup]="paymentSettingsForm" class="policy-form" (ngSubmit)="savePaymentSettings()">
+                <div class="email-config-toggles">
+                  <mat-slide-toggle formControlName="enabled" color="primary">
+                    {{ 'settings.paymentSettings.enabled' | translate }}
+                  </mat-slide-toggle>
+                  <mat-slide-toggle formControlName="sandbox" color="primary">
+                    {{ 'settings.paymentSettings.sandbox' | translate }}
+                  </mat-slide-toggle>
+                </div>
+
+                <div class="sms-config-fields">
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-label>{{ 'settings.paymentSettings.merchantId' | translate }}</mat-label>
+                    <input matInput formControlName="merchantId" dir="ltr" autocomplete="off">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-label>{{ 'settings.paymentSettings.accessToken' | translate }}</mat-label>
+                    <input matInput type="password" formControlName="accessToken" dir="ltr" autocomplete="new-password">
+                    <mat-hint>
+                      {{ (paymentAccessTokenConfigured
+                        ? 'settings.paymentSettings.accessTokenHintKeep'
+                        : 'settings.paymentSettings.accessTokenHint') | translate }}
+                    </mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-label>{{ 'settings.paymentSettings.callbackPublicBaseUrl' | translate }}</mat-label>
+                    <input matInput formControlName="callbackPublicBaseUrl" dir="ltr"
+                           placeholder="http://localhost:4200">
+                    <mat-hint>{{ 'settings.paymentSettings.callbackHint' | translate }}</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-label>{{ 'settings.paymentSettings.minTopUpIrt' | translate }}</mat-label>
+                    <input matInput type="text" inputmode="numeric" autocomplete="off" dir="ltr"
+                           [value]="minTopUpDisplay"
+                           (input)="onPaymentIrtInput($event, 'minTopUpIrt')"
+                           (blur)="paymentSettingsForm.controls.minTopUpIrt.markAsTouched()">
+                    @if (paymentSettingsForm.controls.minTopUpIrt.touched && paymentSettingsForm.controls.minTopUpIrt.invalid) {
+                      <mat-error>{{ 'settings.paymentSettings.minTopUpInvalid' | translate }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-label>{{ 'settings.paymentSettings.commissionPercent' | translate }}</mat-label>
+                    <input matInput type="number" formControlName="commissionPercent" min="0" max="100" step="0.01" dir="ltr">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-label>{{ 'settings.paymentSettings.featuredListingPriceIrt' | translate }}</mat-label>
+                    <input matInput type="text" inputmode="numeric" autocomplete="off" dir="ltr"
+                           [value]="featuredListingPriceDisplay"
+                           (input)="onPaymentIrtInput($event, 'featuredListingPriceIrt')"
+                           (blur)="paymentSettingsForm.controls.featuredListingPriceIrt.markAsTouched()">
+                    @if (paymentSettingsForm.controls.featuredListingPriceIrt.touched && paymentSettingsForm.controls.featuredListingPriceIrt.invalid) {
+                      <mat-error>{{ 'settings.paymentSettings.featuredPriceInvalid' | translate }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width sms-control-field">
+                    <mat-label>{{ 'settings.paymentSettings.escrowHoldDays' | translate }}</mat-label>
+                    <input matInput type="number" formControlName="escrowHoldDays" min="0" max="365" step="1" dir="ltr">
+                  </mat-form-field>
+                </div>
+
+                <h3 class="settings-subgroup-title">{{ 'settings.paymentSettings.notificationsTitle' | translate }}</h3>
+                <p class="settings-group-desc">{{ 'settings.paymentSettings.notificationsSubtitle' | translate }}</p>
+                <div class="email-config-toggles">
+                  <mat-slide-toggle formControlName="paymentNotificationsEnabled" color="primary">
+                    {{ 'settings.paymentSettings.notificationsEnabled' | translate }}
+                  </mat-slide-toggle>
+                </div>
+                <div class="domain-renewal-channels"
+                     [class.disabled-block]="!paymentSettingsForm.controls.paymentNotificationsEnabled.value">
+                  <span class="channel-label">{{ 'settings.paymentSettings.channels' | translate }}</span>
+                  <mat-slide-toggle formControlName="paymentInAppNotificationsEnabled" color="primary"
+                                    [disabled]="!paymentSettingsForm.controls.paymentNotificationsEnabled.value">
+                    {{ 'settings.paymentSettings.channelInApp' | translate }}
+                  </mat-slide-toggle>
+                  <mat-slide-toggle formControlName="paymentEmailNotificationsEnabled" color="primary"
+                                    [disabled]="!paymentSettingsForm.controls.paymentNotificationsEnabled.value">
+                    {{ 'settings.paymentSettings.channelEmail' | translate }}
+                  </mat-slide-toggle>
+                  <mat-slide-toggle formControlName="paymentSmsNotificationsEnabled" color="primary"
+                                    [disabled]="!paymentSettingsForm.controls.paymentNotificationsEnabled.value">
+                    {{ 'settings.paymentSettings.channelSms' | translate }}
+                  </mat-slide-toggle>
+                </div>
+                @if (paymentNotificationChannelError) {
+                  <p class="sms-credit-error">{{ 'settings.paymentSettings.channelError' | translate }}</p>
+                }
+
+                <div class="form-actions">
+                  <button mat-flat-button color="primary" type="submit"
+                          [disabled]="paymentSettingsForm.invalid || paymentSettingsSaving || paymentNotificationChannelError">
+                    {{ 'settings.paymentSettings.save' | translate }}
+                  </button>
+                </div>
+              </form>
+            }
+          </section>
         }
       </div>
     </div>
@@ -1300,6 +1423,13 @@ interface SettingsNavItem {
       margin-bottom: 4px;
     }
 
+    .settings-subgroup-title {
+      margin: 1.25rem 0 0.35rem;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
     .domain-renewal-windows {
       display: flex;
       flex-direction: column;
@@ -1415,6 +1545,7 @@ export class SettingsComponent implements OnInit {
   private readonly smsConfigService = inject(SmsConfigService);
   private readonly emailConfigService = inject(EmailConfigService);
   private readonly domainSettingsService = inject(DomainSettingsService);
+  private readonly paymentSettingsService = inject(PaymentSettingsService);
   private readonly apiError = inject(ApiErrorService);
   private readonly translate = inject(TranslateService);
   private readonly snackBar = inject(MatSnackBar);
@@ -1436,7 +1567,8 @@ export class SettingsComponent implements OnInit {
     { id: 'password-policy', titleKey: 'settings.passwordPolicy.title', icon: 'policy', adminOnly: true },
     { id: 'email-config', titleKey: 'settings.emailConfig.title', icon: 'email', adminOnly: true },
     { id: 'sms-config', titleKey: 'settings.smsConfig.title', icon: 'sms', adminOnly: true },
-    { id: 'domain-renewal', titleKey: 'settings.domainRenewal.title', icon: 'event_upcoming', adminOnly: true }
+    { id: 'domain-renewal', titleKey: 'settings.domainRenewal.title', icon: 'event_upcoming', adminOnly: true },
+    { id: 'payment-settings', titleKey: 'settings.paymentSettings.title', icon: 'payments', adminOnly: true }
   ];
 
   get visibleNavItems(): SettingsNavItem[] {
@@ -1460,6 +1592,8 @@ export class SettingsComponent implements OnInit {
   emailNotificationsSaving = false;
   smsNotificationsEnabled = false;
   smsNotificationsSaving = false;
+  paymentNotificationsEnabled = true;
+  paymentNotificationsSaving = false;
   ticketAvailable = true;
   ticketAvailabilitySaving = false;
   phoneVerificationSending = false;
@@ -1478,6 +1612,11 @@ export class SettingsComponent implements OnInit {
   emailConfigSaving = false;
   domainRenewalLoading = false;
   domainRenewalSaving = false;
+  paymentSettingsLoading = false;
+  paymentSettingsSaving = false;
+  paymentAccessTokenConfigured = false;
+  minTopUpDisplay = '10,000';
+  featuredListingPriceDisplay = '50,000';
   domainRenewalLastRunDate: string | null = null;
   renewalWindowsSelected: number[] = [90, 60, 30];
   renewalWindowPresets = [90, 60, 30, 14, 7];
@@ -1573,12 +1712,36 @@ export class SettingsComponent implements OnInit {
     renewalSendTime: ['09:00', [Validators.required, Validators.pattern(/^\d{2}:\d{2}$/)]]
   });
 
+  paymentSettingsForm = this.fb.nonNullable.group({
+    enabled: [false],
+    sandbox: [true],
+    merchantId: [''],
+    accessToken: [''],
+    callbackPublicBaseUrl: [''],
+    minTopUpIrt: [10000, [Validators.required, Validators.min(1000)]],
+    commissionPercent: [5, [Validators.required, Validators.min(0), Validators.max(100)]],
+    featuredListingPriceIrt: [50000, [Validators.required, Validators.min(0)]],
+    escrowHoldDays: [3, [Validators.required, Validators.min(0), Validators.max(365)]],
+    paymentNotificationsEnabled: [true],
+    paymentInAppNotificationsEnabled: [true],
+    paymentEmailNotificationsEnabled: [true],
+    paymentSmsNotificationsEnabled: [true]
+  });
+
   get domainRenewalChannelError(): boolean {
     const raw = this.domainRenewalForm.getRawValue();
     return !!raw.renewalRemindersEnabled
       && !raw.renewalInAppEnabled
       && !raw.renewalEmailEnabled
       && !raw.renewalSmsEnabled;
+  }
+
+  get paymentNotificationChannelError(): boolean {
+    const raw = this.paymentSettingsForm.getRawValue();
+    return !!raw.paymentNotificationsEnabled
+      && !raw.paymentInAppNotificationsEnabled
+      && !raw.paymentEmailNotificationsEnabled
+      && !raw.paymentSmsNotificationsEnabled;
   }
 
   ngOnInit(): void {
@@ -1592,6 +1755,7 @@ export class SettingsComponent implements OnInit {
       this.loadAdminEmailConfig();
       this.loadAdminSmsConfig();
       this.loadAdminDomainRenewalSettings();
+      this.loadAdminPaymentSettings();
     }
     this.passwordForm.controls.newPassword.valueChanges.subscribe((value) => {
       this.refreshPasswordFeedback(String(value ?? ''));
@@ -2074,6 +2238,124 @@ export class SettingsComponent implements OnInit {
     this.renewalCustomDays = null;
   }
 
+  private loadAdminPaymentSettings(): void {
+    this.paymentSettingsLoading = true;
+    this.paymentSettingsService.getSettings().subscribe({
+      next: (settings) => {
+        this.paymentSettingsLoading = false;
+        this.applyPaymentSettings(settings);
+      },
+      error: (error) => {
+        this.paymentSettingsLoading = false;
+        this.showError(error);
+      }
+    });
+  }
+
+  private applyPaymentSettings(settings: {
+    merchantId: string;
+    sandbox: boolean;
+    accessTokenConfigured: boolean;
+    enabled: boolean;
+    commissionPercent: number;
+    minTopUpIrt: number;
+    featuredListingPriceIrt: number;
+    escrowHoldDays: number;
+    callbackPublicBaseUrl: string;
+    paymentNotificationsEnabled?: boolean;
+    paymentInAppNotificationsEnabled?: boolean;
+    paymentEmailNotificationsEnabled?: boolean;
+    paymentSmsNotificationsEnabled?: boolean;
+  }): void {
+    this.paymentAccessTokenConfigured = !!settings.accessTokenConfigured;
+    const minTopUp = Math.max(0, Math.floor(Number(settings.minTopUpIrt ?? 10000)));
+    const featuredPrice = Math.max(0, Math.floor(Number(settings.featuredListingPriceIrt ?? 50000)));
+    this.paymentSettingsForm.patchValue({
+      enabled: !!settings.enabled,
+      sandbox: settings.sandbox !== false,
+      merchantId: settings.merchantId || '',
+      accessToken: '',
+      callbackPublicBaseUrl: settings.callbackPublicBaseUrl || '',
+      minTopUpIrt: minTopUp,
+      commissionPercent: Number(settings.commissionPercent ?? 5),
+      featuredListingPriceIrt: featuredPrice,
+      escrowHoldDays: settings.escrowHoldDays ?? 3,
+      paymentNotificationsEnabled: settings.paymentNotificationsEnabled !== false,
+      paymentInAppNotificationsEnabled: settings.paymentInAppNotificationsEnabled !== false,
+      paymentEmailNotificationsEnabled: settings.paymentEmailNotificationsEnabled !== false,
+      paymentSmsNotificationsEnabled: settings.paymentSmsNotificationsEnabled !== false
+    });
+    this.minTopUpDisplay = this.formatGroupedIrt(minTopUp);
+    this.featuredListingPriceDisplay = this.formatGroupedIrt(featuredPrice);
+  }
+
+  onPaymentIrtInput(event: Event, field: 'minTopUpIrt' | 'featuredListingPriceIrt'): void {
+    const input = event.target as HTMLInputElement;
+    const digits = toLatinDigits(input.value).replace(/\D/g, '');
+    const value = digits === '' ? 0 : Number(digits);
+    if (!Number.isFinite(value) || value < 0) {
+      this.paymentSettingsForm.controls[field].setValue(0);
+      const display = this.formatGroupedIrt(0);
+      if (field === 'minTopUpIrt') {
+        this.minTopUpDisplay = display;
+      } else {
+        this.featuredListingPriceDisplay = display;
+      }
+      input.value = display;
+      return;
+    }
+    this.paymentSettingsForm.controls[field].setValue(value);
+    this.paymentSettingsForm.controls[field].markAsDirty();
+    const display = this.formatGroupedIrt(value);
+    if (field === 'minTopUpIrt') {
+      this.minTopUpDisplay = display;
+    } else {
+      this.featuredListingPriceDisplay = display;
+    }
+    input.value = display;
+  }
+
+  private formatGroupedIrt(value: number): string {
+    return Math.floor(Math.max(0, value)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  savePaymentSettings(): void {
+    if (this.paymentSettingsForm.invalid || !this.authService.isAdmin()) {
+      this.paymentSettingsForm.markAllAsTouched();
+      return;
+    }
+    if (this.paymentNotificationChannelError) {
+      return;
+    }
+    const raw = this.paymentSettingsForm.getRawValue();
+    this.paymentSettingsSaving = true;
+    this.paymentSettingsService.updateSettings({
+      merchantId: raw.merchantId?.trim() || '',
+      sandbox: !!raw.sandbox,
+      accessToken: raw.accessToken?.trim() || undefined,
+      enabled: !!raw.enabled,
+      commissionPercent: Number(raw.commissionPercent),
+      minTopUpIrt: Math.floor(Number(raw.minTopUpIrt)),
+      featuredListingPriceIrt: Math.floor(Number(raw.featuredListingPriceIrt)),
+      escrowHoldDays: Math.floor(Number(raw.escrowHoldDays)),
+      callbackPublicBaseUrl: raw.callbackPublicBaseUrl?.trim() || '',
+      paymentNotificationsEnabled: !!raw.paymentNotificationsEnabled,
+      paymentInAppNotificationsEnabled: !!raw.paymentInAppNotificationsEnabled,
+      paymentEmailNotificationsEnabled: !!raw.paymentEmailNotificationsEnabled,
+      paymentSmsNotificationsEnabled: !!raw.paymentSmsNotificationsEnabled
+    }).subscribe({
+      next: (settings) => {
+        this.paymentSettingsSaving = false;
+        this.applyPaymentSettings(settings);
+        this.snack(this.translate.instant('settings.paymentSettings.saved'));
+      },
+      error: (error) => {
+        this.paymentSettingsSaving = false;
+        this.showError(error);
+      }
+    });
+  }
+
   saveDomainRenewalSettings(): void {
     if (this.domainRenewalForm.invalid || !this.authService.isAdmin()) {
       this.domainRenewalForm.markAllAsTouched();
@@ -2364,6 +2646,7 @@ export class SettingsComponent implements OnInit {
     this.phoneVerified = user.phoneVerified !== false;
     this.emailNotificationsEnabled = user.emailNotificationsEnabled !== false;
     this.smsNotificationsEnabled = user.smsNotificationsEnabled === true;
+    this.paymentNotificationsEnabled = user.paymentNotificationsEnabled !== false;
     this.ticketAvailable = user.ticketAvailable !== false;
     this.phoneOtpSent = false;
     this.phoneOtpCode = '';
@@ -2474,6 +2757,30 @@ export class SettingsComponent implements OnInit {
       error: (error) => {
         this.smsNotificationsSaving = false;
         this.smsNotificationsEnabled = previous;
+        this.showError(error);
+      }
+    });
+  }
+
+  onPaymentNotificationsToggle(enabled: boolean): void {
+    if (this.paymentNotificationsSaving || enabled === this.paymentNotificationsEnabled) {
+      return;
+    }
+    const previous = this.paymentNotificationsEnabled;
+    this.paymentNotificationsEnabled = enabled;
+    this.paymentNotificationsSaving = true;
+    this.usersService.setPaymentNotificationsEnabled(enabled).subscribe({
+      next: (user) => {
+        this.paymentNotificationsSaving = false;
+        this.applyUser(user);
+        this.authService.setCurrentUser(user);
+        this.snack(this.translate.instant(
+          enabled ? 'settings.paymentNotificationsEnabled' : 'settings.paymentNotificationsDisabled'
+        ));
+      },
+      error: (error) => {
+        this.paymentNotificationsSaving = false;
+        this.paymentNotificationsEnabled = previous;
         this.showError(error);
       }
     });

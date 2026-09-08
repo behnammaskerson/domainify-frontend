@@ -112,6 +112,7 @@
     "marketplace": "بازار",
     "myListings": "لیست‌های من",
     "myOffers": "پیشنهادهای من",
+    "myOrders": "سفارش‌های من",
     "settings": "تنظیمات",
     "createTicket": "ایجاد تیکت",
     "myTickets": "تیکت‌های من",
@@ -138,7 +139,9 @@
     "smsReceiveReports": "گزارش دریافت‌ها",
     "smsLiveSends": "گزارش ارسال‌های روز",
     "smsArchiveSends": "گزارش ارسال‌های آرشیو شده",
-    "smsDailyPacks": "مجموعه ارسال‌های روز"
+    "smsDailyPacks": "مجموعه ارسال‌های روز",
+    "wallet": "کیف پول",
+    "domainBusiness": "کسب‌وکار دامنه"
   },
   "tickets": {
     "agentUnavailable": "خارج از دسترس",
@@ -1074,7 +1077,12 @@
     "topDomainsTitle": "برترین دامنه‌ها",
     "topDomainsSubtitle": "بر اساس ارزش و ترافیک",
     "views": "بازدید",
-    "periods": { "1W": "۱ هفته", "1M": "۱ ماه", "3M": "۳ ماه", "1Y": "۱ سال" },
+    "periods": {
+      "1W": "۱ هفته",
+      "1M": "۱ ماه",
+      "3M": "۳ ماه",
+      "1Y": "۱ سال"
+    },
     "activities": {
       "sold": "دامنه فروخته شد: {{domain}}",
       "added": "دامنه جدید اضافه شد: {{domain}}",
@@ -1252,7 +1260,9 @@
       "marketValue": "ارزش تخمینی بازار",
       "competitionLow": "رقبای کم در این حوزه"
     },
-    "competitionLevels": { "low": "کم" },
+    "competitionLevels": {
+      "low": "کم"
+    },
     "overview": {
       "registrar": "ثبت‌کننده",
       "created": "تاریخ ایجاد",
@@ -1286,6 +1296,7 @@
     "eyebrow": "بازار",
     "myListings": "لیست‌های من",
     "myOffers": "پیشنهادهای من",
+    "myOrders": "سفارش‌های من",
     "search": "جستجوی لیست‌ها...",
     "empty": "هنوز لیست فعالی نیست. دامنه تأییدشده را از دامنه‌های من درج کنید.",
     "featured": "دامنه‌های ویژه",
@@ -1299,11 +1310,26 @@
     "buyNow": "خرید",
     "offers": "{{count}} پیشنهاد",
     "tags": {
-      "premium": "ویژه", "crypto": "رمزارز", "finance": "مالی", "ai": "هوش مصنوعی",
-      "startup": "استارتاپ", "tech": "فناوری", "saas": "SaaS", "cloud": "ابر",
-      "business": "کسب‌وکار", "nft": "NFT", "marketplace": "بازار", "green": "سبز",
-      "energy": "انرژی", "fintech": "فین‌تک", "hub": "هاب", "remote": "دورکار",
-      "work": "کار", "data": "داده", "devops": "DevOps", "health": "سلامت"
+      "premium": "ویژه",
+      "crypto": "رمزارز",
+      "finance": "مالی",
+      "ai": "هوش مصنوعی",
+      "startup": "استارتاپ",
+      "tech": "فناوری",
+      "saas": "SaaS",
+      "cloud": "ابر",
+      "business": "کسب‌وکار",
+      "nft": "NFT",
+      "marketplace": "بازار",
+      "green": "سبز",
+      "energy": "انرژی",
+      "fintech": "فین‌تک",
+      "hub": "هاب",
+      "remote": "دورکار",
+      "work": "کار",
+      "data": "داده",
+      "devops": "DevOps",
+      "health": "سلامت"
     },
     "descriptions": {
       "cryptoCom": "دامنه پریمیوم یک کلمه‌ای .com در حوزه رمزارز. مناسب صرافی، کیف پول یا رسانه.",
@@ -1403,7 +1429,7 @@
     },
     "confirm": {
       "acceptTitle": "پذیرش پیشنهاد؟",
-      "acceptMessage": "قیمت فعلی برای {{domain}} پذیرفته می‌شود و لیست فروخته‌شده علامت می‌خورد.",
+      "acceptMessage": "قیمت فعلی برای {{domain}} پذیرفته می‌شود. خریدار باید قبل از علامت‌گذاری فروش، پرداخت کند.",
       "rejectTitle": "رد پیشنهاد؟",
       "rejectMessage": "مذاکره فعلی برای {{domain}} رد شود.",
       "withdrawTitle": "پس‌گرفتن پیشنهاد؟",
@@ -1413,6 +1439,7 @@
       "created": "پیشنهاد ارسال شد",
       "countered": "پیشنهاد متقابل ارسال شد",
       "accepted": "پیشنهاد پذیرفته شد",
+      "acceptedPendingPay": "پیشنهاد پذیرفته شد. برای تکمیل خرید پرداخت کنید.",
       "rejected": "پیشنهاد رد شد",
       "withdrawn": "پیشنهاد پس گرفته شد"
     },
@@ -1443,14 +1470,18 @@
     "languageLabel": "زبان نمایش",
     "languageDesc": "زبان رابط و زبان اعلان‌های ایمیل، پیامک و درون‌برنامه",
     "emailNotifications": "اعلان‌های ایمیل",
-    "emailNotificationsDesc": "هشدار ایمیل برای به‌روزرسانی تیکت و یادآوری تمدید دامنه (۹۰/۶۰/۳۰ روز قبل از انقضا)",
+    "emailNotificationsDesc": "هشدار ایمیل برای تیکت، تمدید دامنه، پیشنهادها و تراکنش‌های پرداخت",
     "emailNotificationsEnabled": "هشدارهای ایمیل فعال شد",
     "emailNotificationsDisabled": "هشدارهای ایمیل غیرفعال شد",
     "smsNotifications": "اعلان‌های پیامک",
-    "smsNotificationsDesc": "عضویت برای پیامک تیکت فوری و یادآوری تمدید دامنه (نیاز به موبایل تأییدشده)",
+    "smsNotificationsDesc": "عضویت برای پیامک تیکت فوری، تمدید، پیشنهاد و پرداخت (نیاز به موبایل تأییدشده)",
     "smsNotificationsNeedPhone": "برای فعال‌سازی پیامک، در پروفایل شماره موبایل اضافه و تأیید کنید.",
     "smsNotificationsEnabled": "هشدارهای پیامکی فعال شد",
     "smsNotificationsDisabled": "هشدارهای پیامکی غیرفعال شد",
+    "paymentNotifications": "اعلان‌های پرداخت",
+    "paymentNotificationsDesc": "اعلان درون‌برنامه، ایمیل و پیامک برای شارژ و تعدیل کیف پول (کانال ایمیل/پیامک بالا نیز لازم است)",
+    "paymentNotificationsEnabled": "اعلان‌های پرداخت فعال شد",
+    "paymentNotificationsDisabled": "اعلان‌های پرداخت غیرفعال شد",
     "ticketAvailability": "در دسترس برای تیکت",
     "ticketAvailabilityDesc": "در حالت خاموش، تخصیص خودکار شما را رد می‌کند. همکاران همچنان می‌توانند دستی به شما تخصیص یا انتقال دهند.",
     "ticketAvailabilityEnabled": "برای تخصیص خودکار تیکت در دسترس هستید",
@@ -1860,6 +1891,35 @@
       "actionFailed": "عملیات دومرحله‌ای ناموفق بود",
       "secretCopied": "کلید در کلیپ‌بورد کپی شد",
       "backupCopied": "کدهای پشتیبان در کلیپ‌بورد کپی شدند"
+    },
+    "paymentSettings": {
+      "title": "پرداخت",
+      "subtitle": "درگاه پذیرنده، شارژ کیف پول و تنظیمات پیش‌فرض کارمزد. فقط ادمین.",
+      "loading": "در حال بارگذاری تنظیمات پرداخت...",
+      "enabled": "فعال‌سازی پرداخت‌ها",
+      "sandbox": "حالت سندباکس",
+      "merchantId": "مرچنت آیدی",
+      "accessToken": "توکن دسترسی (بازپرداخت)",
+      "accessTokenHint": "اختیاری در فاز ۱؛ برای بازپرداخت‌های بعدی لازم می‌شود",
+      "accessTokenHintKeep": "برای حفظ توکن فعلی خالی بگذارید",
+      "callbackPublicBaseUrl": "آدرس پایه فرانت‌اند عمومی",
+      "callbackHint": "برای کال‌بک پرداخت، مثلاً http://localhost:4200",
+      "minTopUpIrt": "حداقل شارژ (تومان)",
+      "commissionPercent": "درصد کمیسیون (آینده)",
+      "featuredListingPriceIrt": "قیمت آگهی ویژه (تومان، آینده)",
+      "escrowHoldDays": "روزهای نگه‌داشت اسکرو (آینده)",
+      "notificationsTitle": "اعلان‌های پرداخت",
+      "notificationsSubtitle": "فعال/غیرفعال‌سازی سراسری هشدارهای شارژ و تعدیل کیف پول.",
+      "notificationsEnabled": "فعال‌سازی اعلان‌های پرداخت",
+      "channels": "کانال‌ها",
+      "channelInApp": "درون‌برنامه",
+      "channelEmail": "ایمیل",
+      "channelSms": "پیامک",
+      "channelError": "وقتی اعلان‌های پرداخت فعال است حداقل یک کانال را روشن کنید.",
+      "save": "ذخیره تنظیمات پرداخت",
+      "saved": "تنظیمات پرداخت به‌روز شد",
+      "minTopUpInvalid": "حداقل مبلغ شارژ معتبر وارد کنید",
+      "featuredPriceInvalid": "قیمت آگهی ویژه معتبر وارد کنید"
     }
   },
   "users": {
@@ -1938,12 +1998,26 @@
       "enable": "فعال‌سازی",
       "disable": "غیرفعال‌سازی",
       "changeRole": "تغییر نقش",
+      "adjustWallet": "تعدیل کیف پول",
       "enableEmailNotifications": "فعال‌سازی هشدار ایمیل",
       "disableEmailNotifications": "غیرفعال‌سازی هشدار ایمیل",
       "enableSmsNotifications": "فعال‌سازی هشدار پیامک",
       "disableSmsNotifications": "غیرفعال‌سازی هشدار پیامک",
       "markTicketAvailable": "علامت‌گذاری در دسترس برای تیکت",
       "markTicketUnavailable": "علامت‌گذاری غیرفعال برای تیکت"
+    },
+    "wallet": {
+      "adjustTitle": "تعدیل کیف پول",
+      "adjustHint": "افزایش یا کاهش موجودی قابل برداشت برای {{name}}.",
+      "currentBalance": "موجودی فعلی",
+      "direction": "نوع تعدیل",
+      "credit": "افزایش (بستانکار)",
+      "debit": "کاهش (بدهکار)",
+      "amount": "مبلغ (تومان)",
+      "amountInvalid": "مبلغ باید حداقل ۱ باشد",
+      "note": "دلیل / یادداشت",
+      "noteRequired": "یادداشت الزامی است",
+      "apply": "اعمال تعدیل"
     },
     "confirm": {
       "deleteTitle": "حذف حساب کاربری؟",
@@ -1963,6 +2037,8 @@
       "enabled": "کاربر فعال شد",
       "disabled": "کاربر غیرفعال شد",
       "roleUpdated": "نقش به‌روز شد",
+      "walletCredited": "موجودی کیف پول افزایش یافت",
+      "walletDebited": "موجودی کیف پول کاهش یافت",
       "emailNotificationsEnabled": "هشدار ایمیل کاربر فعال شد",
       "emailNotificationsDisabled": "هشدار ایمیل کاربر غیرفعال شد",
       "smsNotificationsEnabled": "هشدار پیامک کاربر فعال شد",
@@ -1993,7 +2069,6 @@
     "turkish": "ترکی",
     "copy": "کپی",
     "copied": "کپی شد",
-    "close": "بستن",
     "retry": "تلاش دوباره",
     "backToTop": "بازگشت به بالا",
     "rowNumber": "#"
@@ -2202,7 +2277,29 @@
     "TICKET_ARCHIVE_REQUIRES_CLOSED": "فقط تیکت‌های بسته‌شده قابل بایگانی هستند",
     "TICKET_ALREADY_DELETED": "تیکت از قبل حذف شده است",
     "TICKET_NOT_DELETED": "تیکت حذف نشده است",
-    "TICKET_DELETED": "این تیکت حذف شده است"
+    "TICKET_DELETED": "این تیکت حذف شده است",
+    "PAYMENT_DISABLED": "پرداخت‌ها فعلاً غیرفعال است",
+    "PAYMENT_MERCHANT_REQUIRED": "ابتدا مرچنت آیدی را تنظیم کنید",
+    "PAYMENT_CALLBACK_URL_INVALID": "آدرس کال‌بک معتبر وارد کنید",
+    "PAYMENT_AMOUNT_TOO_LOW": "مبلغ کمتر از حداقل شارژ است",
+    "PAYMENT_AUTHORITY_REQUIRED": "کد authority پرداخت موجود نیست",
+    "PAYMENT_INTENT_NOT_FOUND": "پرداخت پیدا نشد",
+    "PAYMENT_PURPOSE_UNSUPPORTED": "این نوع پرداخت هنوز پشتیبانی نمی‌شود",
+    "PAYMENT_GATEWAY_ERROR": "درخواست به درگاه پرداخت ناموفق بود",
+    "PAYMENT_VERIFY_FAILED": "تأیید پرداخت ناموفق بود",
+    "WALLET_AMOUNT_INVALID": "مبلغ کیف پول نامعتبر است",
+    "WALLET_NOT_FOUND": "کیف پول پیدا نشد",
+    "WALLET_INSUFFICIENT_BALANCE": "موجودی کیف پول کافی نیست",
+    "PAYMENT_NOTIFICATION_SETTINGS_INVALID": "حداقل یک کانال اعلان پرداخت را فعال کنید",
+    "ORDER_NOT_FOUND": "سفارش پیدا نشد",
+    "ORDER_NOT_PENDING_PAYMENT": "سفارش در انتظار پرداخت نیست",
+    "ORDER_ALREADY_PAID": "سفارش قبلاً پرداخت شده است",
+    "ORDER_FORBIDDEN": "اجازه دسترسی به این سفارش را ندارید",
+    "ORDER_LISTING_NOT_ACTIVE": "این آگهی برای خرید در دسترس نیست",
+    "ORDER_SELF_PURCHASE": "نمی‌توانید آگهی خودتان را بخرید",
+    "ORDER_PENDING_EXISTS": "برای این آگهی یک سفارش در انتظار پرداخت وجود دارد",
+    "ORDER_PAYMENT_REQUIRED": "برای تکمیل این سفارش پرداخت لازم است",
+    "ORDER_WALLET_PAY_FAILED": "پرداخت از کیف پول ناموفق بود"
   },
   "avatar": {
     "title": "ویرایش آواتار",
@@ -2279,7 +2376,15 @@
       "OFFER_ACCEPTED": "{{actor}} پیشنهاد {{domain}} را پذیرفت ({{amount}})",
       "OFFER_REJECTED": "{{actor}} پیشنهاد {{domain}} را رد کرد",
       "OFFER_WITHDRAWN": "{{actor}} پیشنهاد {{domain}} را پس گرفت",
-      "OFFER_EXPIRED": "پیشنهاد {{amount}} برای {{domain}} منقضی شد"
+      "OFFER_EXPIRED": "پیشنهاد {{amount}} برای {{domain}} منقضی شد",
+      "PAYMENT_TOP_UP_SUCCESS": "کیف پول به مبلغ {{amount}} تومان شارژ شد (پیگیری {{ref}})",
+      "PAYMENT_TOP_UP_FAILED": "شارژ {{amount}} تومان ناموفق بود",
+      "PAYMENT_TOP_UP_CANCELLED": "شارژ {{amount}} تومان لغو شد",
+      "PAYMENT_WALLET_ADJUSTED": "{{actor}} موجودی کیف پول را {{direction}} داد: {{amount}} ({{note}})"
+    },
+    "paymentDirection": {
+      "credit": "افزایش",
+      "debit": "کاهش"
     }
   },
   "toolbar": {
@@ -2287,11 +2392,137 @@
     "logout": "خروج",
     "notifications": "اعلان‌ها",
     "settings": "تنظیمات",
+    "walletBalance": "موجودی کیف پول",
     "notifSold": "دامنه فروخته شد: crypto.com",
     "notifOffer": "پیشنهاد جدید برای ai-startup.io",
     "notifExpired": "انقضای نزدیک: web3.xyz",
     "time5m": "۵ دقیقه پیش",
     "time1h": "۱ ساعت پیش",
     "time3h": "۳ ساعت پیش"
+  },
+  "wallet": {
+    "eyebrow": "موجودی",
+    "title": "کیف پول",
+    "subtitle": "شارژ موجودی و مشاهده گردش حساب.",
+    "loading": "در حال بارگذاری کیف پول...",
+    "paymentsDisabled": "شارژ کیف پول تا فعال‌سازی پرداخت‌ها توسط ادمین غیرفعال است.",
+    "available": "موجودی قابل برداشت",
+    "held": "مبلغ مسدود",
+    "paymentsTitle": "پرداخت‌ها",
+    "paymentsSubtitle": "تلاش‌های شارژ و نتیجه درگاه.",
+    "emptyPayments": "هنوز پرداختی ثبت نشده",
+    "refId": "پیگیری",
+    "ledgerTitle": "گردش حساب",
+    "ledgerSubtitle": "بستانکار و بدهکار اعمال‌شده روی موجودی.",
+    "emptyLedger": "هنوز فعالیتی ثبت نشده",
+    "paymentStatus": {
+      "CREATED": "ایجاد شده",
+      "REDIRECTED": "در انتظار",
+      "VERIFIED": "تأیید شده",
+      "FAILED": "ناموفق",
+      "CANCELLED": "لغو شده"
+    },
+    "table": {
+      "date": "تاریخ",
+      "type": "نوع",
+      "direction": "جهت",
+      "amount": "مبلغ",
+      "availableAfter": "موجودی پس از"
+    },
+    "direction": {
+      "CREDIT": "بستانکار",
+      "DEBIT": "بدهکار"
+    },
+    "entryType": {
+      "TOP_UP": "شارژ",
+      "HOLD": "مسدودسازی",
+      "RELEASE": "آزادسازی",
+      "CAPTURE_TO_SELLER": "انتقال به فروشنده",
+      "COMMISSION": "کمیسیون",
+      "PURCHASE": "خرید",
+      "REFUND": "بازپرداخت",
+      "FEATURED_FEE": "هزینه ویژه",
+      "PAYOUT": "برداشت",
+      "ADJUSTMENT": "تعدیل"
+    },
+    "topUp": {
+      "cta": "شارژ",
+      "title": "شارژ کیف پول",
+      "hint": "حداقل مبلغ {{min}} تومان است. به درگاه پرداخت هدایت می‌شوید.",
+      "amount": "مبلغ (تومان)",
+      "amountRequired": "مبلغ را وارد کنید",
+      "amountTooLow": "حداقل شارژ {{min}} تومان است",
+      "continue": "ادامه پرداخت"
+    },
+    "openPaymentSettings": "باز کردن تنظیمات پرداخت"
+  },
+  "payments": {
+    "return": {
+      "eyebrow": "پرداخت‌ها",
+      "title": "نتیجه پرداخت",
+      "subtitle": "در حال تأیید پرداخت.",
+      "verifying": "در حال تأیید پرداخت…",
+      "verifyingHint": "لطفاً صبر کنید تا پاسخ درگاه تأیید شود.",
+      "success": "پرداخت تأیید و کیف پول شارژ شد.",
+      "successHint": "موجودی قابل برداشت به‌روز شد.",
+      "orderSuccess": "پرداخت بازار تأیید شد.",
+      "orderSuccessHint": "مبلغ تا زمان آزادسازی در امانت نگه داشته می‌شود. سفارش را در «سفارش‌های من» ببینید.",
+      "alreadyVerified": "این پرداخت قبلاً تأیید شده است.",
+      "cancelled": "پرداخت در درگاه لغو یا ناموفق بود.",
+      "cancelledHint": "مبلغی اضافه نشد. می‌توانید دوباره از کیف پول تلاش کنید.",
+      "failedTitle": "پرداخت تأیید نشد",
+      "amount": "مبلغ",
+      "refId": "کد پیگیری",
+      "available": "موجودی قابل برداشت",
+      "backToWallet": "بازگشت به کیف پول",
+      "backToOrders": "سفارش‌های من"
+    }
+  },
+  "orders": {
+    "eyebrow": "تسویه",
+    "title": "سفارش‌های من",
+    "subtitle": "خرید و فروش‌های بازار که در امانت نگه داشته شده‌اند",
+    "browseMarketplace": "مرور بازار",
+    "roleFilter": "نقش",
+    "empty": "هنوز سفارشی در بازار ندارید.",
+    "role": {
+      "all": "همه",
+      "buyer": "خریدار",
+      "seller": "فروشنده"
+    },
+    "table": {
+      "domain": "دامنه",
+      "role": "نقش شما",
+      "gross": "مبلغ کل",
+      "status": "وضعیت",
+      "updated": "به‌روزرسانی"
+    },
+    "status": {
+      "PENDING_PAYMENT": "در انتظار پرداخت",
+      "PAID_HELD": "پرداخت‌شده · در امانت",
+      "RELEASED": "آزادشده",
+      "REFUNDED": "بازپرداخت‌شده",
+      "CANCELLED": "لغوشده",
+      "DISPUTED": "اختلاف"
+    },
+    "actions": {
+      "pay": "پرداخت",
+      "refresh": "بازخوانی"
+    },
+    "checkout": {
+      "title": "تکمیل خرید",
+      "gross": "مبلغ خرید",
+      "commission": "کارمزد پلتفرم",
+      "sellerNet": "سهم فروشنده",
+      "walletAvailable": "موجودی کیف پول",
+      "deadline": "مهلت پرداخت: {{when}}",
+      "payWallet": "پرداخت از کیف پول",
+      "payGateway": "پرداخت از درگاه"
+    },
+    "toast": {
+      "paid": "پرداخت موفق. مبلغ در امانت نگه داشته شد.",
+      "gatewayMissing": "آدرس درگاه پرداخت موجود نبود",
+      "refreshed": "سفارش به‌روز شد"
+    }
   }
 }

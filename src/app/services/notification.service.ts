@@ -23,7 +23,11 @@ export type NotificationType =
   | 'OFFER_ACCEPTED'
   | 'OFFER_REJECTED'
   | 'OFFER_WITHDRAWN'
-  | 'OFFER_EXPIRED';
+  | 'OFFER_EXPIRED'
+  | 'PAYMENT_TOP_UP_SUCCESS'
+  | 'PAYMENT_TOP_UP_FAILED'
+  | 'PAYMENT_TOP_UP_CANCELLED'
+  | 'PAYMENT_WALLET_ADJUSTED';
 
 export type TicketStatus = 'NEW' | 'OPEN' | 'PENDING' | 'ON_HOLD' | 'RESOLVED' | 'CLOSED';
 
@@ -159,6 +163,33 @@ export class NotificationService {
         amount: notif.ticketPublicNumber || ''
       });
     }
+    if (
+      notif.type === 'PAYMENT_TOP_UP_SUCCESS'
+      || notif.type === 'PAYMENT_TOP_UP_FAILED'
+      || notif.type === 'PAYMENT_TOP_UP_CANCELLED'
+    ) {
+      return this.translate.instant(`notifications.types.${notif.type}`, {
+        amount: notif.ticketSubject || '',
+        ref: notif.ticketPublicNumber || ''
+      });
+    }
+    if (notif.type === 'PAYMENT_WALLET_ADJUSTED') {
+      const direction = (notif.ticketPublicNumber || 'credit').toLowerCase();
+      const directionLabel = this.translate.instant(
+        direction === 'debit'
+          ? 'notifications.paymentDirection.debit'
+          : 'notifications.paymentDirection.credit'
+      );
+      const subject = notif.ticketSubject || '';
+      const amount = subject.includes(' — ') ? subject.split(' — ')[0] : subject;
+      const note = subject.includes(' — ') ? subject.split(' — ').slice(1).join(' — ') : '';
+      return this.translate.instant('notifications.types.PAYMENT_WALLET_ADJUSTED', {
+        actor: notif.actorName || this.translate.instant('notifications.someone'),
+        direction: directionLabel,
+        amount,
+        note
+      });
+    }
     const autoEscalated = notif.type === 'TICKET_ESCALATED' && !notif.actorName;
     const key = autoEscalated
       ? 'notifications.types.TICKET_ESCALATED_AUTO'
@@ -216,6 +247,13 @@ export class NotificationService {
       case 'OFFER_WITHDRAWN':
       case 'OFFER_EXPIRED':
         return 'cancel';
+      case 'PAYMENT_TOP_UP_SUCCESS':
+        return 'account_balance_wallet';
+      case 'PAYMENT_TOP_UP_FAILED':
+      case 'PAYMENT_TOP_UP_CANCELLED':
+        return 'money_off';
+      case 'PAYMENT_WALLET_ADJUSTED':
+        return 'tune';
       default:
         return 'notifications';
     }
@@ -245,6 +283,13 @@ export class NotificationService {
       case 'OFFER_RECEIVED':
       case 'OFFER_COUNTERED':
         return 'var(--info)';
+      case 'PAYMENT_TOP_UP_SUCCESS':
+        return 'var(--success)';
+      case 'PAYMENT_TOP_UP_FAILED':
+      case 'PAYMENT_TOP_UP_CANCELLED':
+        return 'var(--danger)';
+      case 'PAYMENT_WALLET_ADJUSTED':
+        return 'var(--accent)';
       default:
         return 'var(--warning)';
     }
@@ -274,6 +319,14 @@ export class NotificationService {
   notificationRoute(notif: AppNotification): string[] | null {
     if (notif.type === 'DOMAIN_RENEWAL') {
       return ['/domains'];
+    }
+    if (
+      notif.type === 'PAYMENT_TOP_UP_SUCCESS'
+      || notif.type === 'PAYMENT_TOP_UP_FAILED'
+      || notif.type === 'PAYMENT_TOP_UP_CANCELLED'
+      || notif.type === 'PAYMENT_WALLET_ADJUSTED'
+    ) {
+      return ['/wallet'];
     }
     if (
       notif.type === 'OFFER_RECEIVED'

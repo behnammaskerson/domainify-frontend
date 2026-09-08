@@ -113,6 +113,7 @@
     "marketplace": "Marketplace",
     "myListings": "My Listings",
     "myOffers": "My Offers",
+    "myOrders": "My Orders",
     "settings": "Settings",
     "createTicket": "Create Ticket",
     "myTickets": "My Tickets",
@@ -139,7 +140,9 @@
     "smsReceiveReports": "Receive Reports",
     "smsLiveSends": "Today's Sends",
     "smsArchiveSends": "Archived Sends",
-    "smsDailyPacks": "Today's Packs"
+    "smsDailyPacks": "Today's Packs",
+    "wallet": "Wallet",
+    "domainBusiness": "Domain Business"
   },
   "tickets": {
     "agentUnavailable": "Away",
@@ -1294,6 +1297,7 @@
     "eyebrow": "Market",
     "myListings": "My listings",
     "myOffers": "My offers",
+    "myOrders": "My orders",
     "search": "Search listings...",
     "empty": "No active listings yet. List a verified domain from My Domains.",
     "featured": "Featured Domains",
@@ -1426,7 +1430,7 @@
     },
     "confirm": {
       "acceptTitle": "Accept offer?",
-      "acceptMessage": "Accept the current price for {{domain}}. The listing will be marked sold.",
+      "acceptMessage": "Accept the current price for {{domain}}. The buyer must pay before the listing is marked sold.",
       "rejectTitle": "Reject offer?",
       "rejectMessage": "Reject the current negotiation for {{domain}}.",
       "withdrawTitle": "Withdraw offer?",
@@ -1436,6 +1440,7 @@
       "created": "Offer submitted",
       "countered": "Counter-offer sent",
       "accepted": "Offer accepted",
+      "acceptedPendingPay": "Offer accepted. Complete payment to finish the purchase.",
       "rejected": "Offer rejected",
       "withdrawn": "Offer withdrawn"
     },
@@ -1466,14 +1471,18 @@
     "languageLabel": "Display Language",
     "languageDesc": "UI language and the language used for your email, SMS, and in-app notifications",
     "emailNotifications": "Email Notifications",
-    "emailNotificationsDesc": "Email alerts for ticket updates and domain renewal reminders (90/60/30 days before expiry)",
+    "emailNotificationsDesc": "Email alerts for tickets, domain renewals, offers, and payment transactions",
     "emailNotificationsEnabled": "Email alerts enabled",
     "emailNotificationsDisabled": "Email alerts disabled",
     "smsNotifications": "SMS Notifications",
-    "smsNotificationsDesc": "Opt in to SMS for urgent ticket alerts and domain renewal reminders (requires a verified phone)",
+    "smsNotificationsDesc": "Opt in to SMS for urgent tickets, renewals, offers, and payment alerts (requires a verified phone)",
     "smsNotificationsNeedPhone": "Add and verify a phone number in your profile to enable SMS alerts.",
     "smsNotificationsEnabled": "SMS alerts enabled",
     "smsNotificationsDisabled": "SMS alerts disabled",
+    "paymentNotifications": "Payment Notifications",
+    "paymentNotificationsDesc": "In-app, email, and SMS alerts for wallet top-ups and balance adjustments (also requires email/SMS channel toggles above)",
+    "paymentNotificationsEnabled": "Payment alerts enabled",
+    "paymentNotificationsDisabled": "Payment alerts disabled",
     "ticketAvailability": "Available for tickets",
     "ticketAvailabilityDesc": "When off, auto-assign skips you. Colleagues can still assign or transfer tickets to you manually.",
     "ticketAvailabilityEnabled": "You are available for ticket auto-assign",
@@ -1883,6 +1892,35 @@
       "actionFailed": "Two-factor action failed",
       "secretCopied": "Secret copied to clipboard",
       "backupCopied": "Backup codes copied to clipboard"
+    },
+    "paymentSettings": {
+      "title": "Payments",
+      "subtitle": "Merchant gateway, wallet top-ups, and marketplace fee defaults. Admin only.",
+      "loading": "Loading payment settings...",
+      "enabled": "Enable payments",
+      "sandbox": "Sandbox mode",
+      "merchantId": "Merchant ID",
+      "accessToken": "Access token (refunds)",
+      "accessTokenHint": "Optional for Phase 1; required later for refunds",
+      "accessTokenHintKeep": "Leave blank to keep the current access token",
+      "callbackPublicBaseUrl": "Public frontend base URL",
+      "callbackHint": "Used for payment callback, e.g. http://localhost:4200 (falls back to app.frontend-url)",
+      "minTopUpIrt": "Minimum top-up (IRT)",
+      "commissionPercent": "Commission percent (future)",
+      "featuredListingPriceIrt": "Featured listing price (IRT, future)",
+      "escrowHoldDays": "Escrow hold days (future)",
+      "notificationsTitle": "Payment notifications",
+      "notificationsSubtitle": "Global enable/disable for wallet top-up and adjustment alerts.",
+      "notificationsEnabled": "Enable payment notifications",
+      "channels": "Channels",
+      "channelInApp": "In-app",
+      "channelEmail": "Email",
+      "channelSms": "SMS",
+      "channelError": "Turn on at least one channel when payment notifications are enabled.",
+      "save": "Save payment settings",
+      "saved": "Payment settings updated",
+      "minTopUpInvalid": "Enter a valid minimum top-up amount",
+      "featuredPriceInvalid": "Enter a valid featured listing price"
     }
   },
   "users": {
@@ -1961,12 +1999,26 @@
       "enable": "Enable",
       "disable": "Disable",
       "changeRole": "Change Role",
+      "adjustWallet": "Adjust wallet",
       "enableEmailNotifications": "Enable email alerts",
       "disableEmailNotifications": "Disable email alerts",
       "enableSmsNotifications": "Enable SMS alerts",
       "disableSmsNotifications": "Disable SMS alerts",
       "markTicketAvailable": "Mark available for tickets",
       "markTicketUnavailable": "Mark unavailable for tickets"
+    },
+    "wallet": {
+      "adjustTitle": "Adjust wallet",
+      "adjustHint": "Increase or decrease the available balance for {{name}}.",
+      "currentBalance": "Current available",
+      "direction": "Adjustment type",
+      "credit": "Increase (credit)",
+      "debit": "Decrease (debit)",
+      "amount": "Amount (IRT)",
+      "amountInvalid": "Enter an amount of at least 1",
+      "note": "Reason / note",
+      "noteRequired": "A note is required",
+      "apply": "Apply adjustment"
     },
     "confirm": {
       "deleteTitle": "Delete user account?",
@@ -1986,6 +2038,8 @@
       "enabled": "User enabled",
       "disabled": "User disabled",
       "roleUpdated": "Role updated",
+      "walletCredited": "Wallet balance increased",
+      "walletDebited": "Wallet balance decreased",
       "emailNotificationsEnabled": "User email alerts enabled",
       "emailNotificationsDisabled": "User email alerts disabled",
       "smsNotificationsEnabled": "User SMS alerts enabled",
@@ -2014,7 +2068,6 @@
     "persian": "Persian",
     "arabic": "Arabic",
     "turkish": "Turkish",
-    "close": "Close",
     "copy": "Copy",
     "copied": "Copied",
     "retry": "Retry",
@@ -2225,7 +2278,29 @@
     "TICKET_ARCHIVE_REQUIRES_CLOSED": "Only closed tickets can be archived",
     "TICKET_ALREADY_DELETED": "Ticket is already deleted",
     "TICKET_NOT_DELETED": "Ticket is not deleted",
-    "TICKET_DELETED": "This ticket has been deleted"
+    "TICKET_DELETED": "This ticket has been deleted",
+    "PAYMENT_DISABLED": "Payments are currently disabled",
+    "PAYMENT_MERCHANT_REQUIRED": "Configure a merchant ID first",
+    "PAYMENT_CALLBACK_URL_INVALID": "Enter a valid callback base URL",
+    "PAYMENT_AMOUNT_TOO_LOW": "Amount is below the minimum top-up",
+    "PAYMENT_AUTHORITY_REQUIRED": "Missing payment authority",
+    "PAYMENT_INTENT_NOT_FOUND": "Payment was not found",
+    "PAYMENT_PURPOSE_UNSUPPORTED": "This payment type is not supported yet",
+    "PAYMENT_GATEWAY_ERROR": "Payment gateway request failed",
+    "PAYMENT_VERIFY_FAILED": "Payment verification failed",
+    "WALLET_AMOUNT_INVALID": "Invalid wallet amount",
+    "WALLET_NOT_FOUND": "Wallet was not found",
+    "WALLET_INSUFFICIENT_BALANCE": "Insufficient wallet balance",
+    "PAYMENT_NOTIFICATION_SETTINGS_INVALID": "Enable at least one payment notification channel",
+    "ORDER_NOT_FOUND": "Order was not found",
+    "ORDER_NOT_PENDING_PAYMENT": "Order is not awaiting payment",
+    "ORDER_ALREADY_PAID": "Order has already been paid",
+    "ORDER_FORBIDDEN": "You are not allowed to access this order",
+    "ORDER_LISTING_NOT_ACTIVE": "Listing is not available for purchase",
+    "ORDER_SELF_PURCHASE": "You cannot buy your own listing",
+    "ORDER_PENDING_EXISTS": "A pending payment order already exists for this listing",
+    "ORDER_PAYMENT_REQUIRED": "Payment is required to complete this order",
+    "ORDER_WALLET_PAY_FAILED": "Wallet payment failed"
   },
   "avatar": {
     "title": "Edit avatar",
@@ -2302,7 +2377,15 @@
       "OFFER_ACCEPTED": "{{actor}} accepted the offer on {{domain}} ({{amount}})",
       "OFFER_REJECTED": "{{actor}} rejected the offer on {{domain}}",
       "OFFER_WITHDRAWN": "{{actor}} withdrew an offer on {{domain}}",
-      "OFFER_EXPIRED": "Offer of {{amount}} on {{domain}} expired"
+      "OFFER_EXPIRED": "Offer of {{amount}} on {{domain}} expired",
+      "PAYMENT_TOP_UP_SUCCESS": "Wallet credited {{amount}} IRT (ref {{ref}})",
+      "PAYMENT_TOP_UP_FAILED": "Top-up of {{amount}} IRT failed",
+      "PAYMENT_TOP_UP_CANCELLED": "Top-up of {{amount}} IRT was cancelled",
+      "PAYMENT_WALLET_ADJUSTED": "{{actor}} {{direction}} your wallet by {{amount}} ({{note}})"
+    },
+    "paymentDirection": {
+      "credit": "increased",
+      "debit": "decreased"
     }
   },
   "toolbar": {
@@ -2310,11 +2393,137 @@
     "logout": "Logout",
     "notifications": "Notifications",
     "settings": "Settings",
+    "walletBalance": "Wallet balance",
     "notifSold": "Domain sold: crypto.com",
     "notifOffer": "New offer on ai-startup.io",
     "notifExpired": "Domain expiring soon: web3.xyz",
     "time5m": "5 min ago",
     "time1h": "1 hour ago",
     "time3h": "3 hours ago"
+  },
+  "wallet": {
+    "eyebrow": "Balances",
+    "title": "Wallet",
+    "subtitle": "Top up your balance and track ledger activity.",
+    "loading": "Loading wallet...",
+    "paymentsDisabled": "Wallet top-ups are disabled until an admin enables payments in Settings.",
+    "available": "Available",
+    "held": "Held",
+    "paymentsTitle": "Payments",
+    "paymentsSubtitle": "Top-up attempts and gateway results.",
+    "emptyPayments": "No payment attempts yet",
+    "refId": "Ref",
+    "ledgerTitle": "Ledger",
+    "ledgerSubtitle": "Credits and debits applied to your balance.",
+    "emptyLedger": "No wallet activity yet",
+    "paymentStatus": {
+      "CREATED": "Created",
+      "REDIRECTED": "Pending",
+      "VERIFIED": "Verified",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled"
+    },
+    "table": {
+      "date": "Date",
+      "type": "Type",
+      "direction": "Direction",
+      "amount": "Amount",
+      "availableAfter": "Available after"
+    },
+    "direction": {
+      "CREDIT": "Credit",
+      "DEBIT": "Debit"
+    },
+    "entryType": {
+      "TOP_UP": "Top-up",
+      "HOLD": "Hold",
+      "RELEASE": "Release",
+      "CAPTURE_TO_SELLER": "Seller capture",
+      "COMMISSION": "Commission",
+      "PURCHASE": "Purchase",
+      "REFUND": "Refund",
+      "FEATURED_FEE": "Featured fee",
+      "PAYOUT": "Payout",
+      "ADJUSTMENT": "Adjustment"
+    },
+    "topUp": {
+      "cta": "Top up",
+      "title": "Top up wallet",
+      "hint": "Minimum amount is {{min}} IRT. You will be redirected to the payment gateway.",
+      "amount": "Amount (IRT)",
+      "amountRequired": "Enter an amount",
+      "amountTooLow": "Minimum top-up is {{min}} IRT",
+      "continue": "Continue to payment"
+    },
+    "openPaymentSettings": "Open payment settings"
+  },
+  "payments": {
+    "return": {
+      "eyebrow": "Payments",
+      "title": "Payment result",
+      "subtitle": "Confirming your payment.",
+      "verifying": "Verifying payment…",
+      "verifyingHint": "Please wait while we confirm the gateway response.",
+      "success": "Payment verified and wallet credited.",
+      "successHint": "Your available balance has been updated.",
+      "orderSuccess": "Marketplace payment verified.",
+      "orderSuccessHint": "Funds are held in escrow until release. Track the order under My Orders.",
+      "alreadyVerified": "This payment was already verified.",
+      "cancelled": "Payment was cancelled or failed at the gateway.",
+      "cancelledHint": "No funds were added. You can try again from your wallet.",
+      "failedTitle": "Payment could not be verified",
+      "amount": "Amount",
+      "refId": "Reference ID",
+      "available": "Available balance",
+      "backToWallet": "Back to wallet",
+      "backToOrders": "My orders"
+    }
+  },
+  "orders": {
+    "eyebrow": "Checkout",
+    "title": "My Orders",
+    "subtitle": "Track marketplace purchases and sales held in escrow",
+    "browseMarketplace": "Browse marketplace",
+    "roleFilter": "Role",
+    "empty": "No marketplace orders yet.",
+    "role": {
+      "all": "All",
+      "buyer": "Buyer",
+      "seller": "Seller"
+    },
+    "table": {
+      "domain": "Domain",
+      "role": "Your role",
+      "gross": "Total",
+      "status": "Status",
+      "updated": "Updated"
+    },
+    "status": {
+      "PENDING_PAYMENT": "Awaiting payment",
+      "PAID_HELD": "Paid · held",
+      "RELEASED": "Released",
+      "REFUNDED": "Refunded",
+      "CANCELLED": "Cancelled",
+      "DISPUTED": "Disputed"
+    },
+    "actions": {
+      "pay": "Pay now",
+      "refresh": "Refresh"
+    },
+    "checkout": {
+      "title": "Complete purchase",
+      "gross": "Purchase total",
+      "commission": "Platform commission",
+      "sellerNet": "Seller receives",
+      "walletAvailable": "Wallet available",
+      "deadline": "Pay by {{when}}",
+      "payWallet": "Pay with wallet",
+      "payGateway": "Pay with gateway"
+    },
+    "toast": {
+      "paid": "Payment successful. Funds are held in escrow.",
+      "gatewayMissing": "Payment gateway URL was missing",
+      "refreshed": "Order updated"
+    }
   }
 }

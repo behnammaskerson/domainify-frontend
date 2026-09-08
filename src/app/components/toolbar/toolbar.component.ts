@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Output, inject, computed, OnInit, OnDestroy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
@@ -16,6 +16,9 @@ import { CurrencyService } from '../../services/currency.service';
 import { AuthService } from '../../services/auth.service';
 import { UsersService } from '../../services/users.service';
 import { AppNotification, NotificationService } from '../../services/notification.service';
+import { WalletService } from '../../services/wallet.service';
+import { LocaleCurrencyPipe } from '../../pipes/locale-format.pipe';
+import { filter, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-toolbar',
@@ -30,7 +33,8 @@ import { AppNotification, NotificationService } from '../../services/notificatio
     MatDividerModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
-    TranslateModule
+    TranslateModule,
+    LocaleCurrencyPipe
   ],
   template: `
     <header class="toolbar">
@@ -46,6 +50,16 @@ import { AppNotification, NotificationService } from '../../services/notificatio
       </div>
 
       <div class="toolbar-right">
+        @if (currentUser() && walletBalance != null) {
+          <a class="wallet-chip"
+             routerLink="/wallet"
+             [attr.aria-label]="'toolbar.walletBalance' | translate"
+             [matTooltip]="'toolbar.walletBalance' | translate">
+            <mat-icon aria-hidden="true">account_balance_wallet</mat-icon>
+            <span dir="ltr">{{ walletBalance | localeCurrency }}</span>
+          </a>
+        }
+
         <button mat-icon-button
                 type="button"
                 class="control-btn"
@@ -223,6 +237,35 @@ import { AppNotification, NotificationService } from '../../services/notificatio
       align-items: center;
       gap: 8px;
       flex-shrink: 0;
+    }
+
+    .wallet-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 700;
+      transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+    }
+
+    .wallet-chip mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: var(--accent);
+    }
+
+    .wallet-chip:hover {
+      border-color: color-mix(in srgb, var(--accent) 45%, var(--border-color));
+      background: var(--accent-light);
+      color: var(--accent-dark);
     }
 
     .control-btn {
@@ -476,6 +519,17 @@ import { AppNotification, NotificationService } from '../../services/notificatio
         padding: 0;
         justify-content: center;
       }
+
+      .wallet-chip span {
+        display: none;
+      }
+
+      .wallet-chip {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        justify-content: center;
+      }
     }
 
     @media (max-width: 640px) {
@@ -494,7 +548,12 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   notificationService = inject(NotificationService);
   private authService = inject(AuthService);
   private usersService = inject(UsersService);
+  private walletService = inject(WalletService);
   private router = inject(Router);
+  private routerSub?: Subscription;
+  private userSub?: Subscription;
+
+  walletBalance: number | null = null;
 
   currentUser = toSignal(this.authService.currentUser$, { initialValue: null });
   notifications = toSignal(this.notificationService.notifications$, { initialValue: [] as AppNotification[] });
@@ -530,11 +589,45 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
       this.notificationService.startPolling();
+      this.refreshWalletBalance();
     }
+
+    this.userSub = this.authService.currentUser$.subscribe((user) => {
+      if (user) {
+        this.refreshWalletBalance();
+      } else {
+        this.walletBalance = null;
+      }
+    });
+
+    this.routerSub = this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        if (event.urlAfterRedirects.includes('/wallet') || event.urlAfterRedirects.includes('/payments/return')) {
+          this.refreshWalletBalance();
+        }
+      });
   }
 
   ngOnDestroy(): void {
     this.notificationService.reset();
+    this.routerSub?.unsubscribe();
+    this.userSub?.unsubscribe();
+  }
+
+  private refreshWalletBalance(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.walletBalance = null;
+      return;
+    }
+    this.walletService.getWallet(1).subscribe({
+      next: (wallet) => {
+        this.walletBalance = Number(wallet.availableBalance ?? 0);
+      },
+      error: () => {
+        /* keep last known balance */
+      }
+    });
   }
 
   onNotificationsOpened(): void {
@@ -566,6 +659,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.notificationService.reset();
+    this.walletBalance = null;
     this.authService.logout();
     this.router.navigate(['/login']);
   }

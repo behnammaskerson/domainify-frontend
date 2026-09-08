@@ -64,6 +64,18 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/marketplace/my-offers-page.component').then(m => m.MyOffersPageComponent)
       },
       {
+        path: 'marketplace/my-orders',
+        loadComponent: () => import('./pages/marketplace/my-orders-page.component').then(m => m.MyOrdersPageComponent)
+      },
+      {
+        path: 'wallet',
+        loadComponent: () => import('./pages/wallet/wallet-page.component').then(m => m.WalletPageComponent)
+      },
+      {
+        path: 'payments/return',
+        loadComponent: () => import('./pages/wallet/payment-return-page.component').then(m => m.PaymentReturnPageComponent)
+      },
+      {
         path: 'settings',
         loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent)
       },
