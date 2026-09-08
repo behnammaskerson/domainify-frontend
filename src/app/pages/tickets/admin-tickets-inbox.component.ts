@@ -1,4 +1,5 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -10,15 +11,25 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, Subscription, debounceTime, distinctUntilChanged, fromEvent } from 'rxjs';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { DatetimeFilterFieldComponent } from '../../components/datetime-filter-field/datetime-filter-field.component';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
+import {
+  TicketManageSavedViewsDialogComponent,
+  TicketManageSavedViewsDialogResult
+} from '../../components/ticket-manage-saved-views-dialog/ticket-manage-saved-views-dialog.component';
+import {
+  TicketSavedViewDialogComponent,
+  TicketSavedViewDialogResult
+} from '../../components/ticket-saved-view-dialog/ticket-saved-view-dialog.component';
+import { TicketShortcutsHelpDialogComponent } from '../../components/ticket-shortcuts-help-dialog/ticket-shortcuts-help-dialog.component';
 import { LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
 import { ApiErrorService } from '../../services/api-error.service';
 import { AuthService } from '../../services/auth.service';
@@ -27,6 +38,8 @@ import {
   Ticket,
   TicketAssigneeOption,
   TicketCategory,
+  TicketInboxSavedView,
+  TicketInboxSavedViewFilter,
   TicketInboxView,
   TicketPriority,
   TicketQueue,
@@ -36,6 +49,11 @@ import {
 } from '../../services/ticket.service';
 import { UsersService } from '../../services/users.service';
 import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
+import {
+  hasOpenMaterialOverlay,
+  isEditableKeyboardTarget,
+  isPlainLetterKey
+} from '../../utils/ticket-keyboard.util';
 
 const UNASSIGNED_VALUE = '__unassigned__';
 
@@ -53,6 +71,7 @@ const UNASSIGNED_VALUE = '__unassigned__';
     MatIconModule,
     MatInputModule,
     MatPaginatorModule,
+    MatMenuModule,
     MatSelectModule,
     MatSidenavModule,
     MatSnackBarModule,
@@ -84,6 +103,14 @@ const UNASSIGNED_VALUE = '__unassigned__';
           <button mat-stroked-button type="button" (click)="reload()" [disabled]="loading">
             <mat-icon>refresh</mat-icon>
             {{ 'tickets.adminInbox.refresh' | translate }}
+          </button>
+          <button mat-icon-button
+                  type="button"
+                  (click)="openShortcutsHelp()"
+                  [matTooltip]="'tickets.shortcuts.helpTitle' | translate"
+                  [attr.aria-keyshortcuts]="'?'"
+                  [attr.aria-label]="'tickets.shortcuts.helpTitle' | translate">
+            <mat-icon>keyboard</mat-icon>
           </button>
         </div>
       </app-page-hero>
@@ -217,6 +244,10 @@ const UNASSIGNED_VALUE = '__unassigned__';
             </div>
 
             <footer class="filters-sidenav-footer">
+              <button mat-stroked-button type="button" class="filters-save-view" (click)="saveCurrentView()">
+                <mat-icon>bookmark_add</mat-icon>
+                {{ 'tickets.adminInbox.savedViews.saveCurrent' | translate }}
+              </button>
               @if (activeFilterCount > 0) {
                 <button mat-stroked-button type="button" class="filters-clear" (click)="clearAllFilters()">
                   <mat-icon>filter_alt_off</mat-icon>
@@ -238,8 +269,8 @@ const UNASSIGNED_VALUE = '__unassigned__';
                   <button type="button"
                           class="filter-tab"
                           role="tab"
-                          [class.active]="inboxView === tab.id"
-                          [attr.aria-selected]="inboxView === tab.id"
+                          [class.active]="inboxView === tab.id && activeSavedViewId == null"
+                          [attr.aria-selected]="inboxView === tab.id && activeSavedViewId == null"
                           (click)="setView(tab.id)">
                     {{ tab.labelKey | translate }}
                   </button>
@@ -247,7 +278,48 @@ const UNASSIGNED_VALUE = '__unassigned__';
               </div>
 
               <div class="toolbar-end">
-                <button mat-stroked-button type="button" class="filters-open-btn" (click)="filterNav.open()">
+                <button mat-stroked-button
+                        type="button"
+                        class="saved-views-btn"
+                        [class.active]="activeSavedViewId != null"
+                        [matMenuTriggerFor]="savedViewsMenu"
+                        [matTooltip]="'tickets.adminInbox.savedViews.menuHint' | translate">
+                  <mat-icon>bookmark</mat-icon>
+                  @if (activeSavedView; as view) {
+                    <span class="saved-view-label">{{ view.name }}</span>
+                  } @else {
+                    {{ 'tickets.adminInbox.savedViews.menu' | translate }}
+                  }
+                  <mat-icon class="chevron">expand_more</mat-icon>
+                </button>
+                <mat-menu #savedViewsMenu="matMenu" panelClass="saved-views-menu">
+                  <button mat-menu-item type="button" (click)="saveCurrentView()">
+                    <mat-icon>bookmark_add</mat-icon>
+                    {{ 'tickets.adminInbox.savedViews.saveCurrent' | translate }}
+                  </button>
+                  <button mat-menu-item type="button" (click)="openManageSavedViews()">
+                    <mat-icon>settings</mat-icon>
+                    {{ 'tickets.adminInbox.savedViews.manage' | translate }}
+                  </button>
+                  @if (savedViews.length) {
+                    <div class="saved-views-divider" role="separator" aria-hidden="true"></div>
+                    @for (view of savedViews; track view.id) {
+                      <button mat-menu-item
+                              type="button"
+                              class="saved-views-item"
+                              [class.active-saved]="activeSavedViewId === view.id"
+                              (click)="applySavedView(view)">
+                        <mat-icon>{{ view.isDefault ? 'star' : 'bookmark' }}</mat-icon>
+                        <span class="saved-menu-name">{{ view.name }}</span>
+                        @if (view.isDefault) {
+                          <span class="saved-menu-default">{{ 'tickets.adminInbox.savedViews.default' | translate }}</span>
+                        }
+                      </button>
+                    }
+                  }
+                </mat-menu>
+
+                <button mat-stroked-button type="button" class="filters-open-btn" (click)="openFilters()">
                   <mat-icon>filter_list</mat-icon>
                   {{ 'tickets.adminInbox.filters.title' | translate }}
                   @if (activeFilterCount > 0) {
@@ -258,6 +330,7 @@ const UNASSIGNED_VALUE = '__unassigned__';
                 <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
                   <mat-label>{{ 'tickets.adminInbox.search' | translate }}</mat-label>
                   <input matInput
+                         #searchInputEl
                          [(ngModel)]="searchInput"
                          (ngModelChange)="onSearchInput($event)"
                          [placeholder]="'tickets.adminInbox.searchPlaceholder' | translate">
@@ -468,7 +541,11 @@ const UNASSIGNED_VALUE = '__unassigned__';
                     </ng-container>
 
                     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.overdue-row]="row.overdue"></tr>
+                    <tr mat-row
+                        *matRowDef="let row; columns: displayedColumns;"
+                        [class.overdue-row]="row.overdue"
+                        [class.row-focused]="isFocusedRow(row)"
+                        (click)="focusRow(row)"></tr>
                   </table>
                 </div>
 
@@ -583,6 +660,10 @@ const UNASSIGNED_VALUE = '__unassigned__';
       border-top: 1px solid var(--border-color);
     }
 
+    .filters-save-view {
+      margin-inline-end: auto;
+    }
+
     .page-body {
       display: flex;
       flex-direction: column;
@@ -631,6 +712,29 @@ const UNASSIGNED_VALUE = '__unassigned__';
       flex-wrap: wrap;
       align-items: center;
       gap: 10px;
+    }
+
+    .saved-views-btn {
+      max-width: 220px;
+    }
+
+    .saved-views-btn.active {
+      border-color: color-mix(in srgb, var(--accent) 45%, var(--border-color));
+      color: var(--accent);
+    }
+
+    .saved-views-btn .saved-view-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 120px;
+    }
+
+    .saved-views-btn .chevron {
+      margin-inline-start: -2px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
     }
 
     .filters-open-btn {
@@ -693,6 +797,12 @@ const UNASSIGNED_VALUE = '__unassigned__';
     .ticket-link:hover {
       color: var(--primary);
       text-decoration: underline;
+    }
+
+    tr.row-focused {
+      outline: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
+      outline-offset: -2px;
+      background: color-mix(in srgb, var(--accent) 8%, var(--bg-primary));
     }
 
     .subject {
@@ -829,6 +939,9 @@ const UNASSIGNED_VALUE = '__unassigned__';
   `]
 })
 export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
+  @ViewChild('filterNav') filterNav?: MatSidenav;
+  @ViewChild('searchInputEl') searchInputEl?: ElementRef<HTMLInputElement>;
+
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly ticketService = inject(TicketService);
@@ -838,6 +951,7 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
   private readonly snackBar = inject(MatSnackBar);
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly unassignedValue = UNASSIGNED_VALUE;
   readonly statuses: TicketStatus[] = ['NEW', 'OPEN', 'PENDING', 'ON_HOLD', 'RESOLVED', 'CLOSED'];
@@ -875,6 +989,7 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
   inboxView: TicketInboxView = 'ALL';
   searchInput = '';
   searchQuery = '';
+  focusedIndex = -1;
   pageIndex = 0;
   pageSize = 10;
   totalElements = 0;
@@ -890,12 +1005,22 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
   filterCreatedFrom = '';
   filterCreatedTo = '';
 
+  savedViews: TicketInboxSavedView[] = [];
+  activeSavedViewId: number | null = null;
+  private defaultSavedViewApplied = false;
+  private applyingSavedView = false;
+
   private readonly search$ = new Subject<string>();
   private readonly customer$ = new Subject<string>();
   private searchSub?: Subscription;
   private customerSub?: Subscription;
   private loadSub?: Subscription;
   private querySub?: Subscription;
+
+  get activeSavedView(): TicketInboxSavedView | null {
+    if (this.activeSavedViewId == null) return null;
+    return this.savedViews.find((v) => v.id === this.activeSavedViewId) ?? null;
+  }
 
   get activeFilterCount(): number {
     let count = 0;
@@ -1085,6 +1210,11 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
       next: (tags) => { this.tags = tags ?? []; },
       error: () => { this.tags = []; }
     });
+    this.loadSavedViews();
+
+    fromEvent<KeyboardEvent>(document, 'keydown')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => this.onShortcutKeydown(event));
 
     this.querySub = this.route.queryParamMap.subscribe((params) => {
       const view = (params.get('view') ?? 'ALL').toUpperCase() as TicketInboxView;
@@ -1104,8 +1234,14 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
         this.filterAssigneeValue = '';
       }
 
+      if (!this.applyingSavedView) {
+        this.activeSavedViewId = null;
+      }
+      this.applyingSavedView = false;
+
       this.pageIndex = 0;
       this.load();
+      this.maybeApplyDefaultSavedView(params);
     });
 
     this.searchSub = this.search$.pipe(debounceTime(300), distinctUntilChanged()).subscribe((value) => {
@@ -1129,6 +1265,7 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
   }
 
   setView(view: TicketInboxView): void {
+    this.activeSavedViewId = null;
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { view: view.toLowerCase() },
@@ -1137,19 +1274,25 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
   }
 
   onSearchInput(value: string): void {
+    this.activeSavedViewId = null;
     this.search$.next(value ?? '');
   }
 
   clearSearch(): void {
+    this.activeSavedViewId = null;
     this.searchInput = '';
     this.search$.next('');
   }
 
   onCustomerInput(value: string): void {
+    this.activeSavedViewId = null;
     this.customer$.next(value ?? '');
   }
 
   onFiltersChanged(): void {
+    if (!this.applyingSavedView) {
+      this.activeSavedViewId = null;
+    }
     this.pageIndex = 0;
     this.clearSelection();
     this.load();
@@ -1166,6 +1309,7 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
   }
 
   clearAllFilters(): void {
+    this.activeSavedViewId = null;
     this.filterStatus = '';
     this.filterPriority = '';
     this.filterCategoryId = '';
@@ -1180,6 +1324,155 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
     this.onFiltersChanged();
   }
 
+  saveCurrentView(): void {
+    const ref = this.dialog.open(TicketSavedViewDialogComponent, {
+      width: '420px',
+      maxWidth: '95vw',
+      panelClass: ['app-dialog', 'ticket-saved-view-dialog-panel'],
+      data: { mode: 'create' as const }
+    });
+    ref.afterClosed().subscribe((result: TicketSavedViewDialogResult | null | undefined) => {
+      if (!result) return;
+      this.ticketService.createInboxSavedView({
+        name: result.name,
+        filter: this.collectFilterPayload(),
+        isDefault: result.isDefault
+      }).subscribe({
+        next: (created) => {
+          this.savedViews = [
+            ...this.savedViews.map((v) => created.isDefault ? { ...v, isDefault: false } : v),
+            created
+          ].sort((a, b) => a.sortOrder - b.sortOrder || a.id - b.id);
+          this.activeSavedViewId = created.id;
+          this.snackBar.open(this.translate.instant('tickets.adminInbox.savedViews.saved'), undefined, {
+            duration: 2500
+          });
+        },
+        error: (error) => {
+          this.snackBar.open(this.apiError.resolve(error), undefined, {
+            duration: 6000,
+            panelClass: ['error-snackbar']
+          });
+        }
+      });
+    });
+  }
+
+  openManageSavedViews(): void {
+    const ref = this.dialog.open(TicketManageSavedViewsDialogComponent, {
+      width: '480px',
+      maxWidth: '95vw',
+      panelClass: 'app-dialog',
+      data: { views: this.savedViews }
+    });
+    ref.afterClosed().subscribe((result: TicketManageSavedViewsDialogResult | null | undefined) => {
+      if (!result) return;
+      this.savedViews = result.views ?? [];
+      if (this.activeSavedViewId != null && !this.savedViews.some((v) => v.id === this.activeSavedViewId)) {
+        this.activeSavedViewId = null;
+      }
+    });
+  }
+
+  applySavedView(view: TicketInboxSavedView): void {
+    this.applyFilterPayload(view.filter ?? {}, view.id);
+  }
+
+  private loadSavedViews(): void {
+    this.ticketService.listInboxSavedViews().subscribe({
+      next: (views) => {
+        this.savedViews = views ?? [];
+        this.maybeApplyDefaultSavedView(this.route.snapshot.queryParamMap);
+      },
+      error: () => {
+        this.savedViews = [];
+      }
+    });
+  }
+
+  private maybeApplyDefaultSavedView(params: { has(name: string): boolean }): void {
+    if (this.defaultSavedViewApplied) return;
+    if (params.has('view') || params.has('assigneeId') || params.has('unassigned')) {
+      this.defaultSavedViewApplied = true;
+      return;
+    }
+    if (!this.savedViews.length) return;
+    const defaultView = this.savedViews.find((v) => v.isDefault);
+    if (!defaultView) {
+      this.defaultSavedViewApplied = true;
+      return;
+    }
+    this.defaultSavedViewApplied = true;
+    this.applyFilterPayload(defaultView.filter ?? {}, defaultView.id);
+  }
+
+  private collectFilterPayload(): TicketInboxSavedViewFilter {
+    return {
+      view: this.inboxView,
+      q: this.searchQuery.trim() || null,
+      status: this.filterStatus || null,
+      priority: this.filterPriority || null,
+      categoryId: this.filterCategoryId === '' ? null : Number(this.filterCategoryId),
+      queueId: this.filterQueueId === '' ? null : Number(this.filterQueueId),
+      tagId: this.filterTagId === '' ? null : Number(this.filterTagId),
+      assigneeId: typeof this.filterAssigneeValue === 'number' ? this.filterAssigneeValue : null,
+      unassigned: this.filterAssigneeValue === UNASSIGNED_VALUE ? true : null,
+      customer: this.filterCustomer.trim() || null,
+      createdFrom: this.filterCreatedFrom || null,
+      createdTo: this.filterCreatedTo || null
+    };
+  }
+
+  private applyFilterPayload(filter: TicketInboxSavedViewFilter, savedViewId: number | null): void {
+    this.applyingSavedView = true;
+    this.activeSavedViewId = savedViewId;
+
+    const nextView = this.normalizeInboxView(filter.view);
+    this.filterStatus = filter.status ?? '';
+    this.filterPriority = filter.priority ?? '';
+    this.filterCategoryId = filter.categoryId != null ? Number(filter.categoryId) : '';
+    this.filterQueueId = filter.queueId != null ? Number(filter.queueId) : '';
+    this.filterTagId = filter.tagId != null ? Number(filter.tagId) : '';
+    if (filter.unassigned) {
+      this.filterAssigneeValue = UNASSIGNED_VALUE;
+    } else if (filter.assigneeId != null) {
+      this.filterAssigneeValue = Number(filter.assigneeId);
+    } else {
+      this.filterAssigneeValue = '';
+    }
+    this.filterCustomerInput = filter.customer?.trim() ?? '';
+    this.filterCustomer = this.filterCustomerInput;
+    this.filterCreatedFrom = filter.createdFrom ?? '';
+    this.filterCreatedTo = filter.createdTo ?? '';
+    this.searchInput = filter.q?.trim() ?? '';
+    this.searchQuery = this.searchInput;
+    this.pageIndex = 0;
+    this.clearSelection();
+
+    const queryParams: Record<string, string | null> = {
+      view: nextView.toLowerCase(),
+      assigneeId: typeof this.filterAssigneeValue === 'number' ? String(this.filterAssigneeValue) : null,
+      unassigned: this.filterAssigneeValue === UNASSIGNED_VALUE ? '1' : null
+    };
+
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge'
+    }).then((navigated) => {
+      if (!navigated) {
+        this.applyingSavedView = false;
+        this.inboxView = nextView;
+        this.load();
+      }
+    });
+  }
+
+  private normalizeInboxView(view: string | null | undefined): TicketInboxView {
+    const upper = (view ?? 'ALL').toUpperCase() as TicketInboxView;
+    return this.inboxTabs.some((tab) => tab.id === upper) ? upper : 'ALL';
+  }
+
   onPage(event: PageEvent): void {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
@@ -1188,6 +1481,182 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
 
   reload(): void {
     this.load();
+  }
+
+  openShortcutsHelp(): void {
+    this.dialog.open(TicketShortcutsHelpDialogComponent, {
+      width: '520px',
+      maxWidth: '95vw',
+      panelClass: 'app-dialog',
+      data: { scope: 'inbox' as const }
+    });
+  }
+
+  openFilters(): void {
+    void this.filterNav?.open();
+  }
+
+  closeFilters(): void {
+    void this.filterNav?.close();
+  }
+
+  toggleFilters(): void {
+    if (this.filterNav?.opened) {
+      this.closeFilters();
+    } else {
+      this.openFilters();
+    }
+  }
+
+  focusSearch(): void {
+    this.searchInputEl?.nativeElement?.focus();
+    this.searchInputEl?.nativeElement?.select();
+  }
+
+  openFocusedTicket(): void {
+    const ticket = this.tickets[this.focusedIndex];
+    if (ticket?.id != null) {
+      void this.router.navigate(['/admin/tickets', ticket.id]);
+    }
+  }
+
+  isFocusedRow(row: Ticket): boolean {
+    const focused = this.tickets[this.focusedIndex];
+    return focused != null && focused.id != null && focused.id === row.id;
+  }
+
+  focusRow(row: Ticket): void {
+    const index = this.tickets.findIndex((t) => t.id === row.id);
+    this.focusedIndex = index;
+  }
+
+  private onShortcutKeydown(event: KeyboardEvent): void {
+    if (event.defaultPrevented) {
+      return;
+    }
+    if (event.key === '?' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      if (!isEditableKeyboardTarget(event.target)) {
+        event.preventDefault();
+        this.openShortcutsHelp();
+      }
+      return;
+    }
+
+    if (hasOpenMaterialOverlay() && event.key !== 'Escape') {
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      if (this.filterNav?.opened) {
+        event.preventDefault();
+        this.closeFilters();
+        return;
+      }
+      if (this.selectedCount > 0) {
+        event.preventDefault();
+        this.clearSelection();
+        return;
+      }
+      if (this.focusedIndex >= 0) {
+        event.preventDefault();
+        this.focusedIndex = -1;
+      }
+      return;
+    }
+
+    if (isEditableKeyboardTarget(event.target)) {
+      return;
+    }
+
+    if (event.key === '/' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      this.focusSearch();
+      return;
+    }
+
+    if (isPlainLetterKey(event, 'r')) {
+      event.preventDefault();
+      this.reload();
+      return;
+    }
+
+    if (isPlainLetterKey(event, 'f')) {
+      event.preventDefault();
+      this.toggleFilters();
+      return;
+    }
+
+    if (isPlainLetterKey(event, 'j')) {
+      event.preventDefault();
+      this.moveFocus(1);
+      return;
+    }
+
+    if (isPlainLetterKey(event, 'k')) {
+      event.preventDefault();
+      this.moveFocus(-1);
+      return;
+    }
+
+    if (isPlainLetterKey(event, 'x')) {
+      event.preventDefault();
+      this.toggleFocusedSelect();
+      return;
+    }
+
+    if (event.key.toLowerCase() === 'a' && event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      this.toggleSelectAllPage(true);
+      return;
+    }
+
+    if ((event.key === 'Enter' || isPlainLetterKey(event, 'o')) && !event.shiftKey) {
+      if (this.focusedIndex >= 0) {
+        event.preventDefault();
+        this.openFocusedTicket();
+      }
+      return;
+    }
+
+    if (event.key.toLowerCase() === 'c' && event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      if (this.selectedCount > 0) {
+        event.preventDefault();
+        this.runBulkClose();
+      }
+      return;
+    }
+
+    if (!event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey) {
+      const digit = event.key;
+      if (/^[0-9]$/.test(digit)) {
+        const index = digit === '0' ? 9 : Number(digit) - 1;
+        const tab = this.inboxTabs[index];
+        if (tab) {
+          event.preventDefault();
+          this.setView(tab.id);
+        }
+      }
+    }
+  }
+
+  private moveFocus(delta: number): void {
+    if (!this.tickets.length) {
+      this.focusedIndex = -1;
+      return;
+    }
+    if (this.focusedIndex < 0) {
+      this.focusedIndex = delta > 0 ? 0 : this.tickets.length - 1;
+    } else {
+      this.focusedIndex = Math.max(0, Math.min(this.tickets.length - 1, this.focusedIndex + delta));
+    }
+  }
+
+  private toggleFocusedSelect(): void {
+    const ticket = this.tickets[this.focusedIndex];
+    if (ticket?.id == null) {
+      return;
+    }
+    this.toggleSelect(ticket.id, !this.isSelected(ticket.id));
   }
 
   toggleTicketAvailability(): void {
@@ -1244,11 +1713,15 @@ export class AdminTicketsInboxComponent implements OnInit, OnDestroy {
         this.totalElements = page.totalElements ?? 0;
         this.pageIndex = page.number ?? this.pageIndex;
         this.pageSize = page.size ?? this.pageSize;
+        this.focusedIndex = this.focusedIndex >= 0 && this.tickets.length
+          ? Math.min(this.focusedIndex, this.tickets.length - 1)
+          : -1;
         this.loading = false;
       },
       error: (error) => {
         this.loading = false;
         this.tickets = [];
+        this.focusedIndex = -1;
         this.totalElements = 0;
         this.snackBar.open(this.apiError.resolve(error), undefined, {
           duration: 6000,

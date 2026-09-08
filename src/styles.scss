@@ -490,6 +490,47 @@ body.dark-theme {
     color: var(--text-primary) !important;
   }
 
+  .mat-mdc-menu-panel.saved-views-menu {
+    overflow-x: hidden;
+    max-width: min(280px, calc(100vw - 24px));
+
+    .mat-mdc-menu-item {
+      overflow: hidden;
+      max-width: 100%;
+    }
+
+    .saved-views-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .saved-menu-name {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .saved-menu-default {
+      flex: 0 0 auto;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .saved-views-divider {
+      height: 1px;
+      margin: 4px 12px;
+      background: var(--border-color);
+      pointer-events: none;
+    }
+
+    .saved-views-item.active-saved {
+      color: var(--accent);
+    }
+  }
+
   .mat-mdc-menu-item {
     color: var(--text-primary) !important;
   }
@@ -541,6 +582,17 @@ body.dark-theme {
   }
 
   .domain-ownership-dialog-panel .mat-mdc-dialog-surface {
+    overflow: visible !important;
+  }
+
+  .ticket-saved-view-dialog-panel .mat-mdc-dialog-content,
+  .ticket-saved-view-dialog-panel .mdc-dialog__content {
+    max-height: none !important;
+    overflow: visible !important;
+    overflow-y: visible !important;
+  }
+
+  .ticket-saved-view-dialog-panel .mat-mdc-dialog-surface {
     overflow: visible !important;
   }
 

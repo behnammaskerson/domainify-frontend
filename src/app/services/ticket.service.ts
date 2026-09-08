@@ -172,6 +172,70 @@ export interface TicketCsat {
   ratedAt?: string;
 }
 
+export interface TicketCustomerWalletSummary {
+  walletId?: number | null;
+  availableBalance: number;
+  heldBalance: number;
+  paymentsEnabled: boolean;
+}
+
+export interface TicketCustomerSmsSnippet {
+  receiveReturnId?: number | null;
+  messageText?: string | null;
+  mobile?: string | null;
+  receivedDateTime?: number | null;
+  lineNumber?: number | null;
+}
+
+export interface TicketCustomerDomain {
+  id: number;
+  name: string;
+  status: string;
+  ownershipStatus?: string | null;
+  categoryName?: string | null;
+  expiresAt?: string | null;
+}
+
+export interface TicketCustomerOrder {
+  id: number;
+  domainName?: string | null;
+  grossAmount: number;
+  status: string;
+  createdAt?: string | null;
+  buyerId?: number | null;
+  sellerId?: number | null;
+}
+
+export interface TicketCustomerProfile {
+  id: number;
+  firstName?: string | null;
+  lastName?: string | null;
+  email: string;
+  role: string;
+  enabled: boolean;
+  avatarUrl?: string | null;
+  phoneCountryCode?: string | null;
+  phoneNumber?: string | null;
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
+  createdAt?: string;
+}
+
+export interface TicketCustomerContext {
+  ticketId: number;
+  requesterId: number;
+  profile: TicketCustomerProfile;
+  wallet?: TicketCustomerWalletSummary | null;
+  domains: TicketCustomerDomain[];
+  domainTotal: number;
+  orders: TicketCustomerOrder[];
+  orderTotal: number;
+  recentSms: TicketCustomerSmsSnippet[];
+  smsMobile?: string | null;
+  smsAvailable: boolean;
+  smsUnavailableReason?: string | null;
+}
+
 export interface SubmitTicketCsatPayload {
   score: number;
   comment?: string | null;
@@ -350,6 +414,37 @@ export interface AdminInboxParams {
   sort?: string;
 }
 
+export interface TicketInboxSavedViewFilter {
+  view?: TicketInboxView | null;
+  q?: string | null;
+  status?: TicketStatus | null;
+  priority?: TicketPriority | null;
+  categoryId?: number | null;
+  queueId?: number | null;
+  tagId?: number | null;
+  assigneeId?: number | null;
+  unassigned?: boolean | null;
+  customer?: string | null;
+  createdFrom?: string | null;
+  createdTo?: string | null;
+}
+
+export interface TicketInboxSavedView {
+  id: number;
+  name: string;
+  isDefault: boolean;
+  sortOrder: number;
+  filter: TicketInboxSavedViewFilter;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface TicketInboxSavedViewRequest {
+  name: string;
+  filter: TicketInboxSavedViewFilter;
+  isDefault?: boolean;
+}
+
 export interface CreateTicketPayload {
   subject: string;
   description: string;
@@ -481,6 +576,29 @@ export class TicketService {
     return this.http.get<PagedTickets>(`${this.API_URL}/admin/tickets/inbox`, { params: httpParams });
   }
 
+  listInboxSavedViews(): Observable<TicketInboxSavedView[]> {
+    return this.http.get<TicketInboxSavedView[]>(`${this.API_URL}/admin/tickets/inbox-views`);
+  }
+
+  createInboxSavedView(payload: TicketInboxSavedViewRequest): Observable<TicketInboxSavedView> {
+    return this.http.post<TicketInboxSavedView>(`${this.API_URL}/admin/tickets/inbox-views`, payload);
+  }
+
+  updateInboxSavedView(id: number, payload: TicketInboxSavedViewRequest): Observable<TicketInboxSavedView> {
+    return this.http.put<TicketInboxSavedView>(`${this.API_URL}/admin/tickets/inbox-views/${id}`, payload);
+  }
+
+  setDefaultInboxSavedView(id: number): Observable<TicketInboxSavedView> {
+    return this.http.patch<TicketInboxSavedView>(
+      `${this.API_URL}/admin/tickets/inbox-views/${id}/default`,
+      {}
+    );
+  }
+
+  deleteInboxSavedView(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/admin/tickets/inbox-views/${id}`);
+  }
+
   listAdminAssignees(): Observable<TicketAssigneeOption[]> {
     return this.http.get<TicketAssigneeOption[]>(`${this.API_URL}/admin/tickets/assignees`);
   }
@@ -499,6 +617,14 @@ export class TicketService {
 
   getAdminTicket(id: number): Observable<TicketDetail> {
     return this.http.get<TicketDetail>(`${this.API_URL}/admin/tickets/${id}`);
+  }
+
+  getCustomerContext(ticketId: number, limit = 8): Observable<TicketCustomerContext> {
+    let params = new HttpParams().set('limit', String(limit));
+    return this.http.get<TicketCustomerContext>(
+      `${this.API_URL}/admin/tickets/${ticketId}/customer-context`,
+      { params }
+    );
   }
 
   reply(id: number, payload: ReplyTicketPayload): Observable<TicketDetail> {

@@ -1,6 +1,6 @@
 import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, fromEvent } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -26,6 +26,8 @@ import { TicketTransferDialogComponent } from '../../components/ticket-transfer-
 import { TicketMessageRevisionsDialogComponent } from '../../components/ticket-message-revisions-dialog/ticket-message-revisions-dialog.component';
 import { DatetimeFilterFieldComponent } from '../../components/datetime-filter-field/datetime-filter-field.component';
 import { TicketAttachmentViewerDialogComponent } from '../../components/ticket-attachment-viewer-dialog/ticket-attachment-viewer-dialog.component';
+import { TicketCustomerSidePanelComponent } from '../../components/ticket-customer-side-panel/ticket-customer-side-panel.component';
+import { TicketShortcutsHelpDialogComponent } from '../../components/ticket-shortcuts-help-dialog/ticket-shortcuts-help-dialog.component';
 import { LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
 import { MarkdownPipe } from '../../pipes/markdown.pipe';
 import { ApiErrorService } from '../../services/api-error.service';
@@ -49,6 +51,12 @@ import {
 } from '../../services/ticket.service';
 import { renderReplyTemplate, toMentionHandle } from '../../utils/reply-template.util';
 import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
+import {
+  hasOpenMaterialOverlay,
+  isEditableKeyboardTarget,
+  isModEnter,
+  isPlainLetterKey
+} from '../../utils/ticket-keyboard.util';
 
 type TicketDetailMode = 'customer' | 'admin';
 
@@ -76,7 +84,8 @@ type TicketDetailMode = 'customer' | 'admin';
     DatetimeFilterFieldComponent,
     LocaleDatePipe,
     LocaleDigitsPipe,
-    MarkdownPipe
+    MarkdownPipe,
+    TicketCustomerSidePanelComponent
   ],
   template: `
     <div class="page">
@@ -159,6 +168,16 @@ type TicketDetailMode = 'customer' | 'admin';
             <mat-icon>arrow_back</mat-icon>
             {{ (isAdmin ? 'tickets.detail.backInbox' : 'tickets.detail.back') | translate }}
           </a>
+          @if (isAdmin) {
+            <button mat-icon-button
+                    type="button"
+                    (click)="openShortcutsHelp()"
+                    [matTooltip]="'tickets.shortcuts.helpTitle' | translate"
+                    [attr.aria-keyshortcuts]="'?'"
+                    [attr.aria-label]="'tickets.shortcuts.helpTitle' | translate">
+              <mat-icon>keyboard</mat-icon>
+            </button>
+          }
         </div>
       </app-page-hero>
 
@@ -178,6 +197,8 @@ type TicketDetailMode = 'customer' | 'admin';
             </a>
           </div>
         } @else {
+          <div class="detail-shell" [class.detail-shell--admin]="isAdmin">
+            <div class="detail-main">
           <div class="meta-bar panel-surface">
             <div class="meta-row meta-row--primary">
               <div class="meta-item">
@@ -888,6 +909,7 @@ type TicketDetailMode = 'customer' | 'admin';
 
               <label class="reply-label">{{ 'tickets.detail.replyBody' | translate }}</label>
               <app-markdown-editor
+                #replyEditor
                 formControlName="body"
                 [rows]="6"
                 [maxLength]="10000"
@@ -978,6 +1000,11 @@ type TicketDetailMode = 'customer' | 'admin';
               }
             </div>
           }
+            </div>
+            @if (isAdmin && ticketId) {
+              <app-ticket-customer-side-panel class="detail-side" [ticketId]="ticketId" />
+            }
+          </div>
         }
       </div>
     </div>
@@ -991,6 +1018,29 @@ type TicketDetailMode = 'customer' | 'admin';
       max-width: 100%;
       min-width: 0;
       box-sizing: border-box;
+    }
+    .detail-shell {
+      display: grid;
+      gap: 1rem;
+      align-items: start;
+      min-width: 0;
+    }
+    .detail-shell--admin {
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    }
+    .detail-main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .detail-side {
+      min-width: 0;
+    }
+    @media (max-width: 1100px) {
+      .detail-shell--admin {
+        grid-template-columns: minmax(0, 1fr);
+      }
     }
     [heroActions] {
       display: flex;
@@ -1566,6 +1616,7 @@ export class TicketDetailComponent implements OnInit {
   private readonly authService = inject(AuthService);
 
   @ViewChild('threadEnd') threadEnd?: ElementRef<HTMLElement>;
+  @ViewChild('replyEditor') replyEditor?: MarkdownEditorComponent;
 
   private readonly currentUser = toSignal(this.authService.currentUser$, { initialValue: null });
 
@@ -1734,6 +1785,128 @@ export class TicketDetailComponent implements OnInit {
       filter(() => !this.suppressDraftSave && !!this.ticketId && this.canReply && !this.submitting),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => this.persistReplyDraft());
+
+    fromEvent<KeyboardEvent>(document, 'keydown')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => this.onShortcutKeydown(event));
+  }
+
+  openShortcutsHelp(): void {
+    if (!this.isAdmin) {
+      return;
+    }
+    this.dialog.open(TicketShortcutsHelpDialogComponent, {
+      width: '520px',
+      maxWidth: '95vw',
+      panelClass: 'app-dialog',
+      data: { scope: 'detail' as const }
+    });
+  }
+
+  focusReply(): void {
+    this.replyEditor?.focus();
+  }
+
+  toggleInternalNote(): void {
+    if (!this.isAdmin || !this.canReply) {
+      return;
+    }
+    const control = this.replyForm.controls.internalNote;
+    control.setValue(!control.value);
+  }
+
+  private onShortcutKeydown(event: KeyboardEvent): void {
+    if (!this.isAdmin || event.defaultPrevented) {
+      return;
+    }
+
+    if (event.key === '?' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      if (!isEditableKeyboardTarget(event.target)) {
+        event.preventDefault();
+        this.openShortcutsHelp();
+      }
+      return;
+    }
+
+    if (isModEnter(event) && this.canReply) {
+      event.preventDefault();
+      this.submitReply();
+      return;
+    }
+
+    if (hasOpenMaterialOverlay() && event.key !== 'Escape') {
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      if (this.editingMessageId != null || this.editingInitial) {
+        return;
+      }
+      if (!hasOpenMaterialOverlay() && !isEditableKeyboardTarget(event.target)) {
+        event.preventDefault();
+        void this.router.navigateByUrl(this.backLink);
+      }
+      return;
+    }
+
+    if (isEditableKeyboardTarget(event.target)) {
+      return;
+    }
+
+    if (isPlainLetterKey(event, 'r')) {
+      event.preventDefault();
+      this.focusReply();
+      return;
+    }
+    if (isPlainLetterKey(event, 'i')) {
+      event.preventDefault();
+      this.toggleInternalNote();
+      return;
+    }
+    if (isPlainLetterKey(event, 'a')) {
+      event.preventDefault();
+      this.assignToMe();
+      return;
+    }
+    if (isPlainLetterKey(event, 'w')) {
+      event.preventDefault();
+      this.toggleWatch();
+      return;
+    }
+    if (isPlainLetterKey(event, 'c')) {
+      event.preventDefault();
+      this.closeTicket();
+      return;
+    }
+    if (event.key.toLowerCase() === 'r' && event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      this.reopenTicket();
+      return;
+    }
+    if (isPlainLetterKey(event, 't')) {
+      event.preventDefault();
+      this.transferTicket();
+      return;
+    }
+    if (isPlainLetterKey(event, 'e')) {
+      event.preventDefault();
+      this.escalateTicket();
+      return;
+    }
+    if (isPlainLetterKey(event, 'm')) {
+      event.preventDefault();
+      this.mergeTicket();
+      return;
+    }
+    if (isPlainLetterKey(event, 's')) {
+      event.preventDefault();
+      this.splitTicket();
+      return;
+    }
+    if (isPlainLetterKey(event, 'l')) {
+      event.preventDefault();
+      this.linkRelatedTickets();
+    }
   }
 
   showSeenReceipt(message: TicketMessage): boolean {

@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
@@ -1311,6 +1312,7 @@ export class UsersComponent implements OnInit {
   private readonly translationService = inject(TranslationService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly route = inject(ActivatedRoute);
   private readonly textFilter$ = new Subject<{ key: 'firstName' | 'lastName' | 'email'; value: string }>();
 
   displayedColumns = [
@@ -1366,6 +1368,11 @@ export class UsersComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const emailParam = this.route.snapshot.queryParamMap.get('email')
+      || this.route.snapshot.queryParamMap.get('q');
+    if (emailParam?.trim()) {
+      this.filterEmail = emailParam.trim();
+    }
     this.textFilter$.pipe(debounceTime(300), distinctUntilChanged(
       (a, b) => a.key === b.key && a.value === b.value
     )).subscribe(() => {

@@ -485,4 +485,9 @@ export class MarkdownEditorComponent implements ControlValueAccessor {
       this.captureSelectionFrom(area);
     });
   }
+
+  /** Focus the editor textarea (used by ticket keyboard shortcuts). */
+  focus(): void {
+    queueMicrotask(() => this.areaRef?.nativeElement?.focus());
+  }
 }
