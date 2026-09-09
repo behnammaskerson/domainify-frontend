@@ -12,7 +12,24 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { ApiErrorService } from '../../services/api-error.service';
-import { TicketAssigneeOption, TicketCategory, TicketService } from '../../services/ticket.service';
+import {
+  TicketAssigneeOption,
+  TicketCategory,
+  TicketCategoryRequest,
+  TicketPriority,
+  TicketService
+} from '../../services/ticket.service';
+
+interface CategorySlaDraft {
+  firstResponseSlaUrgentHours: string;
+  firstResponseSlaHighHours: string;
+  firstResponseSlaMediumHours: string;
+  firstResponseSlaLowHours: string;
+  resolveSlaUrgentHours: string;
+  resolveSlaHighHours: string;
+  resolveSlaMediumHours: string;
+  resolveSlaLowHours: string;
+}
 
 @Component({
   selector: 'app-ticket-categories-settings',
@@ -113,6 +130,61 @@ import { TicketAssigneeOption, TicketCategory, TicketService } from '../../servi
                 </mat-select>
                 <mat-hint>{{ 'settings.ticketCategories.skilledAgentsHint' | translate }}</mat-hint>
               </mat-form-field>
+
+              <div class="sla-block">
+                <button type="button" class="sla-toggle" (click)="toggleSlaExpanded(category.id)">
+                  <mat-icon>{{ isSlaExpanded(category.id) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                  <span>{{ 'settings.ticketCategories.slaOverridesTitle' | translate }}</span>
+                  @if (hasSlaOverrides(category)) {
+                    <span class="sla-badge">{{ 'settings.ticketCategories.slaOverridesActive' | translate }}</span>
+                  }
+                </button>
+                @if (isSlaExpanded(category.id)) {
+                  <div class="sla-panel">
+                    <p class="sla-hint">{{ 'settings.ticketCategories.slaOverridesHint' | translate }}</p>
+                    <p class="sla-group-label">{{ 'settings.ticketCategories.slaFirstResponseGroup' | translate }}</p>
+                    <div class="sla-grid">
+                      @for (priority of priorities; track priority) {
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                          <mat-label>{{ ('tickets.priorities.' + priority) | translate }}</mat-label>
+                          <input matInput type="number" min="1" max="8760"
+                                 [disabled]="busyId === category.id"
+                                 [value]="getSlaDraftValue(category.id, firstResponseField(priority))"
+                                 (input)="setSlaDraftField(category.id, firstResponseField(priority), $any($event.target).value)"
+                                 [attr.aria-label]="('settings.ticketCategories.slaFirstResponseGroup' | translate) + ' ' + (('tickets.priorities.' + priority) | translate)">
+                          <mat-hint>{{ 'settings.ticketCategories.slaInheritHint' | translate }}</mat-hint>
+                        </mat-form-field>
+                      }
+                    </div>
+                    <p class="sla-group-label">{{ 'settings.ticketCategories.slaResolveGroup' | translate }}</p>
+                    <div class="sla-grid">
+                      @for (priority of priorities; track priority) {
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                          <mat-label>{{ ('tickets.priorities.' + priority) | translate }}</mat-label>
+                          <input matInput type="number" min="1" max="8760"
+                                 [disabled]="busyId === category.id"
+                                 [value]="getSlaDraftValue(category.id, resolveField(priority))"
+                                 (input)="setSlaDraftField(category.id, resolveField(priority), $any($event.target).value)"
+                                 [attr.aria-label]="('settings.ticketCategories.slaResolveGroup' | translate) + ' ' + (('tickets.priorities.' + priority) | translate)">
+                          <mat-hint>{{ 'settings.ticketCategories.slaInheritHint' | translate }}</mat-hint>
+                        </mat-form-field>
+                      }
+                    </div>
+                    <div class="sla-actions">
+                      <button mat-stroked-button type="button"
+                              [disabled]="busyId === category.id"
+                              (click)="resetSlaDraft(category)">
+                        {{ 'common.cancel' | translate }}
+                      </button>
+                      <button mat-flat-button color="primary" type="button"
+                              [disabled]="busyId === category.id"
+                              (click)="saveSlaOverrides(category)">
+                        {{ 'settings.ticketCategories.slaOverridesSave' | translate }}
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
             </li>
           } @empty {
             <li class="empty">{{ 'settings.ticketCategories.empty' | translate }}</li>
@@ -231,9 +303,84 @@ import { TicketAssigneeOption, TicketCategory, TicketService } from '../../servi
       width: 100%;
     }
 
+    .sla-block {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 8px;
+    }
+
+    .sla-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 0;
+      border: none;
+      background: none;
+      color: var(--text-primary);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .sla-toggle mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    .sla-badge {
+      font-size: 0.72rem;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--primary, #1976d2) 12%, transparent);
+      color: var(--primary, #1976d2);
+    }
+
+    .sla-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+    }
+
+    .sla-hint,
+    .sla-group-label {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .sla-group-label {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .sla-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 12px;
+    }
+
+    .sla-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
     .empty,
     .muted {
       color: var(--text-muted);
+    }
+
+    @media (max-width: 720px) {
+      .sla-grid { grid-template-columns: 1fr; }
     }
   `]
 })
@@ -251,6 +398,9 @@ export class TicketCategoriesSettingsComponent implements OnInit {
   agentsLoading = true;
   saving = false;
   busyId: number | null = null;
+  readonly priorities: TicketPriority[] = ['URGENT', 'HIGH', 'MEDIUM', 'LOW'];
+  private readonly slaExpanded = new Set<number>();
+  private readonly slaDrafts = new Map<number, CategorySlaDraft>();
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -315,15 +465,106 @@ export class TicketCategoriesSettingsComponent implements OnInit {
     });
   }
 
+  toggleSlaExpanded(categoryId: number): void {
+    if (this.slaExpanded.has(categoryId)) {
+      this.slaExpanded.delete(categoryId);
+      return;
+    }
+    this.slaExpanded.add(categoryId);
+    const category = this.categories.find((item) => item.id === categoryId);
+    if (category) {
+      this.syncSlaDraft(category);
+    }
+  }
+
+  isSlaExpanded(categoryId: number): boolean {
+    return this.slaExpanded.has(categoryId);
+  }
+
+  hasSlaOverrides(category: TicketCategory): boolean {
+    return [
+      category.firstResponseSlaUrgentHours,
+      category.firstResponseSlaHighHours,
+      category.firstResponseSlaMediumHours,
+      category.firstResponseSlaLowHours,
+      category.resolveSlaUrgentHours,
+      category.resolveSlaHighHours,
+      category.resolveSlaMediumHours,
+      category.resolveSlaLowHours
+    ].some((value) => value != null);
+  }
+
+  firstResponseField(priority: TicketPriority): keyof CategorySlaDraft {
+    switch (priority) {
+      case 'URGENT': return 'firstResponseSlaUrgentHours';
+      case 'HIGH': return 'firstResponseSlaHighHours';
+      case 'MEDIUM': return 'firstResponseSlaMediumHours';
+      default: return 'firstResponseSlaLowHours';
+    }
+  }
+
+  resolveField(priority: TicketPriority): keyof CategorySlaDraft {
+    switch (priority) {
+      case 'URGENT': return 'resolveSlaUrgentHours';
+      case 'HIGH': return 'resolveSlaHighHours';
+      case 'MEDIUM': return 'resolveSlaMediumHours';
+      default: return 'resolveSlaLowHours';
+    }
+  }
+
+  getSlaDraftValue(categoryId: number, field: keyof CategorySlaDraft): string {
+    return this.getSlaDraft(categoryId)[field];
+  }
+
+  getSlaDraft(categoryId: number): CategorySlaDraft {
+    const category = this.categories.find((item) => item.id === categoryId);
+    if (!this.slaDrafts.has(categoryId) && category) {
+      this.syncSlaDraft(category);
+    }
+    return this.slaDrafts.get(categoryId) ?? this.emptySlaDraft();
+  }
+
+  setSlaDraftField(categoryId: number, field: keyof CategorySlaDraft, value: string): void {
+    const draft = { ...this.getSlaDraft(categoryId), [field]: value };
+    this.slaDrafts.set(categoryId, draft);
+  }
+
+  resetSlaDraft(category: TicketCategory): void {
+    this.syncSlaDraft(category);
+  }
+
+  saveSlaOverrides(category: TicketCategory): void {
+    const draft = this.getSlaDraft(category.id);
+    if (!this.isSlaDraftValid(draft)) {
+      this.showError(this.translate.instant('settings.ticketCategories.slaOverridesInvalid'));
+      return;
+    }
+    this.busyId = category.id;
+    this.ticketService.updateCategory(category.id, {
+      ...this.categoryPayload(category),
+      ...this.slaPayloadFromDraft(draft)
+    }).subscribe({
+      next: (updated) => {
+        const index = this.categories.findIndex((item) => item.id === category.id);
+        if (index >= 0) {
+          this.categories[index] = updated;
+        }
+        this.syncSlaDraft(updated);
+        this.busyId = null;
+        this.snack(this.translate.instant('settings.ticketCategories.slaOverridesSaved'));
+      },
+      error: (error) => {
+        this.busyId = null;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
   toggleActive(category: TicketCategory, active: boolean): void {
     this.busyId = category.id;
     this.ticketService.updateCategory(category.id, {
-      name: category.name,
-      code: category.code,
-      active,
-      emailNotificationsEnabled: category.emailNotificationsEnabled !== false,
-      smsNotificationsEnabled: category.smsNotificationsEnabled !== false,
-      sortOrder: category.sortOrder
+      ...this.categoryPayload(category),
+      active
     }).subscribe({
       next: () => {
         this.busyId = null;
@@ -339,12 +580,8 @@ export class TicketCategoriesSettingsComponent implements OnInit {
   toggleEmailNotifications(category: TicketCategory, enabled: boolean): void {
     this.busyId = category.id;
     this.ticketService.updateCategory(category.id, {
-      name: category.name,
-      code: category.code,
-      active: category.active,
-      emailNotificationsEnabled: enabled,
-      smsNotificationsEnabled: category.smsNotificationsEnabled !== false,
-      sortOrder: category.sortOrder
+      ...this.categoryPayload(category),
+      emailNotificationsEnabled: enabled
     }).subscribe({
       next: () => {
         this.busyId = null;
@@ -365,12 +602,8 @@ export class TicketCategoriesSettingsComponent implements OnInit {
   toggleSmsNotifications(category: TicketCategory, enabled: boolean): void {
     this.busyId = category.id;
     this.ticketService.updateCategory(category.id, {
-      name: category.name,
-      code: category.code,
-      active: category.active,
-      emailNotificationsEnabled: category.emailNotificationsEnabled !== false,
-      smsNotificationsEnabled: enabled,
-      sortOrder: category.sortOrder
+      ...this.categoryPayload(category),
+      smsNotificationsEnabled: enabled
     }).subscribe({
       next: () => {
         this.busyId = null;
@@ -437,6 +670,99 @@ export class TicketCategoriesSettingsComponent implements OnInit {
         }
       });
     });
+  }
+
+  private categoryPayload(category: TicketCategory): TicketCategoryRequest {
+    return {
+      name: category.name,
+      code: category.code,
+      active: category.active,
+      emailNotificationsEnabled: category.emailNotificationsEnabled !== false,
+      smsNotificationsEnabled: category.smsNotificationsEnabled !== false,
+      sortOrder: category.sortOrder,
+      firstResponseSlaUrgentHours: category.firstResponseSlaUrgentHours ?? null,
+      firstResponseSlaHighHours: category.firstResponseSlaHighHours ?? null,
+      firstResponseSlaMediumHours: category.firstResponseSlaMediumHours ?? null,
+      firstResponseSlaLowHours: category.firstResponseSlaLowHours ?? null,
+      resolveSlaUrgentHours: category.resolveSlaUrgentHours ?? null,
+      resolveSlaHighHours: category.resolveSlaHighHours ?? null,
+      resolveSlaMediumHours: category.resolveSlaMediumHours ?? null,
+      resolveSlaLowHours: category.resolveSlaLowHours ?? null
+    };
+  }
+
+  private syncSlaDraft(category: TicketCategory): void {
+    this.slaDrafts.set(category.id, {
+      firstResponseSlaUrgentHours: this.hoursToDraft(category.firstResponseSlaUrgentHours),
+      firstResponseSlaHighHours: this.hoursToDraft(category.firstResponseSlaHighHours),
+      firstResponseSlaMediumHours: this.hoursToDraft(category.firstResponseSlaMediumHours),
+      firstResponseSlaLowHours: this.hoursToDraft(category.firstResponseSlaLowHours),
+      resolveSlaUrgentHours: this.hoursToDraft(category.resolveSlaUrgentHours),
+      resolveSlaHighHours: this.hoursToDraft(category.resolveSlaHighHours),
+      resolveSlaMediumHours: this.hoursToDraft(category.resolveSlaMediumHours),
+      resolveSlaLowHours: this.hoursToDraft(category.resolveSlaLowHours)
+    });
+  }
+
+  private slaPayloadFromDraft(draft: CategorySlaDraft): Pick<
+    TicketCategoryRequest,
+    | 'firstResponseSlaUrgentHours'
+    | 'firstResponseSlaHighHours'
+    | 'firstResponseSlaMediumHours'
+    | 'firstResponseSlaLowHours'
+    | 'resolveSlaUrgentHours'
+    | 'resolveSlaHighHours'
+    | 'resolveSlaMediumHours'
+    | 'resolveSlaLowHours'
+  > {
+    return {
+      firstResponseSlaUrgentHours: this.draftToHours(draft.firstResponseSlaUrgentHours),
+      firstResponseSlaHighHours: this.draftToHours(draft.firstResponseSlaHighHours),
+      firstResponseSlaMediumHours: this.draftToHours(draft.firstResponseSlaMediumHours),
+      firstResponseSlaLowHours: this.draftToHours(draft.firstResponseSlaLowHours),
+      resolveSlaUrgentHours: this.draftToHours(draft.resolveSlaUrgentHours),
+      resolveSlaHighHours: this.draftToHours(draft.resolveSlaHighHours),
+      resolveSlaMediumHours: this.draftToHours(draft.resolveSlaMediumHours),
+      resolveSlaLowHours: this.draftToHours(draft.resolveSlaLowHours)
+    };
+  }
+
+  private hoursToDraft(value?: number | null): string {
+    return value == null ? '' : String(value);
+  }
+
+  private draftToHours(value: string): number | null {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const hours = Number.parseInt(trimmed, 10);
+    return Number.isFinite(hours) ? hours : null;
+  }
+
+  private isSlaDraftValid(draft: CategorySlaDraft): boolean {
+    const values = Object.values(draft);
+    return values.every((value) => {
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return true;
+      }
+      const hours = Number.parseInt(trimmed, 10);
+      return Number.isFinite(hours) && hours >= 1 && hours <= 8760;
+    });
+  }
+
+  private emptySlaDraft(): CategorySlaDraft {
+    return {
+      firstResponseSlaUrgentHours: '',
+      firstResponseSlaHighHours: '',
+      firstResponseSlaMediumHours: '',
+      firstResponseSlaLowHours: '',
+      resolveSlaUrgentHours: '',
+      resolveSlaHighHours: '',
+      resolveSlaMediumHours: '',
+      resolveSlaLowHours: ''
+    };
   }
 
   private snack(message: string): void {

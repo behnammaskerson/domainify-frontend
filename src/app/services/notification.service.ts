@@ -17,6 +17,7 @@ export type NotificationType =
   | 'TICKET_WATCHER_ADDED'
   | 'TICKET_TRANSFERRED'
   | 'TICKET_ESCALATED'
+  | 'TICKET_SLA_APPROACHING'
   | 'DOMAIN_RENEWAL'
   | 'OFFER_RECEIVED'
   | 'OFFER_COUNTERED'
@@ -232,6 +233,8 @@ export class NotificationService {
         return 'swap_horiz';
       case 'TICKET_ESCALATED':
         return 'trending_up';
+      case 'TICKET_SLA_APPROACHING':
+        return 'schedule';
       case 'TICKET_CLOSED':
         return 'lock';
       case 'TICKET_REOPENED':
@@ -267,6 +270,7 @@ export class NotificationService {
       case 'TICKET_WATCHER_ADDED':
       case 'TICKET_TRANSFERRED':
       case 'TICKET_ESCALATED':
+      case 'TICKET_SLA_APPROACHING':
         return 'var(--accent)';
       case 'TICKET_CLOSED':
         return 'var(--text-muted)';

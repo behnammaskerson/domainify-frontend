@@ -523,13 +523,28 @@ const UNASSIGNED_VALUE = '__unassigned__';
                     <ng-container matColumnDef="dueAt">
                       <th mat-header-cell *matHeaderCellDef>{{ 'tickets.adminInbox.table.dueAt' | translate }}</th>
                       <td mat-cell *matCellDef="let ticket">
-                        @if (ticket.dueAt) {
-                          <span class="due-at" [class.overdue]="ticket.overdue" dir="ltr">
-                            {{ ticket.dueAt | localeDate:dateTimeFormat }}
-                          </span>
-                        } @else {
-                          <span>—</span>
-                        }
+                        <div class="due-cell">
+                          @if (ticket.dueAt) {
+                            <span class="due-at"
+                                  [class.overdue]="ticket.resolveOverdue"
+                                  [class.approaching]="ticket.approachingSla && !ticket.resolveOverdue && !ticket.slaPaused"
+                                  dir="ltr">
+                              {{ ticket.dueAt | localeDate:dateTimeFormat }}
+                            </span>
+                          } @else {
+                            <span>—</span>
+                          }
+                          @if (ticket.slaPaused) {
+                            <span class="sla-paused" [matTooltip]="'tickets.adminInbox.table.slaPaused' | translate">
+                              <mat-icon>pause_circle</mat-icon>
+                            </span>
+                          }
+                          @if (ticket.firstResponseOverdue) {
+                            <span class="fr-overdue" [matTooltip]="'tickets.adminInbox.table.firstResponseOverdue' | translate">
+                              <mat-icon>reply</mat-icon>
+                            </span>
+                          }
+                        </div>
                       </td>
                     </ng-container>
 
@@ -843,9 +858,43 @@ const UNASSIGNED_VALUE = '__unassigned__';
       font-style: italic;
     }
 
+    .due-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .due-at.approaching {
+      color: var(--warning, #ed6c02);
+      font-weight: 600;
+    }
     .due-at.overdue {
       color: #dc2626;
       font-weight: 600;
+    }
+
+    .sla-paused {
+      display: inline-flex;
+      align-items: center;
+      color: var(--text-muted, #6b7280);
+    }
+
+    .sla-paused mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+
+    .fr-overdue {
+      display: inline-flex;
+      align-items: center;
+      color: #dc2626;
+    }
+
+    .fr-overdue mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
     }
 
     .overdue-row {

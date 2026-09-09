@@ -1,7 +1,7 @@
 import { Injectable, Injector, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 import { TranslationService } from './translation.service';
 
 export interface User {
@@ -22,6 +22,7 @@ export interface User {
   emailNotificationsEnabled?: boolean;
   smsNotificationsEnabled?: boolean;
   paymentNotificationsEnabled?: boolean;
+  ticketDigestEmailEnabled?: boolean;
   ticketAvailable?: boolean;
   preferredLanguage?: 'en' | 'fa' | 'ar' | 'tr' | string | null;
   createdAt?: string | null;
@@ -67,16 +68,37 @@ export interface TotpEnableResponse {
   backupCodes: string[];
 }
 
+export interface ImpersonationResponse {
+  accessToken: string;
+  tokenType?: string;
+  auditId: number;
+  expiresAt?: string;
+  user: User;
+  impersonator: User;
+}
+
+interface StashedAdminSession {
+  accessToken: string;
+  refreshToken: string;
+  user: User;
+  auditId: number;
+  impersonator?: User;
+  target?: User;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private readonly API_URL = 'http://localhost:8080/api';
+  private readonly IMPERSONATION_STASH_KEY = 'impersonationAdminSession';
   private currentUserSubject = new BehaviorSubject<User | null>(this.getUserFromStorage());
+  private impersonationSubject = new BehaviorSubject<StashedAdminSession | null>(this.readStash());
   /** Lazy — do not inject TranslationService eagerly (HttpClient ↔ interceptor cycle). */
   private readonly injector = inject(Injector);
 
   public currentUser$ = this.currentUserSubject.asObservable();
+  public impersonation$ = this.impersonationSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -115,7 +137,14 @@ export class AuthService {
 
   logout(): void {
     const token = localStorage.getItem('accessToken');
-    if (token) {
+    if (this.isImpersonating()) {
+      if (token) {
+        this.http.post(`${this.API_URL}/users/impersonation/end`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).subscribe({ error: () => undefined });
+      }
+      this.clearImpersonationStash();
+    } else if (token) {
       this.http.post(`${this.API_URL}/auth/logout`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       }).subscribe();
@@ -124,6 +153,10 @@ export class AuthService {
   }
 
   refreshToken(): Observable<AuthResponse> {
+    if (this.isImpersonating()) {
+      this.logout();
+      throw new Error('Impersonation session expired');
+    }
     const refreshToken = localStorage.getItem('refreshToken');
     if (!refreshToken) {
       this.logout();
@@ -181,7 +214,76 @@ export class AuthService {
 
   isAdmin(): boolean {
     const user = this.currentUserSubject.getValue();
-    return user?.role === 'ADMIN';
+    return user?.role === 'ADMIN' && !this.isImpersonating();
+  }
+
+  getCurrentUserValue(): User | null {
+    return this.currentUserSubject.getValue();
+  }
+
+  isImpersonating(): boolean {
+    return !!this.impersonationSubject.getValue();
+  }
+
+  getImpersonationTarget(): User | null {
+    return this.impersonationSubject.getValue()?.target ?? this.currentUserSubject.getValue();
+  }
+
+  getImpersonator(): User | null {
+    return this.impersonationSubject.getValue()?.impersonator
+      ?? this.impersonationSubject.getValue()?.user
+      ?? null;
+  }
+
+  startImpersonation(targetUserId: number, note?: string): Observable<ImpersonationResponse> {
+    const accessToken = localStorage.getItem('accessToken');
+    const refreshToken = localStorage.getItem('refreshToken');
+    const adminUser = this.currentUserSubject.getValue();
+    if (!accessToken || !refreshToken || !adminUser || adminUser.role !== 'ADMIN' || this.isImpersonating()) {
+      return throwError(() => new Error('Admin session required'));
+    }
+    const body = note?.trim() ? { note: note.trim() } : {};
+    return this.http.post<ImpersonationResponse>(`${this.API_URL}/users/${targetUserId}/impersonate`, body).pipe(
+      tap((response) => {
+        const stash: StashedAdminSession = {
+          accessToken,
+          refreshToken,
+          user: adminUser,
+          auditId: response.auditId,
+          impersonator: response.impersonator ?? adminUser,
+          target: response.user
+        };
+        localStorage.setItem(this.IMPERSONATION_STASH_KEY, JSON.stringify(stash));
+        this.impersonationSubject.next(stash);
+        localStorage.setItem('accessToken', response.accessToken);
+        localStorage.removeItem('refreshToken');
+        this.setCurrentUser(response.user);
+      })
+    );
+  }
+
+  endImpersonation(): Observable<void> {
+    const stash = this.readStash();
+    if (!stash) {
+      return of(void 0);
+    }
+    const impersonationToken = localStorage.getItem('accessToken');
+    localStorage.setItem('accessToken', stash.accessToken);
+    localStorage.setItem('refreshToken', stash.refreshToken);
+    this.setCurrentUser(stash.user);
+    this.clearImpersonationStash();
+
+    return this.http.post<unknown>(`${this.API_URL}/users/impersonation/${stash.auditId}/end`, {}).pipe(
+      map(() => void 0),
+      catchError(() => {
+        if (impersonationToken) {
+          this.http.post(`${this.API_URL}/users/impersonation/end`, {}, {
+            headers: { Authorization: `Bearer ${impersonationToken}` }
+          }).subscribe({ error: () => undefined });
+        }
+        return of(void 0);
+      })
+    );
   }
 
   setCurrentUser(user: User): void {
@@ -194,6 +296,7 @@ export class AuthService {
     if (!response.accessToken || !response.refreshToken || !response.user) {
       return;
     }
+    this.clearImpersonationStash();
     localStorage.setItem('accessToken', response.accessToken);
     localStorage.setItem('refreshToken', response.refreshToken);
     localStorage.setItem('user', JSON.stringify(response.user));
@@ -218,7 +321,29 @@ export class AuthService {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
+    this.clearImpersonationStash();
     this.currentUserSubject.next(null);
+  }
+
+  private clearImpersonationStash(): void {
+    localStorage.removeItem(this.IMPERSONATION_STASH_KEY);
+    this.impersonationSubject.next(null);
+  }
+
+  private readStash(): StashedAdminSession | null {
+    const raw = localStorage.getItem(this.IMPERSONATION_STASH_KEY);
+    if (!raw) {
+      return null;
+    }
+    try {
+      const parsed = JSON.parse(raw) as StashedAdminSession;
+      if (!parsed?.accessToken || !parsed?.refreshToken || !parsed?.user || !parsed?.auditId) {
+        return null;
+      }
+      return parsed;
+    } catch {
+      return null;
+    }
   }
 
   private getUserFromStorage(): User | null {

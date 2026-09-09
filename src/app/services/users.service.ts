@@ -183,6 +183,10 @@ export class UsersService {
     return this.http.patch<ManagedUser>(`${this.API_URL}/users/me/ticket-availability`, { enabled });
   }
 
+  setTicketDigestEmailEnabled(enabled: boolean): Observable<ManagedUser> {
+    return this.http.patch<ManagedUser>(`${this.API_URL}/users/me/ticket-digest-email`, { enabled });
+  }
+
   setPreferredLanguage(language: string): Observable<ManagedUser> {
     return this.http.patch<ManagedUser>(`${this.API_URL}/users/me/preferred-language`, { language });
   }
@@ -193,6 +197,10 @@ export class UsersService {
 
   setUserTicketAvailable(id: number, enabled: boolean): Observable<ManagedUser> {
     return this.http.patch<ManagedUser>(`${this.API_URL}/users/${id}/ticket-availability`, { enabled });
+  }
+
+  setUserTicketDigestEmailEnabled(id: number, enabled: boolean): Observable<ManagedUser> {
+    return this.http.patch<ManagedUser>(`${this.API_URL}/users/${id}/ticket-digest-email`, { enabled });
   }
 
   sendPhoneVerification(): Observable<{ message?: string }> {

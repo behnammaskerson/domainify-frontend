@@ -1,13 +1,15 @@
 import { Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LocaleCurrencyPipe, LocaleDatePipe, LocaleDigitsPipe } from '../../pipes/locale-format.pipe';
 import { ApiErrorService } from '../../services/api-error.service';
+import { AuthService } from '../../services/auth.service';
 import {
   TicketCustomerContext,
   TicketCustomerSmsSnippet,
@@ -27,6 +29,7 @@ import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatSnackBarModule,
     MatTooltipModule,
     TranslateModule,
     LocaleCurrencyPipe,
@@ -104,6 +107,44 @@ import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
               <dd>{{ (profile.phoneVerified ? 'tickets.detail.sidePanel.yes' : 'tickets.detail.sidePanel.no') | translate }}</dd>
             </div>
           </dl>
+          <section class="activity-block" [attr.aria-label]="'tickets.detail.sidePanel.recentActivity' | translate">
+            <div class="section-head">
+              <h3>{{ 'tickets.detail.sidePanel.recentActivity' | translate }}</h3>
+            </div>
+            <dl class="facts activity-facts">
+              <div>
+                <dt>{{ 'tickets.detail.sidePanel.lastLogin' | translate }}</dt>
+                <dd dir="ltr">
+                  @if (profile.lastLoginAt) {
+                    {{ profile.lastLoginAt | localeDate:dateFormat }}
+                  } @else {
+                    {{ 'tickets.detail.sidePanel.never' | translate }}
+                  }
+                </dd>
+              </div>
+              <div>
+                <dt>{{ 'tickets.detail.sidePanel.creditBalance' | translate }}</dt>
+                <dd dir="ltr">
+                  @if (context.wallet; as wallet) {
+                    {{ wallet.availableBalance | localeCurrency }}
+                  } @else {
+                    —
+                  }
+                </dd>
+              </div>
+              <div class="activity-sms">
+                <dt>{{ 'tickets.detail.sidePanel.lastSmsSend' | translate }}</dt>
+                <dd>
+                  @if (context.lastSmsSend; as send) {
+                    <span class="activity-sms-time" dir="ltr">{{ formatEpoch(send.sendDateTime) }}</span>
+                    <span class="activity-sms-preview">{{ send.messageText || '—' }}</span>
+                  } @else {
+                    {{ 'tickets.detail.sidePanel.noLastSmsSend' | translate }}
+                  }
+                </dd>
+              </div>
+            </dl>
+          </section>
           @if (context.wallet; as wallet) {
             <div class="wallet-strip">
               <div>
@@ -121,6 +162,12 @@ import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
             <mat-icon>manage_accounts</mat-icon>
             {{ 'tickets.detail.sidePanel.openUser' | translate }}
           </a>
+          @if (canViewAsCustomer) {
+            <button mat-stroked-button type="button" class="full-btn" [disabled]="impersonatingBusy" (click)="viewAsCustomer()">
+              <mat-icon>visibility</mat-icon>
+              {{ 'tickets.detail.sidePanel.viewAsCustomer' | translate }}
+            </button>
+          }
         </section>
 
         <section class="panel-section">
@@ -325,6 +372,34 @@ import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
       grid-template-columns: 1fr 1fr;
       gap: 0.5rem;
     }
+    .activity-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .activity-facts .activity-sms {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.2rem;
+    }
+    .activity-facts .activity-sms dd {
+      text-align: start;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      font-weight: 500;
+    }
+    .activity-sms-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .activity-sms-preview {
+      font-size: 0.82rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-weight: 600;
+    }
     .wallet-strip > div {
       padding: 0.65rem 0.7rem;
       border-radius: 10px;
@@ -393,8 +468,12 @@ import { SMS_DATETIME_FORMAT } from '../../utils/jalali-date';
 export class TicketCustomerSidePanelComponent implements OnChanges {
   private readonly ticketService = inject(TicketService);
   private readonly usersService = inject(UsersService);
+  private readonly authService = inject(AuthService);
   private readonly apiError = inject(ApiErrorService);
   private readonly translationService = inject(TranslationService);
+  private readonly translate = inject(TranslateService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly router = inject(Router);
 
   @Input({ required: true }) ticketId!: number;
   /** When the linked customer changes, reload context even if ticketId is unchanged. */
@@ -405,6 +484,35 @@ export class TicketCustomerSidePanelComponent implements OnChanges {
   loading = false;
   error = '';
   context: TicketCustomerContext | null = null;
+  impersonatingBusy = false;
+
+  get canViewAsCustomer(): boolean {
+    const profile = this.context?.profile;
+    if (!profile || !this.authService.isAdmin() || this.authService.isImpersonating()) {
+      return false;
+    }
+    const me = this.authService.getCurrentUserValue();
+    return profile.role !== 'ADMIN' && !!profile.enabled && (!me || profile.id !== me.id);
+  }
+
+  viewAsCustomer(): void {
+    const profile = this.context?.profile;
+    if (!profile || !this.canViewAsCustomer || this.impersonatingBusy) {
+      return;
+    }
+    this.impersonatingBusy = true;
+    this.authService.startImpersonation(profile.id).subscribe({
+      next: () => {
+        this.impersonatingBusy = false;
+        this.snackBar.open(this.translate.instant('impersonation.started'), undefined, { duration: 3500 });
+        this.router.navigate(['/dashboard']);
+      },
+      error: (error) => {
+        this.impersonatingBusy = false;
+        this.error = this.apiError.resolve(error);
+      }
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['ticketId'] || changes['requesterId']) && this.ticketId != null) {

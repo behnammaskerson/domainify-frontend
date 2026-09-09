@@ -22,6 +22,40 @@ export interface RelatedDomain {
   ownershipStatus?: 'UNVERIFIED' | 'PENDING' | 'VERIFIED';
 }
 
+export type TicketSmsLinkType = 'PACK' | 'SEND' | 'SCHEDULED';
+
+export interface RelatedSms {
+  id: number;
+  type: TicketSmsLinkType;
+  externalId: string;
+  mobile?: string | null;
+  messagePreview?: string | null;
+  lineNumber?: string | null;
+  statusLabel?: string | null;
+  recipientCount?: number | null;
+  occurredAt?: string | null;
+  createdAt?: string | null;
+}
+
+export interface TicketSmsLinkableItem {
+  type: TicketSmsLinkType;
+  externalId: string;
+  mobile?: string | null;
+  messagePreview?: string | null;
+  lineNumber?: string | null;
+  statusLabel?: string | null;
+  recipientCount?: number | null;
+  occurredAt?: string | null;
+}
+
+export interface PagedResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
 export interface TicketCategory {
   id: number;
   code: string;
@@ -31,6 +65,14 @@ export interface TicketCategory {
   smsNotificationsEnabled?: boolean;
   sortOrder: number;
   agentIds?: number[];
+  firstResponseSlaUrgentHours?: number | null;
+  firstResponseSlaHighHours?: number | null;
+  firstResponseSlaMediumHours?: number | null;
+  firstResponseSlaLowHours?: number | null;
+  resolveSlaUrgentHours?: number | null;
+  resolveSlaHighHours?: number | null;
+  resolveSlaMediumHours?: number | null;
+  resolveSlaLowHours?: number | null;
 }
 
 export interface TicketCategoryRequest {
@@ -40,6 +82,14 @@ export interface TicketCategoryRequest {
   emailNotificationsEnabled?: boolean;
   smsNotificationsEnabled?: boolean;
   sortOrder?: number;
+  firstResponseSlaUrgentHours?: number | null;
+  firstResponseSlaHighHours?: number | null;
+  firstResponseSlaMediumHours?: number | null;
+  firstResponseSlaLowHours?: number | null;
+  resolveSlaUrgentHours?: number | null;
+  resolveSlaHighHours?: number | null;
+  resolveSlaMediumHours?: number | null;
+  resolveSlaLowHours?: number | null;
 }
 
 export interface TicketQueue {
@@ -82,7 +132,15 @@ export interface Ticket {
   assigneeEmail?: string;
   assigneeName?: string;
   dueAt?: string;
+  firstResponseDueAt?: string;
+  firstRespondedAt?: string;
+  slaPausedAt?: string | null;
+  slaPaused?: boolean;
+  slaWarnedAt?: string | null;
+  approachingSla?: boolean;
   overdue?: boolean;
+  firstResponseOverdue?: boolean;
+  resolveOverdue?: boolean;
   escalatedAt?: string | null;
   escalated?: boolean;
   closedAt?: string;
@@ -98,6 +156,7 @@ export interface Ticket {
   splitChildPublicNumbers?: string[];
   relatedTickets?: RelatedTicket[];
   relatedDomains?: RelatedDomain[];
+  relatedSms?: RelatedSms[];
   tags?: TicketTag[];
   createdAt?: string;
   updatedAt?: string;
@@ -196,6 +255,15 @@ export interface TicketCustomerSmsSnippet {
   lineNumber?: number | null;
 }
 
+export interface TicketCustomerSmsSendSnippet {
+  messageId?: number | null;
+  messageText?: string | null;
+  mobile?: string | null;
+  sendDateTime?: number | null;
+  lineNumber?: number | null;
+  statusLabel?: string | null;
+}
+
 export interface TicketCustomerDomain {
   id: number;
   name: string;
@@ -228,6 +296,7 @@ export interface TicketCustomerProfile {
   emailVerified?: boolean;
   phoneVerified?: boolean;
   createdAt?: string;
+  lastLoginAt?: string | null;
 }
 
 export interface TicketCustomerContext {
@@ -240,6 +309,7 @@ export interface TicketCustomerContext {
   orders: TicketCustomerOrder[];
   orderTotal: number;
   recentSms: TicketCustomerSmsSnippet[];
+  lastSmsSend?: TicketCustomerSmsSendSnippet | null;
   smsMobile?: string | null;
   smsAvailable: boolean;
   smsUnavailableReason?: string | null;
@@ -265,6 +335,7 @@ export interface TicketDetail {
   canSplit?: boolean;
   canLinkRelated?: boolean;
   canLinkDomains?: boolean;
+  canLinkSms?: boolean;
   canEditDueDate?: boolean;
   canWatch?: boolean;
   watching?: boolean;
@@ -361,6 +432,26 @@ export interface BulkTicketActionResult {
 export type TicketAttachmentKind = 'IMAGE' | 'PDF' | 'LOG' | 'DOCUMENT';
 export type TicketAutoAssignMode = 'OFF' | 'ROUND_ROBIN' | 'CATEGORY_SKILL' | 'QUEUE_MEMBERSHIP';
 
+export interface BusinessHoursDay {
+  start: string;
+  end: string;
+}
+
+export interface BusinessHoliday {
+  date: string;
+  name?: string;
+}
+
+export interface BusinessHoursWeek {
+  monday?: BusinessHoursDay | null;
+  tuesday?: BusinessHoursDay | null;
+  wednesday?: BusinessHoursDay | null;
+  thursday?: BusinessHoursDay | null;
+  friday?: BusinessHoursDay | null;
+  saturday?: BusinessHoursDay | null;
+  sunday?: BusinessHoursDay | null;
+}
+
 export interface TicketSettings {
   reopenWindowDays: number;
   maxAttachments: number;
@@ -371,6 +462,10 @@ export interface TicketSettings {
   slaHighHours: number;
   slaMediumHours: number;
   slaLowHours: number;
+  firstResponseSlaUrgentHours: number;
+  firstResponseSlaHighHours: number;
+  firstResponseSlaMediumHours: number;
+  firstResponseSlaLowHours: number;
   autoAssignMode: TicketAutoAssignMode;
   autoAssignFallbackRoundRobin: boolean;
   defaultQueueId?: number | null;
@@ -378,6 +473,19 @@ export interface TicketSettings {
   ticketSmsNotificationsEnabled: boolean;
   emailNotificationPriorities: TicketPriority[];
   smsNotificationPriorities: TicketPriority[];
+  agentDigestEnabled?: boolean;
+  agentDigestSendHour?: number;
+  agentDigestSendMinute?: number;
+  slaUseBusinessHours?: boolean;
+  slaTimezone?: string;
+  businessHours?: BusinessHoursWeek;
+  businessHolidays?: BusinessHoliday[];
+  slaWarnEnabled?: boolean;
+  slaWarnHoursBefore?: number;
+  slaBreachEscalationEnabled?: boolean;
+  slaBreachBumpPriority?: boolean;
+  slaBreachAssigneeId?: number | null;
+  slaBreachQueueId?: number | null;
 }
 
 export interface TicketAttachmentPolicy {
@@ -860,6 +968,35 @@ export class TicketService {
     );
   }
 
+  listAdminLinkableSms(
+    ticketId: number,
+    type: TicketSmsLinkType,
+    params?: { q?: string; page?: number; size?: number }
+  ): Observable<PagedResponse<TicketSmsLinkableItem>> {
+    let httpParams = new HttpParams().set('type', type);
+    if (params?.q?.trim()) {
+      httpParams = httpParams.set('q', params.q.trim());
+    }
+    if (params?.page != null) {
+      httpParams = httpParams.set('page', String(params.page));
+    }
+    if (params?.size != null) {
+      httpParams = httpParams.set('size', String(params.size));
+    }
+    return this.http.get<PagedResponse<TicketSmsLinkableItem>>(
+      `${this.API_URL}/admin/tickets/${ticketId}/linkable-sms`,
+      { params: httpParams }
+    );
+  }
+
+  linkAdminSms(ticketId: number, items: { type: TicketSmsLinkType; externalId: string }[]): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${ticketId}/sms-links`, { items });
+  }
+
+  unlinkAdminSms(ticketId: number, linkId: number): Observable<TicketDetail> {
+    return this.http.delete<TicketDetail>(`${this.API_URL}/admin/tickets/${ticketId}/sms-links/${linkId}`);
+  }
+
   watchAdminTicket(ticketId: number): Observable<TicketDetail> {
     return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${ticketId}/watch`, {});
   }
@@ -945,6 +1082,10 @@ export class TicketService {
 
   saveTicketSettings(settings: TicketSettings): Observable<TicketSettings> {
     return this.http.put<TicketSettings>(`${this.API_URL}/admin/ticket-settings`, settings);
+  }
+
+  runAgentDigestNow(): Observable<{ emailsSent: number }> {
+    return this.http.post<{ emailsSent: number }>(`${this.API_URL}/admin/ticket-settings/digest/run-now`, {});
   }
 
   updateCategoryAgents(categoryId: number, agentIds: number[]): Observable<TicketCategory> {

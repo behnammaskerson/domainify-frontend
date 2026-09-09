@@ -22,6 +22,7 @@ import { TicketMergeDialogComponent } from '../../components/ticket-merge-dialog
 import { TicketSplitDialogComponent } from '../../components/ticket-split-dialog/ticket-split-dialog.component';
 import { TicketLinkDialogComponent } from '../../components/ticket-link-dialog/ticket-link-dialog.component';
 import { TicketLinkDomainDialogComponent } from '../../components/ticket-link-domain-dialog/ticket-link-domain-dialog.component';
+import { TicketLinkSmsDialogComponent } from '../../components/ticket-link-sms-dialog/ticket-link-sms-dialog.component';
 import { TicketLinkRequesterDialogComponent } from '../../components/ticket-link-requester-dialog/ticket-link-requester-dialog.component';
 import { TicketEscalateDialogComponent } from '../../components/ticket-escalate-dialog/ticket-escalate-dialog.component';
 import { TicketTransferDialogComponent } from '../../components/ticket-transfer-dialog/ticket-transfer-dialog.component';
@@ -48,6 +49,7 @@ import {
   TicketReplyDraft,
   RelatedTicket,
   RelatedDomain,
+  RelatedSms,
   TicketTransfer,
   TicketRequesterChange,
   TicketEscalation,
@@ -345,13 +347,31 @@ type TicketDetailMode = 'customer' | 'admin';
                   <span class="meta-datetime" dir="ltr">{{ ticket.createdAt | localeDate:dateTimeFormat }}</span>
                 </div>
               </div>
-              <div class="meta-item meta-due" [class.overdue]="ticket.overdue">
-                <span class="meta-label">{{ 'tickets.detail.meta.dueAt' | translate }}</span>
+              <div class="meta-item meta-first-response" [class.overdue]="ticket.firstResponseOverdue && !ticket.slaPaused">
+                <span class="meta-label">{{ 'tickets.detail.meta.firstResponseDueAt' | translate }}</span>
+                <div class="meta-value meta-value--center">
+                  @if (ticket.firstRespondedAt) {
+                    <span class="meta-datetime" dir="ltr">{{ ticket.firstRespondedAt | localeDate:dateTimeFormat }}</span>
+                    <span class="met-pill">{{ 'tickets.detail.firstResponseMet' | translate }}</span>
+                  } @else if (ticket.firstResponseDueAt) {
+                    <span class="meta-datetime" dir="ltr">{{ ticket.firstResponseDueAt | localeDate:dateTimeFormat }}</span>
+                    @if (ticket.firstResponseOverdue) {
+                      <span class="overdue-pill">{{ 'tickets.detail.firstResponseOverdue' | translate }}</span>
+                    }
+                  } @else {
+                    <span class="meta-datetime muted-inline">—</span>
+                  }
+                </div>
+              </div>
+              <div class="meta-item meta-due"
+                   [class.overdue]="ticket.resolveOverdue && !ticket.slaPaused"
+                   [class.approaching]="ticket.approachingSla && !ticket.resolveOverdue && !ticket.slaPaused">
+                <span class="meta-label">{{ 'tickets.detail.meta.resolveDueAt' | translate }}</span>
                 <div class="meta-value meta-value--center">
                   @if (ticket.dueAt) {
                     <span class="meta-datetime" dir="ltr">{{ ticket.dueAt | localeDate:dateTimeFormat }}</span>
-                    @if (ticket.overdue) {
-                      <span class="overdue-pill">{{ 'tickets.detail.overdue' | translate }}</span>
+                    @if (ticket.resolveOverdue) {
+                      <span class="overdue-pill">{{ 'tickets.detail.resolveOverdue' | translate }}</span>
                     }
                   } @else {
                     <span class="meta-datetime muted-inline">—</span>
@@ -361,10 +381,24 @@ type TicketDetailMode = 'customer' | 'admin';
             </div>
           </div>
 
-          @if (ticket.overdue) {
+          @if (ticket.slaPaused) {
+            <p class="lifecycle-banner panel-surface sla-paused-banner">
+              <mat-icon>pause_circle</mat-icon>
+              <span>{{ 'tickets.detail.slaPaused' | translate }}</span>
+            </p>
+          }
+
+          @if (ticket.approachingSla && !ticket.overdue && !ticket.slaPaused) {
+            <p class="lifecycle-banner panel-surface approaching-banner">
+              <mat-icon>schedule</mat-icon>
+              <span>{{ 'tickets.detail.approachingSlaNotice' | translate }}</span>
+            </p>
+          }
+
+          @if (ticket.overdue && !ticket.slaPaused) {
             <p class="lifecycle-banner panel-surface overdue-banner">
               <mat-icon>schedule</mat-icon>
-              <span>{{ 'tickets.detail.overdueNotice' | translate }}</span>
+              <span>{{ overdueNoticeKey(ticket) | translate }}</span>
             </p>
           }
 
@@ -384,7 +418,7 @@ type TicketDetailMode = 'customer' | 'admin';
                 </div>
               </div>
               <app-datetime-filter-field
-                labelKey="tickets.detail.meta.dueAt"
+                labelKey="tickets.detail.meta.resolveDueAt"
                 timeLabelKey="tickets.detail.meta.dueTime"
                 [isoValue]="draftDueAt"
                 (isoValueChange)="draftDueAt = $event"
@@ -774,6 +808,52 @@ type TicketDetailMode = 'customer' | 'admin';
                                 [disabled]="lifecycleBusy"
                                 [matTooltip]="'tickets.detail.unlinkDomain' | translate"
                                 (click)="unlinkDomain(domain.id)">
+                          <mat-icon>link_off</mat-icon>
+                        </button>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          }
+
+          @if (isAdmin) {
+            <div class="related-card panel-surface">
+              <div class="tags-header">
+                <div>
+                  <h2>{{ 'tickets.detail.relatedSmsTitle' | translate }}</h2>
+                  <p>{{ 'tickets.detail.relatedSmsHint' | translate }}</p>
+                </div>
+                @if (canLinkSms) {
+                  <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="linkSms()">
+                    <mat-icon>sms</mat-icon>
+                    {{ 'tickets.detail.linkSms' | translate }}
+                  </button>
+                }
+              </div>
+              @if (relatedSms.length === 0) {
+                <p class="muted-inline">{{ 'tickets.detail.noRelatedSms' | translate }}</p>
+              } @else {
+                <ul class="related-list">
+                  @for (sms of relatedSms; track sms.id) {
+                    <li class="related-item">
+                      <div class="related-link">
+                        <span class="related-number" dir="ltr">{{ sms.externalId }}</span>
+                        <span class="status-pill" [attr.data-status]="sms.type">{{ ('tickets.detail.smsType' + sms.type) | translate }}</span>
+                        @if (sms.mobile) {
+                          <span class="muted-inline" dir="ltr">{{ sms.mobile }}</span>
+                        }
+                        @if (sms.messagePreview) {
+                          <span class="muted-inline">{{ sms.messagePreview }}</span>
+                        }
+                      </div>
+                      @if (canLinkSms) {
+                        <button mat-icon-button
+                                type="button"
+                                [disabled]="lifecycleBusy"
+                                [matTooltip]="'tickets.detail.unlinkSms' | translate"
+                                (click)="unlinkSms(sms.id)">
                           <mat-icon>link_off</mat-icon>
                         </button>
                       }
@@ -1229,11 +1309,26 @@ type TicketDetailMode = 'customer' | 'admin';
     .meta-requester,
     .meta-assignee { min-width: 0; }
     .meta-created,
+    .meta-first-response,
     .meta-due {
       align-items: center;
       text-align: center;
     }
+    .meta-first-response.overdue .meta-datetime,
     .meta-due.overdue .meta-datetime { color: var(--danger, #c62828); font-weight: 600; }
+    .meta-due.approaching .meta-datetime { color: var(--warning, #ed6c02); font-weight: 600; }
+    .met-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--success, #2e7d32);
+      background: color-mix(in srgb, var(--success, #2e7d32) 12%, transparent);
+      border: 1px solid color-mix(in srgb, var(--success, #2e7d32) 35%, var(--border-color));
+    }
     .overdue-pill {
       display: inline-flex;
       align-items: center;
@@ -1246,6 +1341,13 @@ type TicketDetailMode = 'customer' | 'admin';
       background: color-mix(in srgb, var(--danger, #c62828) 12%, transparent);
       border: 1px solid color-mix(in srgb, var(--danger, #c62828) 35%, var(--border-color));
     }
+    .approaching-banner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--warning, #ed6c02);
+      border-inline-start: 3px solid var(--warning, #ed6c02);
+    }
     .overdue-banner {
       color: var(--danger, #c62828);
       border-color: color-mix(in srgb, var(--danger, #c62828) 35%, var(--border-color));
@@ -1253,6 +1355,10 @@ type TicketDetailMode = 'customer' | 'admin';
     .escalated-banner {
       color: var(--warning, #c47d0e);
       border-color: color-mix(in srgb, var(--warning, #c47d0e) 35%, var(--border-color));
+    }
+    .sla-paused-banner {
+      color: var(--text-muted, #6b7280);
+      border-color: color-mix(in srgb, var(--text-muted, #6b7280) 35%, var(--border-color));
     }
     .sla-card { padding: 16px; margin-bottom: 16px; }
     .sla-actions {
@@ -1714,6 +1820,7 @@ type TicketDetailMode = 'customer' | 'admin';
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
       .meta-created,
+      .meta-first-response,
       .meta-due {
         align-items: flex-start;
         text-align: start;
@@ -1795,6 +1902,7 @@ export class TicketDetailComponent implements OnInit {
   canSplit = false;
   canLinkRelated = false;
   canLinkDomains = false;
+  canLinkSms = false;
   canEditDueDate = false;
   canWatch = false;
   watching = false;
@@ -1895,6 +2003,10 @@ export class TicketDetailComponent implements OnInit {
 
   get relatedDomains(): RelatedDomain[] {
     return this.ticket?.relatedDomains ?? [];
+  }
+
+  get relatedSms(): RelatedSms[] {
+    return this.ticket?.relatedSms ?? [];
   }
 
   get availableCatalogTags(): TicketTag[] {
@@ -2514,6 +2626,62 @@ export class TicketDetailComponent implements OnInit {
     });
   }
 
+  linkSms(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canLinkSms || this.lifecycleBusy) {
+      return;
+    }
+    this.dialog
+      .open(TicketLinkSmsDialogComponent, {
+        width: '760px',
+        maxWidth: '95vw',
+        panelClass: 'app-dialog',
+        data: {
+          ticketId: this.ticketId,
+          publicNumber: this.ticket?.publicNumber
+        }
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (!result?.items?.length || !this.ticketId) {
+          return;
+        }
+        this.lifecycleBusy = true;
+        this.ticketService.linkAdminSms(this.ticketId, result.items).subscribe({
+          next: (detail) => {
+            this.applyDetail(detail);
+            this.lifecycleBusy = false;
+            this.snackBar.open(this.translate.instant('tickets.detail.linkedSmsSuccess'), undefined, {
+              duration: 3000
+            });
+          },
+          error: (error) => {
+            this.lifecycleBusy = false;
+            this.showError(this.apiError.resolve(error));
+          }
+        });
+      });
+  }
+
+  unlinkSms(linkId: number): void {
+    if (!this.isAdmin || !this.ticketId || !this.canLinkSms || this.lifecycleBusy) {
+      return;
+    }
+    this.lifecycleBusy = true;
+    this.ticketService.unlinkAdminSms(this.ticketId, linkId).subscribe({
+      next: (detail) => {
+        this.applyDetail(detail);
+        this.lifecycleBusy = false;
+        this.snackBar.open(this.translate.instant('tickets.detail.unlinkedSmsSuccess'), undefined, {
+          duration: 3000
+        });
+      },
+      error: (error) => {
+        this.lifecycleBusy = false;
+        this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
   toggleWatch(): void {
     if (!this.isAdmin || !this.ticketId || !this.canWatch || this.watcherBusy) {
       return;
@@ -2593,6 +2761,16 @@ export class TicketDetailComponent implements OnInit {
         this.showError(this.apiError.resolve(error));
       }
     });
+  }
+
+  overdueNoticeKey(ticket: TicketDetail['ticket']): string {
+    if (ticket.firstResponseOverdue && ticket.resolveOverdue) {
+      return 'tickets.detail.overdueNoticeBoth';
+    }
+    if (ticket.firstResponseOverdue) {
+      return 'tickets.detail.overdueNoticeFirstResponse';
+    }
+    return 'tickets.detail.overdueNoticeResolve';
   }
 
   applySlaDueDate(): void {
@@ -3180,6 +3358,7 @@ export class TicketDetailComponent implements OnInit {
     this.canSplit = !!detail.canSplit;
     this.canLinkRelated = !!detail.canLinkRelated;
     this.canLinkDomains = !!detail.canLinkDomains;
+    this.canLinkSms = !!detail.canLinkSms;
     this.canEditDueDate = !!detail.canEditDueDate;
     this.canWatch = !!detail.canWatch;
     this.watching = !!detail.watching;

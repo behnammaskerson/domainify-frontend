@@ -17,7 +17,6 @@ export class ErrorInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
-          // Token expired or invalid - try to refresh
           return this.handleTokenRefresh(request, next);
         }
         return throwError(() => error);
@@ -26,10 +25,23 @@ export class ErrorInterceptor implements HttpInterceptor {
   }
   
   private handleTokenRefresh(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+    if (this.authService.isImpersonating()) {
+      return this.authService.endImpersonation().pipe(
+        switchMap(() => {
+          this.router.navigate(['/dashboard']);
+          return throwError(() => new Error('Impersonation session expired'));
+        }),
+        catchError(() => {
+          this.authService.logout();
+          this.router.navigate(['/login']);
+          return throwError(() => new Error('Session expired'));
+        })
+      );
+    }
+
     return this.authService.refreshToken().pipe(
       switchMap(() => next.handle(request)),
       catchError(() => {
-        // Refresh failed - logout and redirect
         this.authService.logout();
         this.router.navigate(['/login']);
         return throwError(() => new Error('Session expired'));

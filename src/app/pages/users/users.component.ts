@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
@@ -22,6 +22,7 @@ import { Inject } from '@angular/core';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { DatetimeFilterFieldComponent } from '../../components/datetime-filter-field/datetime-filter-field.component';
 import { ApiErrorService } from '../../services/api-error.service';
+import { AuthService } from '../../services/auth.service';
 import { ManagedUser, UsersService } from '../../services/users.service';
 import { TranslationService } from '../../services/translation.service';
 import { PasswordPolicy, PasswordPolicyService } from '../../services/password-policy.service';
@@ -491,6 +492,12 @@ export class UserFormDialogComponent {
                           <mat-icon>account_balance_wallet</mat-icon>
                           {{ 'users.actions.adjustWallet' | translate }}
                         </button>
+                        @if (canImpersonate(user)) {
+                          <button mat-menu-item type="button" (click)="viewAsCustomer(user)">
+                            <mat-icon>visibility</mat-icon>
+                            {{ 'users.actions.viewAsCustomer' | translate }}
+                          </button>
+                        }
                         <button mat-menu-item type="button" (click)="toggleEnabled(user)">
                           <mat-icon>{{ user.enabled ? 'block' : 'check_circle' }}</mat-icon>
                           {{ (user.enabled ? 'users.actions.disable' : 'users.actions.enable') | translate }}
@@ -719,6 +726,12 @@ export class UserFormDialogComponent {
                       <mat-icon>account_balance_wallet</mat-icon>
                       {{ 'users.actions.adjustWallet' | translate }}
                     </button>
+                    @if (canImpersonate(user)) {
+                      <button mat-menu-item type="button" (click)="viewAsCustomer(user)">
+                        <mat-icon>visibility</mat-icon>
+                        {{ 'users.actions.viewAsCustomer' | translate }}
+                      </button>
+                    }
                     <button mat-menu-item type="button" (click)="toggleEnabled(user)">
                       <mat-icon>{{ user.enabled ? 'block' : 'check_circle' }}</mat-icon>
                       {{ (user.enabled ? 'users.actions.disable' : 'users.actions.enable') | translate }}
@@ -1307,12 +1320,14 @@ export class UsersComponent implements OnInit {
 
   private readonly usersService = inject(UsersService);
   private readonly walletService = inject(WalletService);
+  private readonly authService = inject(AuthService);
   private readonly apiError = inject(ApiErrorService);
   private readonly translate = inject(TranslateService);
   private readonly translationService = inject(TranslationService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly textFilter$ = new Subject<{ key: 'firstName' | 'lastName' | 'email'; value: string }>();
 
   displayedColumns = [
@@ -1614,6 +1629,27 @@ export class UsersComponent implements OnInit {
       error: () => {
         this.openAdjustWalletDialog(user, displayName, null);
       }
+    });
+  }
+
+  canImpersonate(user: ManagedUser): boolean {
+    if (!this.authService.isAdmin() || this.authService.isImpersonating()) {
+      return false;
+    }
+    const me = this.authService.getCurrentUserValue();
+    return !!user?.id && user.role !== 'ADMIN' && !!user.enabled && (!me || user.id !== me.id);
+  }
+
+  viewAsCustomer(user: ManagedUser): void {
+    if (!this.canImpersonate(user)) {
+      return;
+    }
+    this.authService.startImpersonation(user.id).subscribe({
+      next: () => {
+        this.snackBar.open(this.translate.instant('impersonation.started'), undefined, { duration: 3500 });
+        this.router.navigate(['/dashboard']);
+      },
+      error: (error) => this.showError(error)
     });
   }
 

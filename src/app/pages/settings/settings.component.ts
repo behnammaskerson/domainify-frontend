@@ -425,6 +425,20 @@ interface SettingsNavItem {
           @if (authService.isAdmin()) {
             <div class="setting-row">
               <div class="setting-copy">
+                <span class="setting-label">{{ 'settings.ticketDigestEmail' | translate }}</span>
+                <span class="setting-desc">{{ 'settings.ticketDigestEmailDesc' | translate }}</span>
+                @if (!emailNotificationsEnabled) {
+                  <span class="setting-desc warn-hint">{{ 'settings.ticketDigestEmailNeedEmail' | translate }}</span>
+                }
+              </div>
+              <mat-slide-toggle color="primary"
+                                [checked]="ticketDigestEmailEnabled"
+                                [disabled]="ticketDigestEmailSaving || !emailNotificationsEnabled"
+                                (change)="onTicketDigestEmailToggle($event.checked)">
+              </mat-slide-toggle>
+            </div>
+            <div class="setting-row">
+              <div class="setting-copy">
                 <span class="setting-label">{{ 'settings.ticketAvailability' | translate }}</span>
                 <span class="setting-desc">{{ 'settings.ticketAvailabilityDesc' | translate }}</span>
               </div>
@@ -1594,6 +1608,8 @@ export class SettingsComponent implements OnInit {
   smsNotificationsSaving = false;
   paymentNotificationsEnabled = true;
   paymentNotificationsSaving = false;
+  ticketDigestEmailEnabled = false;
+  ticketDigestEmailSaving = false;
   ticketAvailable = true;
   ticketAvailabilitySaving = false;
   phoneVerificationSending = false;
@@ -2647,6 +2663,7 @@ export class SettingsComponent implements OnInit {
     this.emailNotificationsEnabled = user.emailNotificationsEnabled !== false;
     this.smsNotificationsEnabled = user.smsNotificationsEnabled === true;
     this.paymentNotificationsEnabled = user.paymentNotificationsEnabled !== false;
+    this.ticketDigestEmailEnabled = user.ticketDigestEmailEnabled === true;
     this.ticketAvailable = user.ticketAvailable !== false;
     this.phoneOtpSent = false;
     this.phoneOtpCode = '';
@@ -2781,6 +2798,33 @@ export class SettingsComponent implements OnInit {
       error: (error) => {
         this.paymentNotificationsSaving = false;
         this.paymentNotificationsEnabled = previous;
+        this.showError(error);
+      }
+    });
+  }
+
+  onTicketDigestEmailToggle(enabled: boolean): void {
+    if (!this.authService.isAdmin()
+        || this.ticketDigestEmailSaving
+        || enabled === this.ticketDigestEmailEnabled
+        || !this.emailNotificationsEnabled) {
+      return;
+    }
+    const previous = this.ticketDigestEmailEnabled;
+    this.ticketDigestEmailEnabled = enabled;
+    this.ticketDigestEmailSaving = true;
+    this.usersService.setTicketDigestEmailEnabled(enabled).subscribe({
+      next: (user) => {
+        this.ticketDigestEmailSaving = false;
+        this.applyUser(user);
+        this.authService.setCurrentUser(user);
+        this.snack(this.translate.instant(
+          enabled ? 'settings.ticketDigestEmailEnabled' : 'settings.ticketDigestEmailDisabled'
+        ));
+      },
+      error: (error) => {
+        this.ticketDigestEmailSaving = false;
+        this.ticketDigestEmailEnabled = previous;
         this.showError(error);
       }
     });
