@@ -385,7 +385,7 @@ export interface TicketRequesterChange {
 
 export interface TicketEscalation {
   id: number;
-  triggerType?: 'MANUAL' | 'SLA_BREACH';
+  triggerType?: 'MANUAL' | 'SLA_BREACH' | 'NO_REPLY';
   escalatedById?: number | null;
   escalatedByName?: string | null;
   fromPriority?: TicketPriority | null;
@@ -486,7 +486,15 @@ export interface TicketSettings {
   slaBreachBumpPriority?: boolean;
   slaBreachAssigneeId?: number | null;
   slaBreachQueueId?: number | null;
+  automationDefaultPriority?: TicketPriority | null;
+  automationCustomerAckEnabled?: boolean;
+  automationNoReplyEnabled?: boolean;
+  automationNoReplyHours?: number;
+  automationNoReplyAction?: TicketNoReplyAction;
+  automationCsatInviteEnabled?: boolean;
 }
+
+export type TicketNoReplyAction = 'REMIND' | 'ESCALATE' | 'REMIND_AND_ESCALATE';
 
 export interface TicketAttachmentPolicy {
   maxAttachments: number;

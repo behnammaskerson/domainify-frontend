@@ -18,6 +18,8 @@ export type NotificationType =
   | 'TICKET_TRANSFERRED'
   | 'TICKET_ESCALATED'
   | 'TICKET_SLA_APPROACHING'
+  | 'TICKET_ACK'
+  | 'TICKET_NO_REPLY_REMIND'
   | 'DOMAIN_RENEWAL'
   | 'OFFER_RECEIVED'
   | 'OFFER_COUNTERED'
@@ -235,6 +237,10 @@ export class NotificationService {
         return 'trending_up';
       case 'TICKET_SLA_APPROACHING':
         return 'schedule';
+      case 'TICKET_ACK':
+        return 'mark_email_read';
+      case 'TICKET_NO_REPLY_REMIND':
+        return 'notifications_active';
       case 'TICKET_CLOSED':
         return 'lock';
       case 'TICKET_REOPENED':
@@ -271,6 +277,8 @@ export class NotificationService {
       case 'TICKET_TRANSFERRED':
       case 'TICKET_ESCALATED':
       case 'TICKET_SLA_APPROACHING':
+      case 'TICKET_ACK':
+      case 'TICKET_NO_REPLY_REMIND':
         return 'var(--accent)';
       case 'TICKET_CLOSED':
         return 'var(--text-muted)';

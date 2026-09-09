@@ -18,6 +18,7 @@ import {
   TicketAttachmentKind,
   TicketAssigneeOption,
   TicketAutoAssignMode,
+  TicketNoReplyAction,
   TicketPriority,
   TicketQueue,
   TicketService
@@ -358,6 +359,63 @@ interface HolidayDraft {
           </section>
 
           <section class="section">
+            <h3>{{ 'settings.ticketSettings.automationsSection' | translate }}</h3>
+            <p class="section-hint">{{ 'settings.ticketSettings.automationsIntro' | translate }}</p>
+
+            <h4 class="subsection-title">{{ 'settings.ticketSettings.automationsCreateSection' | translate }}</h4>
+            <mat-form-field appearance="outline" class="full-field">
+              <mat-label>{{ 'settings.ticketSettings.automationDefaultPriority' | translate }}</mat-label>
+              <mat-select formControlName="automationDefaultPriority">
+                <mat-option [value]="null">{{ 'settings.ticketSettings.automationDefaultPriorityNone' | translate }}</mat-option>
+                @for (priority of priorities; track priority) {
+                  <mat-option [value]="priority">{{ ('tickets.priorities.' + priority) | translate }}</mat-option>
+                }
+              </mat-select>
+              <mat-hint>{{ 'settings.ticketSettings.automationDefaultPriorityHint' | translate }}</mat-hint>
+            </mat-form-field>
+            <mat-checkbox formControlName="automationCustomerAckEnabled" color="primary">
+              {{ 'settings.ticketSettings.automationCustomerAckEnabled' | translate }}
+            </mat-checkbox>
+            <p class="section-hint">{{ 'settings.ticketSettings.automationCustomerAckHint' | translate }}</p>
+            <p class="section-hint">{{ 'settings.ticketSettings.automationQueueAssignHint' | translate }}</p>
+
+            <h4 class="subsection-title">{{ 'settings.ticketSettings.automationsNoReplySection' | translate }}</h4>
+            <mat-checkbox formControlName="automationNoReplyEnabled" color="primary">
+              {{ 'settings.ticketSettings.automationNoReplyEnabled' | translate }}
+            </mat-checkbox>
+            <p class="section-hint">{{ 'settings.ticketSettings.automationNoReplyEnabledHint' | translate }}</p>
+            <div class="limits-row">
+              <mat-form-field appearance="outline" class="limit-field">
+                <mat-label>{{ 'settings.ticketSettings.automationNoReplyHours' | translate }}</mat-label>
+                <input matInput type="number" formControlName="automationNoReplyHours" min="1" max="8760"
+                       [disabled]="!form.controls.automationNoReplyEnabled.value">
+                <mat-hint>{{ 'settings.ticketSettings.automationNoReplyHoursHint' | translate }}</mat-hint>
+                @if (form.controls.automationNoReplyHours.touched && form.controls.automationNoReplyHours.invalid) {
+                  <mat-error>{{ 'settings.ticketSettings.automationNoReplyHoursInvalid' | translate }}</mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="limit-field">
+                <mat-label>{{ 'settings.ticketSettings.automationNoReplyAction' | translate }}</mat-label>
+                <mat-select formControlName="automationNoReplyAction"
+                            [disabled]="!form.controls.automationNoReplyEnabled.value">
+                  @for (action of noReplyActions; track action) {
+                    <mat-option [value]="action">
+                      {{ ('settings.ticketSettings.noReplyActions.' + action) | translate }}
+                    </mat-option>
+                  }
+                </mat-select>
+                <mat-hint>{{ 'settings.ticketSettings.automationNoReplyActionHint' | translate }}</mat-hint>
+              </mat-form-field>
+            </div>
+
+            <h4 class="subsection-title">{{ 'settings.ticketSettings.automationsCsatSection' | translate }}</h4>
+            <mat-checkbox formControlName="automationCsatInviteEnabled" color="primary">
+              {{ 'settings.ticketSettings.automationCsatInviteEnabled' | translate }}
+            </mat-checkbox>
+            <p class="section-hint">{{ 'settings.ticketSettings.automationCsatInviteHint' | translate }}</p>
+          </section>
+
+          <section class="section">
             <h3>{{ 'settings.ticketSettings.attachmentsSection' | translate }}</h3>
             <p class="section-hint">{{ 'settings.ticketSettings.attachmentsIntro' | translate }}</p>
 
@@ -475,6 +533,7 @@ export class TicketSettingsFormComponent implements OnInit {
   readonly attachmentKinds: TicketAttachmentKind[] = ['IMAGE', 'PDF', 'LOG', 'DOCUMENT'];
   readonly priorities: TicketPriority[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
   readonly autoAssignModes: TicketAutoAssignMode[] = ['OFF', 'ROUND_ROBIN', 'CATEGORY_SKILL', 'QUEUE_MEMBERSHIP'];
+  readonly noReplyActions: TicketNoReplyAction[] = ['REMIND', 'ESCALATE', 'REMIND_AND_ESCALATE'];
   readonly weekdays: WeekdayKey[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   timezoneZonesByArea: Record<string, string[]> = this.buildTimezoneZonesByArea();
   timezoneAreas: string[] = this.buildTimezoneAreas();
@@ -551,7 +610,13 @@ export class TicketSettingsFormComponent implements OnInit {
     slaBreachEscalationEnabled: [true],
     slaBreachBumpPriority: [true],
     slaBreachAssigneeId: this.fb.control<number | null>(null),
-    slaBreachQueueId: this.fb.control<number | null>(null)
+    slaBreachQueueId: this.fb.control<number | null>(null),
+    automationDefaultPriority: this.fb.control<TicketPriority | null>(null),
+    automationCustomerAckEnabled: [true],
+    automationNoReplyEnabled: [false],
+    automationNoReplyHours: [48, [Validators.required, Validators.min(1), Validators.max(8760)]],
+    automationNoReplyAction: this.fb.nonNullable.control<TicketNoReplyAction>('REMIND', [Validators.required]),
+    automationCsatInviteEnabled: [true]
   });
 
   get hasKinds(): boolean {
@@ -804,7 +869,13 @@ export class TicketSettingsFormComponent implements OnInit {
       slaBreachEscalationEnabled: !!value.slaBreachEscalationEnabled,
       slaBreachBumpPriority: !!value.slaBreachBumpPriority,
       slaBreachAssigneeId: value.slaBreachAssigneeId ?? null,
-      slaBreachQueueId: value.slaBreachQueueId ?? null
+      slaBreachQueueId: value.slaBreachQueueId ?? null,
+      automationDefaultPriority: value.automationDefaultPriority ?? null,
+      automationCustomerAckEnabled: !!value.automationCustomerAckEnabled,
+      automationNoReplyEnabled: !!value.automationNoReplyEnabled,
+      automationNoReplyHours: Number(value.automationNoReplyHours),
+      automationNoReplyAction: value.automationNoReplyAction,
+      automationCsatInviteEnabled: !!value.automationCsatInviteEnabled
     }).subscribe({
       next: (settings) => {
         this.applySettings(settings);
@@ -887,6 +958,12 @@ export class TicketSettingsFormComponent implements OnInit {
     slaBreachBumpPriority?: boolean;
     slaBreachAssigneeId?: number | null;
     slaBreachQueueId?: number | null;
+    automationDefaultPriority?: TicketPriority | null;
+    automationCustomerAckEnabled?: boolean;
+    automationNoReplyEnabled?: boolean;
+    automationNoReplyHours?: number;
+    automationNoReplyAction?: TicketNoReplyAction;
+    automationCsatInviteEnabled?: boolean;
   }): void {
     const kinds = (settings.allowedAttachmentKinds?.length
       ? settings.allowedAttachmentKinds
@@ -928,6 +1005,12 @@ export class TicketSettingsFormComponent implements OnInit {
       slaBreachBumpPriority: settings.slaBreachBumpPriority !== false,
       slaBreachAssigneeId: settings.slaBreachAssigneeId ?? null,
       slaBreachQueueId: settings.slaBreachQueueId ?? null,
+      automationDefaultPriority: settings.automationDefaultPriority ?? null,
+      automationCustomerAckEnabled: settings.automationCustomerAckEnabled !== false,
+      automationNoReplyEnabled: settings.automationNoReplyEnabled === true,
+      automationNoReplyHours: settings.automationNoReplyHours ?? 48,
+      automationNoReplyAction: settings.automationNoReplyAction ?? 'REMIND',
+      automationCsatInviteEnabled: settings.automationCsatInviteEnabled !== false,
       ...this.weekdayFormValues(settings.businessHours)
     });
     this.applyTimezoneSelection(settings.slaTimezone ?? 'UTC');

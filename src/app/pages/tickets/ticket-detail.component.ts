@@ -665,6 +665,8 @@ type TicketDetailMode = 'customer' | 'admin';
                     </div>
                     @if (item.triggerType === 'SLA_BREACH') {
                       <p class="transfer-note">{{ 'tickets.detail.escalateSlaBreachNote' | translate }}</p>
+                    } @else if (item.triggerType === 'NO_REPLY') {
+                      <p class="transfer-note">{{ 'tickets.detail.escalateNoReplyNote' | translate }}</p>
                     } @else if (item.note) {
                       <p class="transfer-note">{{ item.note }}</p>
                     }
