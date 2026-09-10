@@ -1,18 +1,17 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
-import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-  
   constructor(
-    private authService: AuthService,
-    private router: Router
+    private readonly injector: Injector,
+    private readonly router: Router
   ) {}
-  
+
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
@@ -23,7 +22,12 @@ export class ErrorInterceptor implements HttpInterceptor {
       })
     );
   }
-  
+
+  private get authService(): AuthService {
+    // Lazy resolve — eager AuthService inject creates HttpClient ↔ HTTP_INTERCEPTORS cycle.
+    return this.injector.get(AuthService);
+  }
+
   private handleTokenRefresh(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     if (this.authService.isImpersonating()) {
       return this.authService.endImpersonation().pipe(

@@ -1674,6 +1674,7 @@ body.dark-theme .panel-surface.table-wrap .mat-mdc-row:hover .mat-mdc-cell {
   a.mat-mdc-unelevated-button.mat-primary .mat-icon,
   a.mat-mdc-flat-button.mat-primary .mat-icon {
     color: inherit !important;
+    margin-inline-end: 6px;
   }
 }
 

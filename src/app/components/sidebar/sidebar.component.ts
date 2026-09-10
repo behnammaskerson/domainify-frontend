@@ -129,47 +129,45 @@ interface NavGroupChild {
         }
 
         @if (collapsed) {
+          @for (child of visibleTicketChildren; track child.route) {
+            <a class="nav-link"
+               [routerLink]="child.route"
+               routerLinkActive="active"
+               (click)="onNavigate()"
+               [matTooltip]="child.labelKey | translate"
+               [matTooltipPosition]="tooltipPosition()">
+              <mat-icon>{{ child.icon }}</mat-icon>
+            </a>
+          }
+          @for (child of visibleKbChildren; track child.route) {
+            <a class="nav-link"
+               [routerLink]="child.route"
+               routerLinkActive="active"
+               (click)="onNavigate()"
+               [matTooltip]="child.labelKey | translate"
+               [matTooltipPosition]="tooltipPosition()">
+              <mat-icon>{{ child.icon }}</mat-icon>
+            </a>
+          }
           <a class="nav-link"
-             routerLink="/tickets/mine"
+             routerLink="/notifications"
              routerLinkActive="active"
              (click)="onNavigate()"
-             [matTooltip]="'menu.myTickets' | translate"
+             [matTooltip]="'menu.notifications' | translate"
              [matTooltipPosition]="tooltipPosition()">
-            <mat-icon>confirmation_number</mat-icon>
-          </a>
-          <a class="nav-link"
-             routerLink="/tickets/new"
-             routerLinkActive="active"
-             (click)="onNavigate()"
-             [matTooltip]="'menu.createTicket' | translate"
-             [matTooltipPosition]="tooltipPosition()">
-            <mat-icon>add_box</mat-icon>
+            <mat-icon>notifications</mat-icon>
           </a>
           @if (authService.isAdmin()) {
-            <a class="nav-link"
-               routerLink="/admin/tickets/inbox"
-               routerLinkActive="active"
-               (click)="onNavigate()"
-               [matTooltip]="'menu.ticketInbox' | translate"
-               [matTooltipPosition]="tooltipPosition()">
-              <mat-icon>inbox</mat-icon>
-            </a>
-            <a class="nav-link"
-               routerLink="/tickets/categories"
-               routerLinkActive="active"
-               (click)="onNavigate()"
-               [matTooltip]="'menu.ticketCategories' | translate"
-               [matTooltipPosition]="tooltipPosition()">
-              <mat-icon>category</mat-icon>
-            </a>
-            <a class="nav-link"
-               routerLink="/tickets/queues"
-               routerLinkActive="active"
-               (click)="onNavigate()"
-               [matTooltip]="'menu.ticketQueues' | translate"
-               [matTooltipPosition]="tooltipPosition()">
-              <mat-icon>groups</mat-icon>
-            </a>
+            @for (child of smsNavChildren; track child.route) {
+              <a class="nav-link"
+                 [routerLink]="child.route"
+                 routerLinkActive="active"
+                 (click)="onNavigate()"
+                 [matTooltip]="child.labelKey | translate"
+                 [matTooltipPosition]="tooltipPosition()">
+                <mat-icon>{{ child.icon }}</mat-icon>
+              </a>
+            }
           }
         } @else {
           <div class="nav-group" [class.expanded]="supportExpanded">
@@ -182,55 +180,89 @@ interface NavGroupChild {
               <mat-icon class="chevron">{{ supportExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
             </button>
             @if (supportExpanded) {
-              @for (child of visibleSupportChildren; track child.route) {
-                <a class="nav-link nav-child"
-                   [routerLink]="child.route"
-                   routerLinkActive="active"
-                   [routerLinkActiveOptions]="child.exact
-                     ? { paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }
-                     : { paths: 'subset', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }"
-                   (click)="onNavigate()">
-                  <mat-icon>{{ child.icon }}</mat-icon>
-                  <span>{{ child.labelKey | translate }}</span>
-                </a>
+              <div class="nav-subgroup" [class.expanded]="ticketsExpanded">
+                <button type="button"
+                        class="nav-link nav-child nav-subgroup-trigger"
+                        (click)="toggleTicketsGroup()"
+                        [attr.aria-expanded]="ticketsExpanded">
+                  <mat-icon>confirmation_number</mat-icon>
+                  <span class="nav-group-label">{{ 'menu.tickets' | translate }}</span>
+                  <mat-icon class="chevron">{{ ticketsExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </button>
+                @if (ticketsExpanded) {
+                  @for (child of visibleTicketChildren; track child.route) {
+                    <a class="nav-link nav-child nav-subchild"
+                       [routerLink]="child.route"
+                       routerLinkActive="active"
+                       [routerLinkActiveOptions]="child.exact
+                         ? { paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }
+                         : { paths: 'subset', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }"
+                       (click)="onNavigate()">
+                      <mat-icon>{{ child.icon }}</mat-icon>
+                      <span>{{ child.labelKey | translate }}</span>
+                    </a>
+                  }
+                }
+              </div>
+
+              <div class="nav-subgroup" [class.expanded]="kbExpanded">
+                <button type="button"
+                        class="nav-link nav-child nav-subgroup-trigger"
+                        (click)="toggleKbGroup()"
+                        [attr.aria-expanded]="kbExpanded">
+                  <mat-icon>menu_book</mat-icon>
+                  <span class="nav-group-label">{{ 'menu.knowledgeBase' | translate }}</span>
+                  <mat-icon class="chevron">{{ kbExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </button>
+                @if (kbExpanded) {
+                  @for (child of visibleKbChildren; track child.route) {
+                    <a class="nav-link nav-child nav-subchild"
+                       [routerLink]="child.route"
+                       routerLinkActive="active"
+                       [routerLinkActiveOptions]="child.exact
+                         ? { paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }
+                         : { paths: 'subset', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }"
+                       (click)="onNavigate()">
+                      <mat-icon>{{ child.icon }}</mat-icon>
+                      <span>{{ child.labelKey | translate }}</span>
+                    </a>
+                  }
+                }
+              </div>
+
+              <a class="nav-link nav-child"
+                 routerLink="/notifications"
+                 routerLinkActive="active"
+                 (click)="onNavigate()">
+                <mat-icon>notifications</mat-icon>
+                <span>{{ 'menu.notifications' | translate }}</span>
+              </a>
+
+              @if (authService.isAdmin()) {
+                <div class="nav-subgroup" [class.expanded]="smsExpanded">
+                  <button type="button"
+                          class="nav-link nav-child nav-subgroup-trigger"
+                          (click)="toggleSmsGroup()"
+                          [attr.aria-expanded]="smsExpanded">
+                    <mat-icon>sms</mat-icon>
+                    <span class="nav-group-label">{{ 'menu.smsManagement' | translate }}</span>
+                    <mat-icon class="chevron">{{ smsExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+                  </button>
+                  @if (smsExpanded) {
+                    @for (child of smsNavChildren; track child.route) {
+                      <a class="nav-link nav-child nav-subchild"
+                         [routerLink]="child.route"
+                         routerLinkActive="active"
+                         (click)="onNavigate()">
+                        <mat-icon>{{ child.icon }}</mat-icon>
+                        <span>{{ child.labelKey | translate }}</span>
+                      </a>
+                    }
+                  }
+                </div>
               }
             }
           </div>
-        }
-
-        @if (authService.isAdmin()) {
-          @if (collapsed) {
-            <a class="nav-link"
-               routerLink="/sms/single-send"
-               routerLinkActive="active"
-               (click)="onNavigate()"
-               [matTooltip]="'menu.singleSmsSend' | translate"
-               [matTooltipPosition]="tooltipPosition()">
-              <mat-icon>send</mat-icon>
-            </a>
-          } @else {
-            <div class="nav-group" [class.expanded]="smsExpanded">
-              <button type="button"
-                      class="nav-link nav-group-trigger"
-                      (click)="toggleSmsGroup()"
-                      [attr.aria-expanded]="smsExpanded">
-                <mat-icon>sms</mat-icon>
-                <span class="nav-group-label">{{ 'menu.smsManagement' | translate }}</span>
-                <mat-icon class="chevron">{{ smsExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
-              </button>
-              @if (smsExpanded) {
-                @for (child of smsNavChildren; track child.route) {
-                  <a class="nav-link nav-child"
-                     [routerLink]="child.route"
-                     routerLinkActive="active"
-                     (click)="onNavigate()">
-                    <mat-icon>{{ child.icon }}</mat-icon>
-                    <span>{{ child.labelKey | translate }}</span>
-                  </a>
-                }
-              }
-            </div>
-          }
         }
       </nav>
 
@@ -460,6 +492,34 @@ interface NavGroupChild {
       bottom: 8px;
     }
 
+    .nav-subgroup {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .nav-subgroup-trigger .chevron {
+      margin-inline-start: auto;
+      flex-shrink: 0;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      opacity: 0.7;
+    }
+
+    .nav-subchild {
+      min-height: 36px;
+      padding-inline-start: 56px;
+      font-size: 0.82rem;
+    }
+
+    .nav-subchild.active::before {
+      top: 6px;
+      bottom: 6px;
+    }
+
     .collapsed .nav-link {
       justify-content: center;
       padding: 0;
@@ -498,13 +558,14 @@ export class SidebarComponent implements OnInit {
 
   smsExpanded = false;
   supportExpanded = false;
+  ticketsExpanded = false;
+  kbExpanded = false;
   domainBusinessExpanded = false;
 
   tooltipPosition = computed(() => this.translationService.isRtl() ? 'left' : 'right');
 
   primaryNavItems: NavItem[] = [
     { icon: 'dashboard', labelKey: 'menu.dashboard', route: '/dashboard' },
-    { icon: 'notifications', labelKey: 'menu.notifications', route: '/notifications' },
     { icon: 'account_balance_wallet', labelKey: 'menu.wallet', route: '/wallet' }
   ];
 
@@ -538,7 +599,7 @@ export class SidebarComponent implements OnInit {
     );
   }
 
-  readonly supportNavChildren: NavGroupChild[] = [
+  readonly ticketNavChildren: NavGroupChild[] = [
     { icon: 'confirmation_number', labelKey: 'menu.myTickets', route: '/tickets/mine' },
     { icon: 'add_box', labelKey: 'menu.createTicket', route: '/tickets/new' },
     { icon: 'inbox', labelKey: 'menu.ticketInbox', route: '/admin/tickets/inbox' },
@@ -548,7 +609,14 @@ export class SidebarComponent implements OnInit {
     { icon: 'label', labelKey: 'menu.ticketTags', route: '/tickets/tags' },
     { icon: 'quickreply', labelKey: 'menu.ticketReplyTemplates', route: '/tickets/reply-templates' },
     { icon: 'tune', labelKey: 'menu.ticketSettings', route: '/tickets/settings' },
+    { icon: 'rule', labelKey: 'menu.ticketBusinessRules', route: '/tickets/business-rules' },
     { icon: 'account_tree', labelKey: 'menu.ticketStatusWorkflow', route: '/tickets/status-workflow' }
+  ];
+
+  readonly kbNavChildren: NavGroupChild[] = [
+    { icon: 'menu_book', labelKey: 'menu.helpCenter', route: '/help' },
+    { icon: 'category', labelKey: 'menu.kbCategories', route: '/kb/admin/categories', adminOnly: true },
+    { icon: 'article', labelKey: 'menu.kbArticles', route: '/kb/admin/articles', adminOnly: true }
   ];
 
   readonly smsNavChildren: NavGroupChild[] = [
@@ -560,19 +628,32 @@ export class SidebarComponent implements OnInit {
     { icon: 'inbox', labelKey: 'menu.smsReceiveReports', route: '/sms/receive-reports' }
   ];
 
-  get visibleSupportChildren(): NavGroupChild[] {
-    if (this.authService.isAdmin()) {
-      return this.supportNavChildren;
-    }
-    return this.supportNavChildren.filter((child) =>
-      child.route !== '/tickets/categories'
-      && child.route !== '/tickets/queues'
-      && child.route !== '/tickets/tags'
-      && child.route !== '/tickets/reply-templates'
-      && child.route !== '/tickets/settings'
-      && child.route !== '/admin/tickets/inbox'
-      && child.route !== '/admin/tickets/workload'
-      && child.route !== '/tickets/status-workflow');
+  private readonly ticketAdminOnlyRoutes = new Set([
+    '/tickets/categories',
+    '/tickets/queues',
+    '/tickets/tags',
+    '/tickets/reply-templates',
+    '/tickets/settings',
+    '/admin/tickets/inbox',
+    '/admin/tickets/workload',
+    '/tickets/status-workflow',
+    '/tickets/business-rules'
+  ]);
+
+  get visibleTicketChildren(): NavGroupChild[] {
+    return this.ticketNavChildren.filter((child) => {
+      if (child.adminOnly && !this.authService.isAdmin()) {
+        return false;
+      }
+      if (this.authService.isAdmin()) {
+        return true;
+      }
+      return !this.ticketAdminOnlyRoutes.has(child.route);
+    });
+  }
+
+  get visibleKbChildren(): NavGroupChild[] {
+    return this.kbNavChildren.filter((child) => !child.adminOnly || this.authService.isAdmin());
   }
 
   ngOnInit(): void {
@@ -590,6 +671,14 @@ export class SidebarComponent implements OnInit {
     this.supportExpanded = !this.supportExpanded;
   }
 
+  toggleTicketsGroup(): void {
+    this.ticketsExpanded = !this.ticketsExpanded;
+  }
+
+  toggleKbGroup(): void {
+    this.kbExpanded = !this.kbExpanded;
+  }
+
   toggleDomainBusinessGroup(): void {
     this.domainBusinessExpanded = !this.domainBusinessExpanded;
   }
@@ -599,8 +688,14 @@ export class SidebarComponent implements OnInit {
   }
 
   private updateGroupExpanded(url: string): void {
-    this.smsExpanded = url.startsWith('/sms');
-    this.supportExpanded = url.startsWith('/tickets') || url.startsWith('/admin/tickets');
+    const onTickets = url.startsWith('/tickets') || url.startsWith('/admin/tickets');
+    const onKb = url.startsWith('/help') || url.startsWith('/kb');
+    const onNotifications = url.startsWith('/notifications');
+    const onSms = url.startsWith('/sms');
+    this.supportExpanded = onTickets || onKb || onNotifications || onSms;
+    this.ticketsExpanded = onTickets;
+    this.kbExpanded = onKb;
+    this.smsExpanded = onSms;
     this.domainBusinessExpanded =
       url.startsWith('/domains')
       || url.startsWith('/analyzer')

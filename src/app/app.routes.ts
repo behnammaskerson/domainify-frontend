@@ -118,6 +118,39 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/tickets/create-ticket.component').then(m => m.CreateTicketComponent)
       },
       {
+        path: 'help',
+        loadComponent: () => import('./pages/kb/kb-help-page.component').then(m => m.KbHelpPageComponent)
+      },
+      {
+        path: 'help/:slug',
+        loadComponent: () => import('./pages/kb/kb-article-page.component').then(m => m.KbArticlePageComponent)
+      },
+      {
+        path: 'kb/admin',
+        redirectTo: '/kb/admin/articles',
+        pathMatch: 'full'
+      },
+      {
+        path: 'kb/admin/categories',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/kb/kb-categories-page.component').then(m => m.KbCategoriesPageComponent)
+      },
+      {
+        path: 'kb/admin/articles/new',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/kb/kb-article-form-page.component').then(m => m.KbArticleFormPageComponent)
+      },
+      {
+        path: 'kb/admin/articles/:id/edit',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/kb/kb-article-form-page.component').then(m => m.KbArticleFormPageComponent)
+      },
+      {
+        path: 'kb/admin/articles',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/kb/kb-articles-page.component').then(m => m.KbArticlesPageComponent)
+      },
+      {
         path: 'tickets/categories',
         canActivate: [AdminGuard],
         loadComponent: () => import('./pages/tickets/ticket-categories-page.component').then(m => m.TicketCategoriesPageComponent)
@@ -141,6 +174,11 @@ export const routes: Routes = [
         path: 'tickets/settings',
         canActivate: [AdminGuard],
         loadComponent: () => import('./pages/tickets/ticket-settings-page.component').then(m => m.TicketSettingsPageComponent)
+      },
+      {
+        path: 'tickets/business-rules',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/tickets/business-rules-page.component').then(m => m.BusinessRulesPageComponent)
       },
       {
         path: 'tickets/status-workflow',

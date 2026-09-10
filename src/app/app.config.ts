@@ -1,6 +1,6 @@
 import { ApplicationConfig, APP_INITIALIZER, provideZoneChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi, HttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, HttpClient, HttpBackend } from '@angular/common/http';
 import { TranslateModule, TranslateLoader, TranslateService, TranslateParser } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { routes } from './app.routes';
@@ -19,8 +19,9 @@ import { MatPaginatorIntl } from '@angular/material/paginator';
 import { enUS } from 'date-fns/locale';
 import { TranslatedPaginatorIntl } from './services/translated-paginator-intl';
 
-export function HttpLoaderFactory(http: HttpClient) {
-  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+/** Load i18n via HttpBackend so TranslateLoader does not participate in the interceptor DI graph. */
+export function HttpLoaderFactory(httpBackend: HttpBackend) {
+  return new TranslateHttpLoader(new HttpClient(httpBackend), './assets/i18n/', '.json');
 }
 
 function initTranslations(translate: TranslateService, translationService: TranslationService) {
@@ -85,7 +86,7 @@ export const appConfig: ApplicationConfig = {
         loader: {
           provide: TranslateLoader,
           useFactory: HttpLoaderFactory,
-          deps: [HttpClient]
+          deps: [HttpBackend]
         },
         parser: {
           provide: TranslateParser,

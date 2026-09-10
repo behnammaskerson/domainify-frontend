@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -13,12 +13,15 @@ import { PageHeroComponent } from '../../components/page-hero/page-hero.componen
 import { TicketPortalNavComponent } from '../../components/ticket-portal-nav/ticket-portal-nav.component';
 import { MarkdownEditorComponent } from '../../components/markdown-editor/markdown-editor.component';
 import { ApiErrorService } from '../../services/api-error.service';
+import { KbArticle, KnowledgeBaseService } from '../../services/knowledge-base.service';
+import { TranslationService } from '../../services/translation.service';
 import {
   TicketAttachmentPolicy,
   TicketCategory,
   TicketPriority,
   TicketService
 } from '../../services/ticket.service';
+import { Subscription, debounceTime, merge } from 'rxjs';
 
 @Component({
   selector: 'app-create-ticket',
@@ -77,6 +80,25 @@ import {
                 <mat-error>{{ 'tickets.create.subjectRequired' | translate }}</mat-error>
               }
             </mat-form-field>
+
+            @if (kbSuggestions.length) {
+              <div class="kb-suggestions panel-surface">
+                <div class="kb-suggestions-header">
+                  <mat-icon>menu_book</mat-icon>
+                  <div>
+                    <h3>{{ 'tickets.create.kbSuggestionsTitle' | translate }}</h3>
+                    <p>{{ 'tickets.create.kbSuggestionsHint' | translate }}</p>
+                  </div>
+                </div>
+                <ul class="kb-suggestion-list">
+                  @for (article of kbSuggestions; track article.slug) {
+                    <li>
+                      <a [routerLink]="['/help', article.slug]">{{ article.title }}</a>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
 
             <div class="row">
               <mat-form-field appearance="outline">
@@ -309,6 +331,64 @@ import {
       justify-content: flex-end;
     }
 
+    .kb-suggestions {
+      padding: 14px 16px;
+      margin: 4px 0 8px;
+      border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border-color));
+      background: color-mix(in srgb, var(--accent) 6%, var(--bg-secondary));
+    }
+
+    .kb-suggestions-header {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .kb-suggestions-header mat-icon {
+      color: var(--accent-dark);
+      flex-shrink: 0;
+    }
+
+    :host-context(body.dark-theme) .kb-suggestions-header mat-icon {
+      color: var(--accent);
+    }
+
+    .kb-suggestions-header h3 {
+      margin: 0 0 4px;
+      font-size: 0.92rem;
+    }
+
+    .kb-suggestions-header p {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .kb-suggestion-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .kb-suggestion-list a {
+      color: var(--accent-dark);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+
+    .kb-suggestion-list a:hover {
+      text-decoration: underline;
+    }
+
+    :host-context(body.dark-theme) .kb-suggestion-list a {
+      color: var(--accent);
+    }
+
     @media (max-width: 720px) {
       .row,
       .attachments-header {
@@ -323,9 +403,11 @@ import {
     }
   `]
 })
-export class CreateTicketComponent implements OnInit {
+export class CreateTicketComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly ticketService = inject(TicketService);
+  private readonly kbService = inject(KnowledgeBaseService);
+  private readonly translationService = inject(TranslationService);
   private readonly apiError = inject(ApiErrorService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly translate = inject(TranslateService);
@@ -353,6 +435,8 @@ export class CreateTicketComponent implements OnInit {
 
   files: File[] = [];
   submitting = false;
+  kbSuggestions: KbArticle[] = [];
+  private kbSuggestSub?: Subscription;
 
   readonly form = this.fb.nonNullable.group({
     subject: ['', [Validators.required, Validators.maxLength(200)]],
@@ -364,6 +448,7 @@ export class CreateTicketComponent implements OnInit {
   ngOnInit(): void {
     this.refreshAttachmentsHint();
     this.loadAttachmentPolicy();
+    this.setupKbSuggestions();
     this.ticketService.listActiveCategories().subscribe({
       next: (categories) => {
         this.categories = categories;
@@ -372,6 +457,35 @@ export class CreateTicketComponent implements OnInit {
       error: (error) => {
         this.categoriesLoading = false;
         this.showError(this.apiError.resolve(error));
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.kbSuggestSub?.unsubscribe();
+  }
+
+  private setupKbSuggestions(): void {
+    this.kbSuggestSub = merge(
+      this.form.controls.subject.valueChanges,
+      this.form.controls.description.valueChanges
+    ).pipe(debounceTime(350)).subscribe(() => this.fetchKbSuggestions());
+  }
+
+  private fetchKbSuggestions(): void {
+    const subject = this.form.controls.subject.value.trim();
+    const description = this.form.controls.description.value.trim();
+    const query = subject.length >= 3 ? subject : description.length >= 3 ? description : '';
+    if (query.length < 3) {
+      this.kbSuggestions = [];
+      return;
+    }
+    this.kbService.suggest(query, this.translationService.currentLang()).subscribe({
+      next: (articles) => {
+        this.kbSuggestions = articles ?? [];
+      },
+      error: () => {
+        this.kbSuggestions = [];
       }
     });
   }
