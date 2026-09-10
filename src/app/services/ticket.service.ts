@@ -492,6 +492,8 @@ export interface TicketSettings {
   automationNoReplyHours?: number;
   automationNoReplyAction?: TicketNoReplyAction;
   automationCsatInviteEnabled?: boolean;
+  automationAutoCloseEnabled?: boolean;
+  automationAutoCloseDays?: number;
 }
 
 export type TicketNoReplyAction = 'REMIND' | 'ESCALATE' | 'REMIND_AND_ESCALATE';

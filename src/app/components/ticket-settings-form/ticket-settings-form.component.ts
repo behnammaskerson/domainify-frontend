@@ -55,7 +55,7 @@ interface HolidayDraft {
       } @else {
         <p class="intro">{{ 'settings.ticketSettings.intro' | translate }}</p>
         <form class="form" [formGroup]="form" (ngSubmit)="save()">
-          <section class="section">
+          <section class="section settings-anchor" id="reopen">
             <h3>{{ 'settings.ticketSettings.reopenSection' | translate }}</h3>
             <mat-form-field appearance="outline" class="full-field">
               <mat-label>{{ 'settings.ticketSettings.reopenWindowDays' | translate }}</mat-label>
@@ -67,7 +67,7 @@ interface HolidayDraft {
             </mat-form-field>
           </section>
 
-          <section class="section">
+          <section class="section settings-anchor" id="archive">
             <h3>{{ 'settings.ticketSettings.archiveSection' | translate }}</h3>
             <p class="section-hint">{{ 'settings.ticketSettings.archiveIntro' | translate }}</p>
             <mat-form-field appearance="outline" class="full-field">
@@ -80,7 +80,7 @@ interface HolidayDraft {
             </mat-form-field>
           </section>
 
-          <section class="section">
+          <section class="section settings-anchor" id="sla">
             <h3>{{ 'settings.ticketSettings.slaSection' | translate }}</h3>
             <p class="section-hint">{{ 'settings.ticketSettings.slaIntro' | translate }}</p>
 
@@ -258,7 +258,7 @@ interface HolidayDraft {
             </div>
           </section>
 
-          <section class="section">
+          <section class="section settings-anchor" id="notifications">
             <h3>{{ 'settings.ticketSettings.emailSection' | translate }}</h3>
             <p class="section-hint">{{ 'settings.ticketSettings.emailIntro' | translate }}</p>
             <mat-checkbox formControlName="ticketEmailNotificationsEnabled" color="primary">
@@ -300,7 +300,7 @@ interface HolidayDraft {
             </div>
           </section>
 
-          <section class="section">
+          <section class="section settings-anchor" id="digest">
             <h3>{{ 'settings.ticketSettings.digestSection' | translate }}</h3>
             <p class="section-hint">{{ 'settings.ticketSettings.digestIntro' | translate }}</p>
             <mat-checkbox formControlName="agentDigestEnabled" color="primary">
@@ -325,7 +325,7 @@ interface HolidayDraft {
             </button>
           </section>
 
-          <section class="section">
+          <section class="section settings-anchor" id="autoassign">
             <h3>{{ 'settings.ticketSettings.autoAssignSection' | translate }}</h3>
             <p class="section-hint">{{ 'settings.ticketSettings.autoAssignIntro' | translate }}</p>
             <mat-form-field appearance="outline" class="full-field">
@@ -358,7 +358,7 @@ interface HolidayDraft {
             </mat-form-field>
           </section>
 
-          <section class="section">
+          <section class="section settings-anchor" id="automations">
             <h3>{{ 'settings.ticketSettings.automationsSection' | translate }}</h3>
             <p class="section-hint">{{ 'settings.ticketSettings.automationsIntro' | translate }}</p>
 
@@ -413,9 +413,24 @@ interface HolidayDraft {
               {{ 'settings.ticketSettings.automationCsatInviteEnabled' | translate }}
             </mat-checkbox>
             <p class="section-hint">{{ 'settings.ticketSettings.automationCsatInviteHint' | translate }}</p>
+
+            <h4 class="subsection-title">{{ 'settings.ticketSettings.automationsAutoCloseSection' | translate }}</h4>
+            <mat-checkbox formControlName="automationAutoCloseEnabled" color="primary">
+              {{ 'settings.ticketSettings.automationAutoCloseEnabled' | translate }}
+            </mat-checkbox>
+            <p class="section-hint">{{ 'settings.ticketSettings.automationAutoCloseEnabledHint' | translate }}</p>
+            <mat-form-field appearance="outline" class="limit-field">
+              <mat-label>{{ 'settings.ticketSettings.automationAutoCloseDays' | translate }}</mat-label>
+              <input matInput type="number" formControlName="automationAutoCloseDays" min="1" max="3650"
+                     [disabled]="!form.controls.automationAutoCloseEnabled.value">
+              <mat-hint>{{ 'settings.ticketSettings.automationAutoCloseDaysHint' | translate }}</mat-hint>
+              @if (form.controls.automationAutoCloseDays.touched && form.controls.automationAutoCloseDays.invalid) {
+                <mat-error>{{ 'settings.ticketSettings.automationAutoCloseDaysInvalid' | translate }}</mat-error>
+              }
+            </mat-form-field>
           </section>
 
-          <section class="section">
+          <section class="section settings-anchor" id="attachments">
             <h3>{{ 'settings.ticketSettings.attachmentsSection' | translate }}</h3>
             <p class="section-hint">{{ 'settings.ticketSettings.attachmentsIntro' | translate }}</p>
 
@@ -469,6 +484,7 @@ interface HolidayDraft {
     .form { display: flex; flex-direction: column; gap: 20px; width: 100%; }
     .section { display: flex; flex-direction: column; gap: 10px; }
     .section h3 { margin: 0; font-size: 1rem; }
+    .settings-anchor { scroll-margin-top: 88px; }
     .subsection-title { margin: 8px 0 0; font-size: 0.92rem; font-weight: 600; }
     .full-field { width: 100%; }
     .limits-row {
@@ -616,7 +632,9 @@ export class TicketSettingsFormComponent implements OnInit {
     automationNoReplyEnabled: [false],
     automationNoReplyHours: [48, [Validators.required, Validators.min(1), Validators.max(8760)]],
     automationNoReplyAction: this.fb.nonNullable.control<TicketNoReplyAction>('REMIND', [Validators.required]),
-    automationCsatInviteEnabled: [true]
+    automationCsatInviteEnabled: [true],
+    automationAutoCloseEnabled: [false],
+    automationAutoCloseDays: [7, [Validators.required, Validators.min(1), Validators.max(3650)]]
   });
 
   get hasKinds(): boolean {
@@ -875,7 +893,9 @@ export class TicketSettingsFormComponent implements OnInit {
       automationNoReplyEnabled: !!value.automationNoReplyEnabled,
       automationNoReplyHours: Number(value.automationNoReplyHours),
       automationNoReplyAction: value.automationNoReplyAction,
-      automationCsatInviteEnabled: !!value.automationCsatInviteEnabled
+      automationCsatInviteEnabled: !!value.automationCsatInviteEnabled,
+      automationAutoCloseEnabled: !!value.automationAutoCloseEnabled,
+      automationAutoCloseDays: Number(value.automationAutoCloseDays)
     }).subscribe({
       next: (settings) => {
         this.applySettings(settings);
@@ -964,6 +984,8 @@ export class TicketSettingsFormComponent implements OnInit {
     automationNoReplyHours?: number;
     automationNoReplyAction?: TicketNoReplyAction;
     automationCsatInviteEnabled?: boolean;
+    automationAutoCloseEnabled?: boolean;
+    automationAutoCloseDays?: number;
   }): void {
     const kinds = (settings.allowedAttachmentKinds?.length
       ? settings.allowedAttachmentKinds
@@ -1011,6 +1033,8 @@ export class TicketSettingsFormComponent implements OnInit {
       automationNoReplyHours: settings.automationNoReplyHours ?? 48,
       automationNoReplyAction: settings.automationNoReplyAction ?? 'REMIND',
       automationCsatInviteEnabled: settings.automationCsatInviteEnabled !== false,
+      automationAutoCloseEnabled: settings.automationAutoCloseEnabled === true,
+      automationAutoCloseDays: settings.automationAutoCloseDays ?? 7,
       ...this.weekdayFormValues(settings.businessHours)
     });
     this.applyTimezoneSelection(settings.slaTimezone ?? 'UTC');
