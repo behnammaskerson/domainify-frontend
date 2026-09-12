@@ -20,6 +20,7 @@ import { MarkdownEditorComponent, MentionCandidate } from '../../components/mark
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { TicketMergeDialogComponent } from '../../components/ticket-merge-dialog/ticket-merge-dialog.component';
 import { TicketSplitDialogComponent } from '../../components/ticket-split-dialog/ticket-split-dialog.component';
+import { TicketCloneDialogComponent } from '../../components/ticket-clone-dialog/ticket-clone-dialog.component';
 import { TicketLinkDialogComponent } from '../../components/ticket-link-dialog/ticket-link-dialog.component';
 import { TicketLinkDomainDialogComponent } from '../../components/ticket-link-domain-dialog/ticket-link-domain-dialog.component';
 import { TicketLinkSmsDialogComponent } from '../../components/ticket-link-sms-dialog/ticket-link-sms-dialog.component';
@@ -126,6 +127,12 @@ type TicketDetailMode = 'customer' | 'admin';
             <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="splitTicket()">
               <mat-icon>call_split</mat-icon>
               {{ 'tickets.detail.split' | translate }}
+            </button>
+          }
+          @if (ticket && canClone) {
+            <button mat-stroked-button type="button" [disabled]="lifecycleBusy" (click)="cloneTicket()">
+              <mat-icon>content_copy</mat-icon>
+              {{ 'tickets.detail.clone' | translate }}
             </button>
           }
           @if (ticket && canMerge) {
@@ -1902,6 +1909,7 @@ export class TicketDetailComponent implements OnInit {
   canRestore = false;
   canMerge = false;
   canSplit = false;
+  canClone = false;
   canLinkRelated = false;
   canLinkDomains = false;
   canLinkSms = false;
@@ -2164,6 +2172,11 @@ export class TicketDetailComponent implements OnInit {
     if (isPlainLetterKey(event, 's')) {
       event.preventDefault();
       this.splitTicket();
+      return;
+    }
+    if (isPlainLetterKey(event, 'd')) {
+      event.preventDefault();
+      this.cloneTicket();
       return;
     }
     if (isPlainLetterKey(event, 'l')) {
@@ -2500,6 +2513,49 @@ export class TicketDetailComponent implements OnInit {
             const snack = this.snackBar.open(
               this.translate.instant('tickets.detail.splitSuccess'),
               newId ? this.translate.instant('tickets.detail.splitOpenNew') : undefined,
+              { duration: 8000 }
+            );
+            if (newId) {
+              snack.onAction().subscribe(() => {
+                void this.router.navigate(['/admin/tickets', newId]);
+              });
+            }
+          },
+          error: (error) => {
+            this.lifecycleBusy = false;
+            this.showError(this.apiError.resolve(error));
+          }
+        });
+      });
+  }
+
+  cloneTicket(): void {
+    if (!this.isAdmin || !this.ticketId || !this.canClone || this.lifecycleBusy) {
+      return;
+    }
+    this.dialog
+      .open(TicketCloneDialogComponent, {
+        width: '480px',
+        maxWidth: '95vw',
+        data: {
+          sourcePublicNumber: this.ticket?.publicNumber,
+          sourceSubject: this.ticket?.subject
+        }
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (!result?.subject || !this.ticketId) {
+          return;
+        }
+        this.lifecycleBusy = true;
+        this.ticketService.cloneAdminTicket(this.ticketId, { subject: result.subject }).subscribe({
+          next: (cloneResult) => {
+            this.applyDetail(cloneResult.source);
+            this.lifecycleBusy = false;
+            const newId = cloneResult.newTicket?.id;
+            const snack = this.snackBar.open(
+              this.translate.instant('tickets.detail.cloneSuccess'),
+              newId ? this.translate.instant('tickets.detail.cloneOpenNew') : undefined,
               { duration: 8000 }
             );
             if (newId) {
@@ -3358,6 +3414,7 @@ export class TicketDetailComponent implements OnInit {
     this.canRestore = !!detail.canRestore;
     this.canMerge = !!detail.canMerge;
     this.canSplit = !!detail.canSplit;
+    this.canClone = !!detail.canClone;
     this.canLinkRelated = !!detail.canLinkRelated;
     this.canLinkDomains = !!detail.canLinkDomains;
     this.canLinkSms = !!detail.canLinkSms;

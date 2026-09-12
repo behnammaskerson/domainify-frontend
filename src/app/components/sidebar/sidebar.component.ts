@@ -604,6 +604,7 @@ export class SidebarComponent implements OnInit {
     { icon: 'add_box', labelKey: 'menu.createTicket', route: '/tickets/new' },
     { icon: 'inbox', labelKey: 'menu.ticketInbox', route: '/admin/tickets/inbox' },
     { icon: 'monitoring', labelKey: 'menu.ticketWorkload', route: '/admin/tickets/workload' },
+    { icon: 'upload_file', labelKey: 'menu.ticketImport', route: '/admin/tickets/import' },
     { icon: 'category', labelKey: 'menu.ticketCategories', route: '/tickets/categories' },
     { icon: 'groups', labelKey: 'menu.ticketQueues', route: '/tickets/queues' },
     { icon: 'label', labelKey: 'menu.ticketTags', route: '/tickets/tags' },
@@ -636,6 +637,7 @@ export class SidebarComponent implements OnInit {
     '/tickets/settings',
     '/admin/tickets/inbox',
     '/admin/tickets/workload',
+    '/admin/tickets/import',
     '/tickets/status-workflow',
     '/tickets/business-rules'
   ]);

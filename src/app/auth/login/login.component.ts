@@ -14,6 +14,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { TranslationService } from '../../services/translation.service';
 import { ApiErrorService } from '../../services/api-error.service';
+import { GuestTicketService } from '../../services/guest-ticket.service';
 import { AuthShellComponent } from '../auth-shell/auth-shell.component';
 
 @Component({
@@ -115,6 +116,13 @@ import { AuthShellComponent } from '../auth-shell/auth-shell.component';
             {{ 'auth.login.noAccount' | translate }}
             <a routerLink="/register" class="text-link">{{ 'auth.login.signUp' | translate }}</a>
           </p>
+          @if (guestSupportEnabled) {
+            <p class="guest-links">
+              <a routerLink="/support/new" class="text-link">{{ 'auth.login.guestSupport' | translate }}</a>
+              <span class="sep">·</span>
+              <a routerLink="/support/tickets" class="text-link">{{ 'guestSupport.list.myTickets' | translate }}</a>
+            </p>
+          }
         </div>
       } @else {
         <form class="auth-form" [formGroup]="totpForm" (ngSubmit)="onVerifyTotp()">
@@ -185,6 +193,18 @@ import { AuthShellComponent } from '../auth-shell/auth-shell.component';
       color: var(--accent-dark);
     }
 
+    .guest-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.35rem 0.5rem;
+      margin-top: 0.35rem;
+    }
+
+    .guest-links .sep {
+      color: var(--text-secondary);
+    }
+
     .submit-btn {
       height: 48px !important;
       font-size: 1rem !important;
@@ -248,10 +268,12 @@ export class LoginComponent implements OnInit {
   showEmailVerificationHint = false;
   resendSending = false;
   step: 'credentials' | 'totp' = 'credentials';
+  guestSupportEnabled = false;
   private preAuthToken = '';
 
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private guestTickets = inject(GuestTicketService);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
   private translationService = inject(TranslationService);
@@ -267,6 +289,16 @@ export class LoginComponent implements OnInit {
     });
     this.totpForm = this.fb.group({
       code: ['', [Validators.required, Validators.minLength(6)]]
+    });
+
+    // Check if guest support is enabled
+    this.guestTickets.getConfig().subscribe({
+      next: (config) => {
+        this.guestSupportEnabled = config.guestTicketCreateEnabled !== false;
+      },
+      error: () => {
+        this.guestSupportEnabled = false;
+      }
     });
   }
 

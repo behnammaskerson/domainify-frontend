@@ -6,23 +6,46 @@ import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.
 import { VerifyEmailComponent } from './auth/verify-email/verify-email.component';
 import { AuthGuard } from './auth/auth.guard';
 import { AdminGuard } from './auth/admin.guard';
+import { GuestGuard } from './auth/guest.guard';
 
 export const routes: Routes = [
   {
     path: 'login',
-    component: LoginComponent
+    component: LoginComponent,
+    canActivate: [GuestGuard]
   },
   {
     path: 'register',
-    component: RegisterComponent
+    component: RegisterComponent,
+    canActivate: [GuestGuard]
   },
   {
     path: 'forgot-password',
-    component: ForgotPasswordComponent
+    component: ForgotPasswordComponent,
+    canActivate: [GuestGuard]
   },
   {
     path: 'verify-email',
     component: VerifyEmailComponent
+  },
+  {
+    path: 'support/new',
+    loadComponent: () =>
+      import('./pages/support/guest-create-ticket.component').then(m => m.GuestCreateTicketComponent),
+    canActivate: [GuestGuard],
+    data: { guestRedirectTo: '/tickets/mine' }
+  },
+  {
+    path: 'support/tickets',
+    loadComponent: () =>
+      import('./pages/support/guest-ticket-list.component').then(m => m.GuestTicketListComponent),
+    canActivate: [GuestGuard],
+    data: { guestRedirectTo: '/tickets/mine' }
+  },
+  {
+    path: 'support/t/:token',
+    loadComponent: () =>
+      import('./pages/support/guest-ticket-view.component').then(m => m.GuestTicketViewComponent)
   },
   {
     path: '',
@@ -92,6 +115,16 @@ export const routes: Routes = [
         path: 'admin/tickets/workload',
         canActivate: [AdminGuard],
         loadComponent: () => import('./pages/tickets/ticket-workload-page.component').then(m => m.TicketWorkloadPageComponent)
+      },
+      {
+        path: 'admin/tickets/outbound',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/tickets/outbound-ticket-page.component').then(m => m.OutboundTicketPageComponent)
+      },
+      {
+        path: 'admin/tickets/import',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/tickets/ticket-import-page.component').then(m => m.TicketImportPageComponent)
       },
       {
         path: 'admin/tickets/:id',

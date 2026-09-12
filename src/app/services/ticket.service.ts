@@ -5,7 +5,7 @@ import { PagedDomains } from './domains.service';
 
 export type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 export type TicketStatus = 'NEW' | 'OPEN' | 'PENDING' | 'ON_HOLD' | 'RESOLVED' | 'CLOSED';
-export type TicketChannel = 'PORTAL' | 'EMAIL';
+export type TicketChannel = 'PORTAL' | 'EMAIL' | 'WEB' | 'CONTACT' | 'OUTBOUND';
 
 export interface RelatedTicket {
   id: number;
@@ -333,6 +333,7 @@ export interface TicketDetail {
   canRestore?: boolean;
   canMerge?: boolean;
   canSplit?: boolean;
+  canClone?: boolean;
   canLinkRelated?: boolean;
   canLinkDomains?: boolean;
   canLinkSms?: boolean;
@@ -407,6 +408,11 @@ export interface SplitTicketResult {
   newTicket: Ticket;
 }
 
+export interface CloneTicketResult {
+  source: TicketDetail;
+  newTicket: Ticket;
+}
+
 export type BulkTicketAction = 'ASSIGN' | 'CHANGE_STATUS' | 'ADD_TAG' | 'CLOSE';
 
 export interface BulkTicketActionPayload {
@@ -469,6 +475,9 @@ export interface TicketSettings {
   autoAssignMode: TicketAutoAssignMode;
   autoAssignFallbackRoundRobin: boolean;
   defaultQueueId?: number | null;
+  guestTicketCreateEnabled?: boolean;
+  guestTicketAttachmentsEnabled?: boolean;
+  captchaSettingsJson?: string;
   ticketEmailNotificationsEnabled: boolean;
   ticketSmsNotificationsEnabled: boolean;
   emailNotificationPriorities: TicketPriority[];
@@ -595,6 +604,50 @@ export interface CreateTicketPayload {
   categoryId: number;
   priority: TicketPriority;
   attachments?: File[];
+}
+
+export interface CreateOutboundTicketPayload {
+  requesterUserId: number;
+  subject: string;
+  description: string;
+  categoryId: number;
+  priority: TicketPriority;
+  queueId?: number | null;
+  assigneeId?: number | null;
+  notifyCustomer?: boolean;
+  notifySms?: boolean;
+  attachments?: File[];
+}
+
+export interface TicketImportPayload {
+  file: File;
+  messagesFile?: File;
+  dryRun?: boolean;
+  createMissingRequesters?: boolean;
+}
+
+export interface TicketImportRowFailure {
+  rowNumber: number;
+  externalId?: string | null;
+  code: string;
+  message: string;
+}
+
+export interface TicketImportSucceeded {
+  rowNumber: number;
+  externalId?: string | null;
+  ticketId?: number | null;
+  publicNumber?: string | null;
+}
+
+export interface TicketImportResult {
+  dryRun: boolean;
+  totalRows: number;
+  validRows: number;
+  importedCount: number;
+  failedCount: number;
+  succeeded: TicketImportSucceeded[];
+  failed: TicketImportRowFailure[];
 }
 
 export interface ReplyTicketPayload {
@@ -935,6 +988,13 @@ export class TicketService {
     return this.http.post<SplitTicketResult>(`${this.API_URL}/admin/tickets/${sourceId}/split`, payload);
   }
 
+  cloneAdminTicket(
+    sourceId: number,
+    payload?: { subject?: string }
+  ): Observable<CloneTicketResult> {
+    return this.http.post<CloneTicketResult>(`${this.API_URL}/admin/tickets/${sourceId}/clone`, payload ?? {});
+  }
+
   linkAdminRelatedTickets(ticketId: number, relatedTicketIds: number[]): Observable<TicketDetail> {
     return this.http.post<TicketDetail>(`${this.API_URL}/admin/tickets/${ticketId}/related`, {
       relatedTicketIds
@@ -1155,6 +1215,50 @@ export class TicketService {
       formData.append('attachments', file, file.name);
     }
     return this.http.post<Ticket>(`${this.API_URL}/tickets`, formData);
+  }
+
+  createAdminOutboundTicket(payload: CreateOutboundTicketPayload): Observable<Ticket> {
+    const formData = new FormData();
+    formData.append('requesterUserId', String(payload.requesterUserId));
+    formData.append('subject', payload.subject);
+    formData.append('description', payload.description);
+    formData.append('categoryId', String(payload.categoryId));
+    formData.append('priority', payload.priority);
+    if (payload.queueId != null) {
+      formData.append('queueId', String(payload.queueId));
+    }
+    if (payload.assigneeId != null) {
+      formData.append('assigneeId', String(payload.assigneeId));
+    }
+    formData.append('notifyCustomer', String(payload.notifyCustomer !== false));
+    formData.append('notifySms', String(payload.notifySms !== false));
+    for (const file of payload.attachments ?? []) {
+      formData.append('attachments', file, file.name);
+    }
+    return this.http.post<Ticket>(`${this.API_URL}/admin/tickets`, formData);
+  }
+
+  downloadTicketImportTemplate(): Observable<Blob> {
+    return this.http.get(`${this.API_URL}/admin/tickets/import/template`, {
+      responseType: 'blob'
+    });
+  }
+
+  downloadTicketImportMessagesTemplate(): Observable<Blob> {
+    return this.http.get(`${this.API_URL}/admin/tickets/import/messages-template`, {
+      responseType: 'blob'
+    });
+  }
+
+  importTickets(payload: TicketImportPayload): Observable<TicketImportResult> {
+    const formData = new FormData();
+    formData.append('file', payload.file, payload.file.name);
+    if (payload.messagesFile) {
+      formData.append('messagesFile', payload.messagesFile, payload.messagesFile.name);
+    }
+    formData.append('dryRun', String(payload.dryRun !== false));
+    formData.append('createMissingRequesters', String(!!payload.createMissingRequesters));
+    return this.http.post<TicketImportResult>(`${this.API_URL}/admin/tickets/import`, formData);
   }
 
   saveBlob(blob: Blob, fileName: string): void {

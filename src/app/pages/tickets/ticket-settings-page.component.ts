@@ -144,6 +144,7 @@ export class TicketSettingsPageComponent implements OnInit {
     { id: 'notifications', titleKey: 'settings.ticketSettings.emailSection', icon: 'notifications' },
     { id: 'digest', titleKey: 'settings.ticketSettings.digestSection', icon: 'summarize' },
     { id: 'autoassign', titleKey: 'settings.ticketSettings.autoAssignSection', icon: 'assignment_ind' },
+    { id: 'guest-support', titleKey: 'settings.ticketSettings.guestSupportSection', icon: 'person_off' },
     { id: 'automations', titleKey: 'settings.ticketSettings.automationsSection', icon: 'auto_mode' },
     { id: 'attachments', titleKey: 'settings.ticketSettings.attachmentsSection', icon: 'attach_file' }
   ];

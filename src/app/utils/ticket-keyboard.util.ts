@@ -93,6 +93,7 @@ export function ticketShortcutHelpGroups(scope: TicketShortcutScope): TicketShor
         { keys: 'e', actionKey: 'tickets.shortcuts.actions.escalate' },
         { keys: 'm', actionKey: 'tickets.shortcuts.actions.merge' },
         { keys: 's', actionKey: 'tickets.shortcuts.actions.split' },
+        { keys: 'd', actionKey: 'tickets.shortcuts.actions.clone' },
         { keys: 'l', actionKey: 'tickets.shortcuts.actions.linkRelated' },
         { keys: 'Esc', actionKey: 'tickets.shortcuts.actions.backInbox' }
       ]

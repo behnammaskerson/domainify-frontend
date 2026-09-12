@@ -358,6 +358,60 @@ interface HolidayDraft {
             </mat-form-field>
           </section>
 
+          <section class="section settings-anchor" id="guest-support">
+            <h3>{{ 'settings.ticketSettings.guestSupportSection' | translate }}</h3>
+            <p class="section-hint">{{ 'settings.ticketSettings.guestSupportIntro' | translate }}</p>
+            <mat-checkbox formControlName="guestTicketCreateEnabled" color="primary">
+              {{ 'settings.ticketSettings.guestTicketCreateEnabled' | translate }}
+            </mat-checkbox>
+            <p class="section-hint">{{ 'settings.ticketSettings.guestTicketCreateHint' | translate }}</p>
+            <mat-checkbox formControlName="guestTicketAttachmentsEnabled" color="primary"
+                          [disabled]="!form.controls.guestTicketCreateEnabled.value">
+              {{ 'settings.ticketSettings.guestTicketAttachmentsEnabled' | translate }}
+            </mat-checkbox>
+            <p class="section-hint">{{ 'settings.ticketSettings.guestTicketAttachmentsHint' | translate }}</p>
+            
+            <h4 class="subsection-title">{{ 'settings.ticketSettings.captchaSubsection' | translate }}</h4>
+            <mat-checkbox formControlName="captchaEnabled" color="primary"
+                          [disabled]="!form.controls.guestTicketCreateEnabled.value">
+              {{ 'settings.ticketSettings.captchaEnabled' | translate }}
+            </mat-checkbox>
+            <p class="section-hint">{{ 'settings.ticketSettings.captchaEnabledHint' | translate }}</p>
+            
+            <div class="limits-row" [class.disabled]="!form.controls.captchaEnabled.value || !form.controls.guestTicketCreateEnabled.value">
+              <mat-form-field appearance="outline" class="limit-field">
+                <mat-label>{{ 'settings.ticketSettings.captchaDifficulty' | translate }}</mat-label>
+                <mat-select formControlName="captchaDifficulty"
+                            [disabled]="!form.controls.captchaEnabled.value || !form.controls.guestTicketCreateEnabled.value">
+                  <mat-option value="EASY">{{ 'settings.ticketSettings.captchaDifficulties.EASY' | translate }}</mat-option>
+                  <mat-option value="MEDIUM">{{ 'settings.ticketSettings.captchaDifficulties.MEDIUM' | translate }}</mat-option>
+                  <mat-option value="HARD">{{ 'settings.ticketSettings.captchaDifficulties.HARD' | translate }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="limit-field">
+                <mat-label>{{ 'settings.ticketSettings.captchaCharacterType' | translate }}</mat-label>
+                <mat-select formControlName="captchaCharacterType"
+                            [disabled]="!form.controls.captchaEnabled.value || !form.controls.guestTicketCreateEnabled.value">
+                  <mat-option value="DIGITS">{{ 'settings.ticketSettings.captchaCharacterTypes.DIGITS' | translate }}</mat-option>
+                  <mat-option value="LETTERS">{{ 'settings.ticketSettings.captchaCharacterTypes.LETTERS' | translate }}</mat-option>
+                  <mat-option value="MIXED">{{ 'settings.ticketSettings.captchaCharacterTypes.MIXED' | translate }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            
+            <div class="limits-row" [class.disabled]="!form.controls.captchaEnabled.value || !form.controls.guestTicketCreateEnabled.value">
+              <mat-checkbox formControlName="captchaEnableNoise" color="primary"
+                            [disabled]="!form.controls.captchaEnabled.value || !form.controls.guestTicketCreateEnabled.value">
+                {{ 'settings.ticketSettings.captchaEnableNoise' | translate }}
+              </mat-checkbox>
+              <mat-checkbox formControlName="captchaEnableDistortion" color="primary"
+                            [disabled]="!form.controls.captchaEnabled.value || !form.controls.guestTicketCreateEnabled.value">
+                {{ 'settings.ticketSettings.captchaEnableDistortion' | translate }}
+              </mat-checkbox>
+            </div>
+            <p class="section-hint">{{ 'settings.ticketSettings.captchaOptionsHint' | translate }}</p>
+          </section>
+
           <section class="section settings-anchor" id="automations">
             <h3>{{ 'settings.ticketSettings.automationsSection' | translate }}</h3>
             <p class="section-hint">{{ 'settings.ticketSettings.automationsIntro' | translate }}</p>
@@ -580,6 +634,13 @@ export class TicketSettingsFormComponent implements OnInit {
     autoAssignMode: this.fb.nonNullable.control<TicketAutoAssignMode>('OFF', [Validators.required]),
     autoAssignFallbackRoundRobin: [true],
     defaultQueueId: this.fb.control<number | null>(null),
+    guestTicketCreateEnabled: [true],
+    guestTicketAttachmentsEnabled: [true],
+    captchaEnabled: [false],
+    captchaDifficulty: ['MEDIUM'],
+    captchaCharacterType: ['MIXED'],
+    captchaEnableNoise: [true],
+    captchaEnableDistortion: [true],
     ticketEmailNotificationsEnabled: [true],
     ticketSmsNotificationsEnabled: [true],
     emailNotificationPriorities: this.fb.nonNullable.control<TicketPriority[]>(
@@ -863,6 +924,9 @@ export class TicketSettingsFormComponent implements OnInit {
       autoAssignMode: value.autoAssignMode,
       autoAssignFallbackRoundRobin: !!value.autoAssignFallbackRoundRobin,
       defaultQueueId: value.defaultQueueId ?? null,
+      guestTicketCreateEnabled: !!value.guestTicketCreateEnabled,
+      guestTicketAttachmentsEnabled: !!value.guestTicketAttachmentsEnabled,
+      captchaSettingsJson: this.buildCaptchaSettingsJson(value),
       ticketEmailNotificationsEnabled: !!value.ticketEmailNotificationsEnabled,
       ticketSmsNotificationsEnabled: !!value.ticketSmsNotificationsEnabled,
       emailNotificationPriorities: [...value.emailNotificationPriorities],
@@ -958,7 +1022,15 @@ export class TicketSettingsFormComponent implements OnInit {
     autoAssignMode?: TicketAutoAssignMode;
     autoAssignFallbackRoundRobin?: boolean;
     defaultQueueId?: number | null;
-    ticketEmailNotificationsEnabled?: boolean;
+  guestTicketCreateEnabled?: boolean;
+  guestTicketAttachmentsEnabled?: boolean;
+  captchaEnabled?: boolean;
+  captchaDifficulty?: string;
+  captchaCharacterType?: string;
+  captchaEnableNoise?: boolean;
+  captchaEnableDistortion?: boolean;
+  captchaSettingsJson?: string;
+  ticketEmailNotificationsEnabled?: boolean;
     ticketSmsNotificationsEnabled?: boolean;
     emailNotificationPriorities?: TicketPriority[];
     smsNotificationPriorities?: TicketPriority[];
@@ -1010,6 +1082,9 @@ export class TicketSettingsFormComponent implements OnInit {
       autoAssignMode: settings.autoAssignMode ?? 'OFF',
       autoAssignFallbackRoundRobin: settings.autoAssignFallbackRoundRobin !== false,
       defaultQueueId: settings.defaultQueueId ?? null,
+      guestTicketCreateEnabled: settings.guestTicketCreateEnabled !== false,
+      guestTicketAttachmentsEnabled: settings.guestTicketAttachmentsEnabled !== false,
+      ...this.parseCaptchaSettings(settings.captchaSettingsJson),
       ticketEmailNotificationsEnabled: settings.ticketEmailNotificationsEnabled !== false,
       ticketSmsNotificationsEnabled: settings.ticketSmsNotificationsEnabled !== false,
       emailNotificationPriorities: [...emailPriorities],
@@ -1128,4 +1203,50 @@ export class TicketSettingsFormComponent implements OnInit {
   private showError(message: string): void {
     this.snackBar.open(message, undefined, { duration: 6000, panelClass: ['error-snackbar'] });
   }
+
+  private buildCaptchaSettingsJson(value: any): string {
+    const captchaSettings = {
+      enabled: !!value.captchaEnabled,
+      difficulty: value.captchaDifficulty || 'MEDIUM',
+      characterType: value.captchaCharacterType || 'MIXED',
+      width: 200,
+      height: 60,
+      expiryMinutes: 10,
+      enableNoise: !!value.captchaEnableNoise,
+      enableDistortion: !!value.captchaEnableDistortion
+    };
+    return JSON.stringify(captchaSettings);
+  }
+
+  private parseCaptchaSettings(json: string | null | undefined): any {
+    if (!json) {
+      return {
+        captchaEnabled: false,
+        captchaDifficulty: 'MEDIUM',
+        captchaCharacterType: 'MIXED',
+        captchaEnableNoise: true,
+        captchaEnableDistortion: true
+      };
+    }
+    
+    try {
+      const settings = JSON.parse(json);
+      return {
+        captchaEnabled: settings.enabled !== false,
+        captchaDifficulty: settings.difficulty || 'MEDIUM',
+        captchaCharacterType: settings.characterType || 'MIXED',
+        captchaEnableNoise: settings.enableNoise !== false,
+        captchaEnableDistortion: settings.enableDistortion !== false
+      };
+    } catch (e) {
+      return {
+        captchaEnabled: false,
+        captchaDifficulty: 'MEDIUM',
+        captchaCharacterType: 'MIXED',
+        captchaEnableNoise: true,
+        captchaEnableDistortion: true
+      };
+    }
+  }
 }
+

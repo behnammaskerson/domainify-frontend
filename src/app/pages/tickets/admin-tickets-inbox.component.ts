@@ -90,6 +90,14 @@ const UNASSIGNED_VALUE = '__unassigned__';
         [title]="'tickets.adminInbox.title' | translate"
         [subtitle]="'tickets.adminInbox.subtitle' | translate">
         <div heroActions>
+          <a mat-flat-button color="primary" routerLink="/admin/tickets/outbound">
+            <mat-icon>outgoing_mail</mat-icon>
+            {{ 'tickets.adminInbox.newOutbound' | translate }}
+          </a>
+          <a mat-stroked-button routerLink="/admin/tickets/import">
+            <mat-icon>upload_file</mat-icon>
+            {{ 'tickets.adminInbox.importTickets' | translate }}
+          </a>
           <button mat-stroked-button
                   type="button"
                   class="presence-btn"

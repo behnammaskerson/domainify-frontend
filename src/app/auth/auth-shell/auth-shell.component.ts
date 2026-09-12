@@ -20,7 +20,7 @@ import { TranslationService } from '../../services/translation.service';
     TranslateModule
   ],
   template: `
-    <div class="auth-shell" [class.dark]="themeService.theme() === 'dark'">
+    <div class="auth-shell" [class.dark]="themeService.theme() === 'dark'" [class.compact]="compact">
       <div class="auth-top-controls">
         <button mat-icon-button
                 type="button"
@@ -314,6 +314,15 @@ import { TranslationService } from '../../services/translation.service';
       animation: panelReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
     }
 
+    /* Slightly wider centered panel for longer forms — keep vertical centering */
+    .auth-shell.compact .panel-inner {
+      max-width: 480px;
+    }
+
+    .auth-shell.compact .panel-header {
+      margin-bottom: 20px;
+    }
+
     @keyframes orbFloat {
       0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
       50% { transform: translate3d(2%, -3%, 0) scale(1.05); }
@@ -391,6 +400,8 @@ export class AuthShellComponent {
   @Input({ required: true }) subtitle!: string;
   @Input({ required: true }) headline!: string;
   @Input({ required: true }) support!: string;
+  /** Wider centered panel for longer forms (e.g. guest support). */
+  @Input() compact = false;
 
   readonly themeService = inject(ThemeService);
   readonly translationService = inject(TranslationService);
